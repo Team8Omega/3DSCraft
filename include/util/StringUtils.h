@@ -2,6 +2,11 @@
 
 #include "util/Paths.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
 #define STRING_GETBASE(x) #x
 #define STRING_GET(x) STRING_GETBASE(x)
 

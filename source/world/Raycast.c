@@ -1,4 +1,4 @@
-#include "world/RayCast.h"
+#include "world/Raycast.h"
 
 #include <stdbool.h>
 #include <stdio.h>

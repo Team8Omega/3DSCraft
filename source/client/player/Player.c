@@ -2,6 +2,7 @@
 
 #include "client/Camera.h"
 #include "client/Crash.h"
+#include "client/gui/DebugUI.h"
 #include "client/player/Damage.h"
 #include "client/renderer/texture/TextureMap.h"
 #include "sounds/Sound.h"
@@ -458,7 +459,7 @@ void Player_PlaceBlock(Player* player, Sound* sound) {
 		sound->background = false;
 		sound->path		  = String_ParsePackName(PACK_VANILLA, PATH_PACK_SOUNDS, "entity/player/hit.opus");
 		// DebugUI_Log("File path for player sound %s", sound->path);
-		playopus(sound);
+		Sound_PlayOpus(sound);
 	}
 	if (player->breakPlaceTimeout < 0.f)
 		player->breakPlaceTimeout = PLAYER_PLACE_REPLACE_TIMEOUT;

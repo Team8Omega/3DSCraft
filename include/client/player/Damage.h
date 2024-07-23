@@ -1,8 +1,8 @@
 #pragma once
 
 typedef struct {
-		char cause;
-		int time;
+	char* cause;
+	int time;
 } Damage;
 
-void OvertimeDamage(cause, time);
+void OvertimeDamage(const char* cause, int time);

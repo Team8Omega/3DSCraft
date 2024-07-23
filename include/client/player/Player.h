@@ -9,7 +9,7 @@
 
 #include "sounds/Sound.h"
 #include "util/math/VecMath.h"
-#include "world/RayCast.h"
+#include "world/Raycast.h"
 #include "world/level/item/ItemStack.h"
 
 #define PLAYER_EYEHEIGHT (1.65f)

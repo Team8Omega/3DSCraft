@@ -6,6 +6,10 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
+ifeq ($(strip $(CURDIR)),)
+CURDIR := $(shell pwd)
+endif
+
 TOPDIR ?= $(CURDIR)
 include $(DEVKITARM)/3ds_rules
 
@@ -163,8 +167,13 @@ endif
 #---------------------------------------------------------------------------------------
 # Cia building preparation
 #---------------------------------------------------------------------------------------
+ifneq ($(OS),Windows_NT)
+BANNERTOOL   ?= tools/bannertool
+MAKEROM      ?= tools/makerom
+else
 BANNERTOOL   ?= tools/bannertool.exe
 MAKEROM      ?= tools/makerom.exe
+endif
 
 MAKEROM_ARGS += -elf "$(TARGET).elf" -rsf "$(RSF_PATH)" -banner "$(BUILD)/banner.bnr" -icon "$(TARGET).smdh"
 MAKEROM_ARGS += -major $(VERSION_MAJOR) -minor $(VERSION_MINOR) -micro $(VERSION_MICRO) -desc app:4
@@ -239,8 +248,13 @@ else
 
 DEPENDS	:=	$(OFILES:.o=.d)
 
+ifneq ($(OS),Windows_NT)
+BANNERTOOL   ?= ../tools/bannertool
+MAKEROM      ?= ../tools/makerom
+else
 BANNERTOOL   ?= ../tools/bannertool.exe
 MAKEROM      ?= ../tools/makerom.exe
+endif
 
 
 ifeq ($(suffix $(BANNER_IMAGE)),.cgfx)

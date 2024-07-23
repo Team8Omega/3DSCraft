@@ -54,6 +54,9 @@ extern bool showDebugInfo;
 
 extern Camera camera;
 
+void Renderer_RenderGameOverlay();
+void renderExpBar();
+
 void Renderer_Init(World* world_, Player* player_, WorkQueue* queue, GameState* gamestate_) {
 	machine = state_machine_create();
 	state_machine_set_current_state(machine, TitleScreen);

@@ -30,7 +30,7 @@ void Texture_Load(C3D_Tex* result, const char* filename) {
 
 	u32* image		   = NULL;
 	unsigned int width = 255, height = 255;
-	u32 error = lodepng_decode32_file((u32**)&image, &width, &height, filepath);
+	u32 error = lodepng_decode32_file((u8**)&image, &width, &height, filepath);
 	if (error == 0 && image != NULL) {
 		u32* imgInLinRam = (u32*)linearAlloc(width * height * sizeof(u32));
 
@@ -154,8 +154,9 @@ void Texture_MapInit(Texture_Map* map, const char** files, int num_files) {
 	while (filename != NULL && c < (TEXTURE_MAPTILES * TEXTURE_MAPTILES) && filei < num_files) {
 		filename = String_ParsePackName(PACK_VANILLA, PATH_PACK_TEXTURES, filename);
 
-		u32 *image, w, h;
-		u32 error = lodepng_decode32_file((u32**)&image, &w, &h, filename);
+		u32* image;
+		unsigned int w, h;
+		u32 error = lodepng_decode32_file((u8**)&image, &w, &h, filename);
 		if (w == TEXTURE_TILESIZE && h == TEXTURE_TILESIZE && image != NULL && error == 0) {
 			for (int x = 0; x < TEXTURE_TILESIZE; x++) {
 				for (int y = 0; y < TEXTURE_TILESIZE; y++) {
@@ -177,7 +178,7 @@ void Texture_MapInit(Texture_Map* map, const char** files, int num_files) {
 				locX = 0;
 			}
 		} else {
-			if (error != NULL)
+			if (error != 0)
 				Crash("Failed to load texture %s\nCode %d", filename, error);
 			printf("Image size(%d, %d) doesn't match or ptr null(internal error)\n'", w, h);
 		}
