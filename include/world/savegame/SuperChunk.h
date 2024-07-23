@@ -1,6 +1,6 @@
 #pragma once
 
-#include <world/Chunk.h>
+#include "world/chunk/Chunk.h"
 
 #include <vec/vec.h>
 
@@ -8,22 +8,26 @@
 #define SUPERCHUNK_BLOCKSIZE (SUPERCHUNK_SIZE * CHUNK_SIZE)
 
 typedef struct {
-	uint32_t position;
-	uint32_t compressedSize;
-	uint32_t actualSize;
-	uint8_t blockSize;
-	uint32_t revision;
+		uint32_t position;
+		uint32_t compressedSize;
+		uint32_t actualSize;
+		uint8_t blockSize;
+		uint32_t revision;
 } ChunkInfo;
 
 typedef struct {
-	int x, z;
-	FILE* dataFile;
-	ChunkInfo grid[SUPERCHUNK_SIZE][SUPERCHUNK_SIZE];
-	vec_t(uint8_t) sectors;
+		int x, z;
+		FILE* dataFile;
+		ChunkInfo grid[SUPERCHUNK_SIZE][SUPERCHUNK_SIZE];
+		vec_t(uint8_t) sectors;
 } SuperChunk;
 
-inline static int ChunkToSuperChunkCoord(int x) { return (x + (int)(x < 0)) / SUPERCHUNK_SIZE - (int)(x < 0); }
-inline static int ChunkToLocalSuperChunkCoord(int x) { return x - ChunkToSuperChunkCoord(x) * SUPERCHUNK_SIZE; }
+static inline int ChunkToSuperChunkCoord(int x) {
+	return (x + (int)(x < 0)) / SUPERCHUNK_SIZE - (int)(x < 0);
+}
+static inline int ChunkToLocalSuperChunkCoord(int x) {
+	return x - ChunkToSuperChunkCoord(x) * SUPERCHUNK_SIZE;
+}
 
 void SuperChunk_InitPools();
 void SuperChunk_DeinitPools();

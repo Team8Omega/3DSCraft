@@ -4,15 +4,15 @@
 
 #include <vec/vec.h>
 
-#include <entity/Player.h>
+#include "client/player/Player.h"
 
-#include <world/savegame/SuperChunk.h>
+#include "world/savegame/SuperChunk.h"
 
 typedef struct {
-	Player* player;
-	World* world;
+		Player* player;
+		World* world;
 
-	vec_t(SuperChunk*) superchunks;
+		vec_t(SuperChunk*) superchunks;
 } SaveManager;
 
 void SaveManager_InitFileSystem();

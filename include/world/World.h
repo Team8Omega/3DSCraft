@@ -1,12 +1,11 @@
 #pragma once
 
-#include <world/Chunk.h>
-#include <world/WorkQueue.h>
+#include "world/WorkQueue.h"
+#include "world/chunk/Chunk.h"
 
-#include <misc/NumberUtils.h>
-#include <misc/Xorshift.h>
+#include "util/math/NumberUtils.h"
+#include "util/math/Xorshift.h"
 #include <vec/vec.h>
-
 
 #define CHUNKCACHE_SIZE (9)
 
@@ -14,42 +13,64 @@
 
 #define CHUNKPOOL_SIZE (CHUNKCACHE_SIZE * CHUNKCACHE_SIZE + UNDEADCHUNKS_COUNT)
 
-typedef enum { WorldGen_Smea, WorldGen_SuperFlat, WorldGenTypes_Count } WorldGenType;
-typedef enum { Gamemode_Survival, Gamemode_Creative,Gamemode_Adventure,Gamemode_Spectator,Gamemode_Count } gamemode;
+typedef enum {
+	WorldGen_Default,
+	WorldGen_SuperFlat,
+	WorldGenTypes_Count
+} WorldGenType;
+typedef enum {
+	Gamemode_Survival,
+	Gamemode_Creative,
+	Gamemode_Adventure,
+	Gamemode_Spectator,
+	Gamemode_Count
+} Gamemode;
+typedef enum {
+    Difficulty_Normal,
+    Difficulty_Peaceful,
+    Difficulty_Easy,
+    Difficulty_Hard,
+    Difficulty_Hardcore,
+    Difficulty_Count
+} Difficulty;
 typedef struct {
-	uint64_t seed;
-	WorldGenType type;
-	//gamemode type;
-	union {
-		struct {
-			// Keine Einstellungen...
-		} superflat;
-	} settings;
+		uint64_t seed;
+		WorldGenType type;
+		// gamemode type;
+		union {
+				struct {
+						// Keine Einstellungen...
+				} superflat;
+		} settings;
 } GeneratorSettings;
 
 #define WORLD_NAME_SIZE 12
 typedef struct {
-	int HighestBlock;
+		int HighestBlock;
 
-	char name[WORLD_NAME_SIZE];
+		char name[WORLD_NAME_SIZE];
 
-	GeneratorSettings genSettings;
+		GeneratorSettings genSettings;
 
-	int cacheTranslationX, cacheTranslationZ;
+		int cacheTranslationX, cacheTranslationZ;
 
-	Chunk chunkPool[CHUNKPOOL_SIZE];
-	Chunk* chunkCache[CHUNKCACHE_SIZE][CHUNKCACHE_SIZE];
-	vec_t(Chunk*) freeChunks;
+		Chunk chunkPool[CHUNKPOOL_SIZE];
+		Chunk* chunkCache[CHUNKCACHE_SIZE][CHUNKCACHE_SIZE];
+		vec_t(Chunk*) freeChunks;
 
-	WorkQueue* workqueue;
+		WorkQueue* workqueue;
 
-	Xorshift32 randomTickGen;
+		Xorshift32 randomTickGen;
 
-	int weather;
+		int weather;
 } World;
 
-inline static int WorldToChunkCoord(int x) { return (x + (int)(x < 0)) / CHUNK_SIZE - (int)(x < 0); }
-inline static int WorldToLocalCoord(int x) { return x - WorldToChunkCoord(x) * CHUNK_SIZE; }
+static inline int WorldToChunkCoord(int x) {
+	return (x + (int)(x < 0)) / CHUNK_SIZE - (int)(x < 0);
+}
+static inline int WorldToLocalCoord(int x) {
+	return x - WorldToChunkCoord(x) * CHUNK_SIZE;
+}
 
 void World_Init(World* world, WorkQueue* workqueue);
 
