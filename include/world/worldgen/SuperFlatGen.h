@@ -1,7 +1,7 @@
 #pragma once
 
-#include <world/WorkQueue.h>
-#include <world/World.h>
+#include "world/WorkQueue.h"
+#include "world/World.h"
 
 typedef struct { World* world; } SuperFlatGen;
 

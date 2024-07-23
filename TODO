@@ -4,9 +4,6 @@ make fall damage use a actual formula instead of just checking for velocity
 
 add gui stuff for gamerules
 
-difficulty (speedrunning hardcore would be fun on this)
-
-multiplayer (fuck this, i've spent 2 fucking days trying to get a socket working on it and nothing)
 
 mobs
 

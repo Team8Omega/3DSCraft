@@ -1,4 +1,4 @@
-#include <world/savegame/SaveManager.h>
+#include "world/savegame/SaveManager.h"
 
 #include <dirent.h>
 #include <string.h>
@@ -6,32 +6,36 @@
 
 #include <mpack/mpack.h>
 
-#include <gui/DebugUI.h>
-#include <misc/Crash.h>
+#include "client/Crash.h"
+#include "client/gui/DebugUI.h"
+#include "util/Paths.h"
 
 #define mkdirFlags S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH
 
 void SaveManager_InitFileSystem() {
-	mkdir("sdmc:/craftus_redesigned", mkdirFlags);
-	mkdir("sdmc:/craftus_redesigned/saves", mkdirFlags);
+	mkdir(PATH_ROOT, mkdirFlags);
+	mkdir(PATH_SAVES, mkdirFlags);
 }
 
 void SaveManager_Init(SaveManager* mgr, Player* player) {
 	mgr->player = player;
-	mgr->world = player->world;
+	mgr->world	= player->world;
 
 	vec_init(&mgr->superchunks);
 }
-void SaveManager_Deinit(SaveManager* mgr) { vec_deinit(&mgr->superchunks); }
+void SaveManager_Deinit(SaveManager* mgr) {
+	vec_deinit(&mgr->superchunks);
+}
 
-#define mpack_elvis(node, key, typ, default_) \
-	((mpack_node_type(mpack_node_map_cstr_optional((node), (key))) != mpack_type_nil) ? mpack_node_ ## typ (mpack_node_map_cstr_optional((node), (key))) : (default_))
-	
+#define mpack_elvis(node, key, typ, default_)                                                                                              \
+	((mpack_node_type(mpack_node_map_cstr_optional((node), (key))) != mpack_type_nil)                                                      \
+		 ? mpack_node_##typ(mpack_node_map_cstr_optional((node), (key)))                                                                   \
+		 : (default_))
 
 void SaveManager_Load(SaveManager* mgr, char* path) {
 	char buffer[256];
 
-	sprintf(buffer, "sdmc:/craftus_redesigned/saves/%s", path);
+	sprintf(buffer, PATH_SAVES "%s", path);
 	mkdir(buffer, mkdirFlags);
 	chdir(buffer);
 
@@ -55,40 +59,34 @@ void SaveManager_Load(SaveManager* mgr, char* path) {
 		mgr->player->position.x = mpack_node_float(mpack_node_map_cstr(player, "x"));
 		mgr->player->position.y = mpack_node_float(mpack_node_map_cstr(player, "y")) + 0.1f;
 		mgr->player->position.z = mpack_node_float(mpack_node_map_cstr(player, "z"));
-	/*	mgr->player->spawnset = mpack_node_int(mpack_node_map_cstr(player,"ss"));
-		if (mpack_node_int(mpack_node_map_cstr(player,"ss"))==1){
-			mgr->player->spawnx = mpack_node_float(mpack_node_map_cstr(player, "sx"));
-			mgr->player->spawny = mpack_node_float(mpack_node_map_cstr(player, "sy"));
-			mgr->player->spawnz = mpack_node_float(mpack_node_map_cstr(player, "sz"));
-			mgr->player->spawnset = mpack_node_int(mpack_node_map_cstr(player,"ss"));
-		}*/
+		/*	mgr->player->spawnset = mpack_node_int(mpack_node_map_cstr(player,"ss"));
+			if (mpack_node_int(mpack_node_map_cstr(player,"ss"))==1){
+				mgr->player->spawnx = mpack_node_float(mpack_node_map_cstr(player, "sx"));
+				mgr->player->spawny = mpack_node_float(mpack_node_map_cstr(player, "sy"));
+				mgr->player->spawnz = mpack_node_float(mpack_node_map_cstr(player, "sz"));
+				mgr->player->spawnset = mpack_node_int(mpack_node_map_cstr(player,"ss"));
+			}*/
 
-		//mgr->player->gamemode=mpack_node_int(mpack_node_map_cstr(player,"gamemode"));
-		//use this optional part for "old" version of saved worlds
+		// mgr->player->gamemode=mpack_node_int(mpack_node_map_cstr(player,"gamemode"));
+		// use this optional part for "old" version of saved worlds
 		mpack_node_t hpNode = mpack_node_map_cstr_optional(player, "hp");
-		if (mpack_node_type(hpNode) != mpack_type_nil)
-		{
+		if (mpack_node_type(hpNode) != mpack_type_nil) {
 			mgr->player->hp = mpack_node_int(mpack_node_map_cstr(player, "hp"));
-		}
-		else
-		{
+		} else {
 			mgr->player->hp = 20;
 		}
 		mpack_node_t hungerNode = mpack_node_map_cstr_optional(player, "hunger");
-		if (mpack_node_type(hungerNode) != mpack_type_nil)
-		{
+		if (mpack_node_type(hungerNode) != mpack_type_nil) {
 			mgr->player->hunger = mpack_node_int(mpack_node_map_cstr(player, "hunger"));
-		}
-		else
-		{
+		} else {
 			mgr->player->hunger = 20;
 		}
 		mgr->player->pitch = mpack_node_float(mpack_node_map_cstr(player, "pitch"));
-		mgr->player->yaw = mpack_node_float(mpack_node_map_cstr(player, "yaw"));
-		
-		mgr->player->flying = mpack_elvis(player, "flying", bool, false);
+		mgr->player->yaw   = mpack_node_float(mpack_node_map_cstr(player, "yaw"));
+
+		mgr->player->flying	   = mpack_elvis(player, "flying", bool, false);
 		mgr->player->crouching = mpack_elvis(player, "crouching", bool, false);
-		//mgr->player->cheats = mpack_elvis(player, "cheats", bool, true);
+		// mgr->player->cheats = mpack_elvis(player, "cheats", bool, true);
 
 		mpack_error_t err = mpack_tree_destroy(&levelTree);
 		if (err != mpack_ok) {
@@ -107,7 +105,7 @@ void SaveManager_Unload(SaveManager* mgr) {
 
 	mpack_write_cstr(&writer, "players");
 	mpack_start_array(&writer, 1);
-	mpack_start_map(&writer, 9);
+	mpack_start_map(&writer, 11);
 
 	mpack_write_cstr(&writer, "x");
 	mpack_write_float(&writer, mgr->player->position.x);
@@ -116,14 +114,14 @@ void SaveManager_Unload(SaveManager* mgr) {
 	mpack_write_cstr(&writer, "z");
 	mpack_write_float(&writer, mgr->player->position.z);
 	mpack_write_cstr(&writer, "hp");
-	mpack_write_int(&writer,mgr->player->hp);
+	mpack_write_int(&writer, mgr->player->hp);
 	mpack_write_cstr(&writer, "hunger");
-	mpack_write_int(&writer,mgr->player->hunger);
+	mpack_write_int(&writer, mgr->player->hunger);
 
-	/*mpack_write_cstr(&writer, "gamemode");
-	mpack_write_int(&writer,mgr->player->gamemode);
+	mpack_write_cstr(&writer, "gamemode");
+	mpack_write_int(&writer, mgr->player->gamemode);
 	mpack_write_cstr(&writer, "cheats");
-	mpack_write_bool(&writer,mgr->player->cheats);*/
+	mpack_write_bool(&writer, mgr->player->cheats);
 
 	mpack_write_cstr(&writer, "pitch");
 	mpack_write_float(&writer, mgr->player->pitch);
@@ -132,7 +130,7 @@ void SaveManager_Unload(SaveManager* mgr) {
 
 	mpack_write_cstr(&writer, "flying");
 	mpack_write_bool(&writer, mgr->player->flying);
-	
+
 	mpack_write_cstr(&writer, "crouching");
 	mpack_write_bool(&writer, mgr->player->crouching);
 
@@ -141,6 +139,8 @@ void SaveManager_Unload(SaveManager* mgr) {
 
 	mpack_write_cstr(&writer, "worldType");
 	mpack_write_uint(&writer, mgr->world->genSettings.type);
+
+	mpack_finish_map(&writer);
 
 	mpack_error_t err = mpack_writer_destroy(&writer);
 	if (err != mpack_ok) {
@@ -168,17 +168,17 @@ static SuperChunk* fetchSuperChunk(SaveManager* mgr, int x, int z) {
 }
 
 void SaveManager_LoadChunk(WorkQueue* queue, WorkerItem item, void* this) {
-	SaveManager* mgr = (SaveManager*)this;
-	int x = ChunkToSuperChunkCoord(item.chunk->x);
-	int z = ChunkToSuperChunkCoord(item.chunk->z);
+	SaveManager* mgr	   = (SaveManager*)this;
+	int x				   = ChunkToSuperChunkCoord(item.chunk->x);
+	int z				   = ChunkToSuperChunkCoord(item.chunk->z);
 	SuperChunk* superchunk = fetchSuperChunk(mgr, x, z);
-	
+
 	SuperChunk_LoadChunk(superchunk, item.chunk);
 }
 void SaveManager_SaveChunk(WorkQueue* queue, WorkerItem item, void* this) {
 	SaveManager* mgr = (SaveManager*)this;
-	int x = ChunkToSuperChunkCoord(item.chunk->x);
-	int z = ChunkToSuperChunkCoord(item.chunk->z);
+	int x			 = ChunkToSuperChunkCoord(item.chunk->x);
+	int z			 = ChunkToSuperChunkCoord(item.chunk->z);
 
 	SuperChunk* superchunk = fetchSuperChunk(mgr, x, z);
 

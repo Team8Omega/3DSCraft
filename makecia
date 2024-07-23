@@ -1,6 +1,0 @@
-make -j4
-makerom -o craftus.cxi -rsf craftus.rsf -target t -elf craftus.elf -icon icon/craftus.png -banner banner.bin -desc app:4
-makerom -o craftus.cfa -rsf craftus.rsf -target t
-makerom -f cia -o craftus.cia -target t -i craftus.cxi:0:0 -i craftus.cfa:1:1
-cp craftus.3dsx /media/silentstorm/FBAC-160B/3ds
-cp craftus.cia /media/silentstorm/FBAC-160B/cias
