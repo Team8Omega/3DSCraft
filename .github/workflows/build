@@ -22,7 +22,7 @@ jobs:
         wget https://apt.devkitpro.org/install-devkitpro-pacman
         chmod +x ./install-devkitpro-pacman
         sudo ./install-devkitpro-pacman
-        sudo pacman -S --noconfirm 3ds-dev
+        sudo dkp-pacman -S --noconfirm 3ds-dev
 
     - name: Build
       run: |
