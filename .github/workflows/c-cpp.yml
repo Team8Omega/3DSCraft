@@ -1,0 +1,30 @@
+name: C/C++ CI for DevkitPro 3DS
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget
+        wget https://apt.devkitpro.org/install-devkitpro-pacman
+        chmod +x ./install-devkitpro-pacman
+        sudo ./install-devkitpro-pacman
+        sudo pacman -S --noconfirm 3ds-dev
+
+    - name: Build
+      run: |
+        make clean
+        make
