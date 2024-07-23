@@ -22,47 +22,26 @@ Cube* Cube_Init(CubeRaw* in) {
 	if (!vbo)
 		vbo = linearAlloc(sizeof(cube_sides_lut));
 
-	// Crash("Cube Data: Size VBO: %d, Size LUT: %d, Expected Size: %d, sizeof WorldVertex: %d", sizeof(cube->vertices),
-	// sizeof(cube_sides_lut),
-	//	  CUBE_VERTICE_NUM * sizeof(WorldVertex), sizeof(WorldVertex));
-
-	s16 min[3];
-	memcpy(min, in->from, sizeof(min));
-	s16 max[3];
-	memcpy(max, in->to, sizeof(min));
-
 	for (u8 face = 0; face < 6; ++face) {
-		int lutStartIndex = face * 6;
-
-		s16 uv[4];
-		memcpy(uv, in->faceUV[face], sizeof(uv));
+		u8 lutStartIndex = face * 6;
 
 		// Apply transformations for each vertex in the LUT
 		for (int i = 0; i < 6; ++i) {
-			int idx				= lutStartIndex + i;
+			u8 idx				= lutStartIndex + i;
 			WorldVertex* vertex = &cube->vertices[idx];
 
-			s16 lutPosition[3];
-			lutPosition[0] = cube_sides_lut[idx].pos[0];
-			lutPosition[1] = cube_sides_lut[idx].pos[1];
-			lutPosition[2] = cube_sides_lut[idx].pos[2];
-
-			vertex->pos[0] = min[0] + (max[0] - min[0]) * lutPosition[0];
-			vertex->pos[1] = min[1] + (max[1] - min[1]) * lutPosition[1];
-			vertex->pos[2] = min[2] + (max[2] - min[2]) * lutPosition[2];
+			vertex->pos[0] = in->from[0] + (in->to[0] - in->from[0]) * cube_sides_lut[idx].pos[0];
+			vertex->pos[1] = in->from[1] + (in->to[1] - in->from[1]) * cube_sides_lut[idx].pos[1];
+			vertex->pos[2] = in->from[2] + (in->to[2] - in->from[2]) * cube_sides_lut[idx].pos[2];
 
 #define toTexCrd(x, tw) (s16)(((float)(x) / (float)(tw)) * (float)(1 << 15))
 
-			vertex->uv[0] = toTexCrd(uv[cube_sides_lut[idx].uv[0] * 2], in->dimensions[0]);
+			vertex->uv[0] = toTexCrd(in->faceUV[face][cube_sides_lut[idx].uv[0] * 2], in->dimensions[0]);
 			if (vertex->uv[0] < 0)
 				vertex->uv[0] = 1 << 15 - 1;
-			vertex->uv[1] = toTexCrd(uv[cube_sides_lut[idx].uv[1] * 2 + 1], in->dimensions[1]);
+			vertex->uv[1] = toTexCrd(in->faceUV[face][cube_sides_lut[idx].uv[1] * 2 + 1], in->dimensions[1]);
 			if (vertex->uv[1] < 0)
 				vertex->uv[1] = 1 << 15 - 1;
-
-			if (i == 32)
-				Crash("%d UV: %d/%d: calc: %d, calc2: %f", idx, uv[cube_sides_lut[idx].uv[0] * 2], in->dimensions[0], vertex->uv[0],
-					  vertex->uv[0] / (float)(1 << 15));
 
 			// (for simplicity, using white here)
 			vertex->rgb[0] = 255;

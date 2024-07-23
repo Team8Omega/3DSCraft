@@ -7,7 +7,7 @@
 #include "util/math/VecMath.h"
 
 typedef struct {
-	s16 pos[3];
+	float pos[3];
 	s16 uv[2];
 	u8 rgb[3];
 	u8 fxyz[3];

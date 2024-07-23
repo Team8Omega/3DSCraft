@@ -5,17 +5,17 @@
 typedef struct {
 	C3D_Mtx rootMatrix;
 
-    u8 cubeNum;
-	Cube* cubes;
+	u8 cubeNum;
+	Cube** cubes;
 
-    C3D_Tex* texture;
+	C3D_Tex* texture;
 } CubeModel;
 
 typedef struct {
 	u8 cubeNum;
 	CubeRaw** cubes;
 
-    C3D_Tex* texture;
+	C3D_Tex* texture;
 } CubeModelRaw;
 
 CubeModel* CubeModel_Init(CubeModelRaw* model);
@@ -43,8 +43,8 @@ static inline void CubeModel_Clean(CubeModelRaw* model) {
 	linearFree(model->cubes);
 	linearFree(model);
 }
-static inline void CubeModel_SetTexture(CubeModel* m, C3D_Tex* tex){
-    m->texture = tex;
+static inline void CubeModel_SetTexture(CubeModel* m, C3D_Tex* tex) {
+	m->texture = tex;
 }
 
 void CubeModel_Draw(CubeModel* model, int shaderUniform, C3D_Mtx* matrix);

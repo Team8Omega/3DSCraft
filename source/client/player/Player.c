@@ -17,92 +17,51 @@ void Player_InitModel(Player* player) {
 	Texture_Load(&textureSkin, "block/diamond_block.png" /*"entity/player/wide/steve.png"*/);
 
 #define cTo 16
+#define offsetZ 32
 
-	CubeRaw cubes[6] = {
-		// legs
-		{ // left leg
-		  { 0, 0, 0 },
-		  { 4, 12, 4 },
+	CubeRaw cubes[] = {
+		{ // torso
+		  { -3.765f, 0.f, 1.882f },
+		  { 3.765f, -11.295f, -1.882f },
 		  { 16, 16 },
-		  { // not sure if correct
+		  { //
 			{ 0, 0, cTo, cTo },
 			{ 0, 0, cTo, cTo },
 			{ 0, 0, cTo, cTo },
 			{ 0, 0, cTo, cTo },
 			{ 0, 0, cTo, cTo },
 			{ 0, 0, cTo, cTo } },
-		  { -4, 0, -64 },
+		  { 0, 22.589f, -offsetZ },
 		  { 0, 0, 0 } },
-		{ // right leg
-		  { 0, 0, 0 },
-		  { 4, 12, 4 },
+		{ // leg l
+		  { -1.882f, 0.f, -1.882f },
+		  { 1.882f, -11.294f, 1.882f },
 		  { 16, 16 },
-		  { // not sure if correct
+		  { //
 			{ 0, 0, cTo, cTo },
 			{ 0, 0, cTo, cTo },
 			{ 0, 0, cTo, cTo },
 			{ 0, 0, cTo, cTo },
 			{ 0, 0, cTo, cTo },
 			{ 0, 0, cTo, cTo } },
-		  { 0, 0, -64 },
+		  { 1.882, 11.294, -offsetZ },
 		  { 0, 0, 0 } },
-		// torso
-		{ { 0, 12, 0 },
-		  { 8, 24, 4 },
+		{ // leg r
+		  { 1.882f, 0.f, 1.882f },
+		  { -1.882f, -11.294f, -1.882f },
 		  { 16, 16 },
-		  { // not sure if correct
+		  { //
 			{ 0, 0, cTo, cTo },
 			{ 0, 0, cTo, cTo },
 			{ 0, 0, cTo, cTo },
 			{ 0, 0, cTo, cTo },
 			{ 0, 0, cTo, cTo },
 			{ 0, 0, cTo, cTo } },
-		  { -4, 0, -64 },
-		  { 0, 0, 0 } },
-		// arms
-		{ // left arm
-		  { 0, 12, 0 },
-		  { 4, 12, 4 },
-		  { 16, 16 },
-		  { // not sure if correct
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo } },
-		  { -8, 12, -64 },
-		  { 0, 0, 0 } },
-		{ // right arm
-		  { 0, 0, 0 },
-		  { 4, 12, 4 },
-		  { 16, 16 },
-		  { // not sure if correct
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo } },
-		  { 4, 0, -64 },
-		  { 0, 0, 0 } },
-		// head
-		{ // right arm
-		  { 0, 0, 0 },
-		  { 16, 24, 16 },
-		  { 16, 16 },
-		  { // not sure if correct
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo } },
-		  { 4, 0, -64 },
+		  { -1.882, 11.294, -offsetZ },
 		  { 0, 0, 0 } },
 	};
 
-	player->model = createModel(cubes, 6, &textureSkin);
+	player->model = createModel(cubes, sizeof(cubes) / sizeof(CubeRaw), &textureSkin);
 }
 
 void Player_Draw(Player* player, int projectionUniform, C3D_Mtx* matrix) {

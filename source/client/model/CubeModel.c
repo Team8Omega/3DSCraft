@@ -8,10 +8,10 @@ extern Camera camera;
 
 CubeModel* CubeModel_Init(CubeModelRaw* in) {
 	if (!in) {
-		Crash("Passed unbaked Model is NULL!");
+		Crash("Passed raw Model is NULL!");
 		return NULL;
 	} else if (!in->cubes) {
-		Crash("Passed cubes for unbaked Model is NULL");
+		Crash("Passed cubes for raw Model is NULL");
 		return NULL;
 	}
 
@@ -20,11 +20,11 @@ CubeModel* CubeModel_Init(CubeModelRaw* in) {
 		Crash("Could not allocate memory for model");
 		return NULL;
 	}
-    model->texture = in->texture;
+	model->texture = in->texture;
 
 	model->cubeNum = in->cubeNum;
 
-	model->cubes = linearAlloc(model->cubeNum * sizeof(Cube));
+	model->cubes = linearAlloc(model->cubeNum * sizeof(Cube*));
 	if (!model->cubes) {
 		linearFree(model);
 		Crash("Could not allocate memory for model cubes\n Amount: %d", model->cubeNum);
@@ -33,13 +33,9 @@ CubeModel* CubeModel_Init(CubeModelRaw* in) {
 
 	for (u8 i = 0; i < model->cubeNum; ++i) {
 		if (!in->cubes[i]) {
-			Crash(
-				"Cube %d for Model is NULL!\n Total: %d\n in->cubes: %08x\n in->cubes[]: %08x, %08x, %08x, %08x, %08x, %08x, %08x, %08x, "
-				"%08x, %08x ... ",
-				i, model->cubeNum, in->cubes, in->cubes[0], in->cubes[1], in->cubes[2], in->cubes[3], in->cubes[4], in->cubes[5],
-				in->cubes[6], in->cubes[7], in->cubes[8], in->cubes[9]);
+			Crash("Cube %d for Model is NULL!\n Total: %d\n in->cubes: %08x", i, model->cubeNum, in->cubes);
 		}
-		model->cubes[i] = *Cube_Init(in->cubes[i]);
+		model->cubes[i] = Cube_Init(in->cubes[i]);
 	}
 
 	CubeModel_Clean(in);
@@ -57,33 +53,31 @@ void CubeModel_Deinit(CubeModel* model) {
 		return;
 
 	for (u8 i = 0; i < model->cubeNum; ++i) {
-		Cube_Deinit(&model->cubes[i]);
+		Cube_Deinit(model->cubes[i]);
 	}
-    //every class handles textures themselves. they init it.
 
 	linearFree(model->cubes);
 	linearFree(model);
 }
 
 void CubeModel_Draw(CubeModel* model, int projectionUniform, C3D_Mtx* projection) {
-
 	C3D_Mtx matrix;
-    Mtx_Identity(&matrix);
+	Mtx_Identity(&matrix);
 	Mtx_Multiply(&matrix, projection, &model->rootMatrix);
 #define modelScale 0.05f
 	Mtx_Scale(&matrix, modelScale, modelScale, modelScale);
 
-    if(model->texture==NULL) {
-        Crash("CubeRaw TEXTURE IS NULL"); // todo: broken texture handling
-		return ;
+	if (model->texture == NULL) {
+		Crash("CubeRaw TEXTURE IS NULL");  // todo: broken texture handling
+		return;
 	}
 
 	C3D_CullFace(GPU_CULL_NONE);
-    C3D_AlphaTest(true, GPU_GREATER, 0);
-    C3D_TexBind(0, model->texture);
+	C3D_AlphaTest(true, GPU_GREATER, 0);
+	C3D_TexBind(0, model->texture);
 
 	for (u8 i = 0; i < model->cubeNum; ++i) {
-		Cube* cube = &model->cubes[i];
+		Cube* cube = model->cubes[i];
 		Cube_Draw(cube, projectionUniform, &matrix);
 	}
 
