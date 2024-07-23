@@ -84,8 +84,8 @@ typedef struct {
 	int8_t x, y, z;
 	Direction direction;
 	Block block;
-	int8_t ao; 
-	uint8_t metadata; 
+	int8_t ao;
+	uint8_t metadata;
 	bool transparent;
 } Face;
 

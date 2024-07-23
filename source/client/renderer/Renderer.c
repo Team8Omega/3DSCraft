@@ -183,7 +183,7 @@ void Renderer_Render() {
 			Renderer_RenderGameOverlay();
 
 		} else {
-			CubeMap_Draw(&camera.projection, f3_new(0.f, 0.002f, 0.f));
+			CubeMap_Draw(&camera.projection, f3_new(0.f, 0.0018f, 0.f));
 
 			SpriteBatch_SetScale(2);
 

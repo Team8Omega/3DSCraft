@@ -1,6 +1,7 @@
 #include "client/model/Cube.h"
 
 #include "client/Crash.h"
+#include "util/math/NumberUtils.h"
 
 extern const WorldVertex cube_sides_lut[CUBE_VERTICE_NUM];
 
@@ -52,10 +53,17 @@ Cube* Cube_Init(CubeRaw* in) {
 
 #define toTexCrd(x, tw) (s16)(((float)(x) / (float)(tw)) * (float)(1 << 15))
 
-			vertex->uv[0] = toTexCrd(uv[cube_sides_lut[idx].uv[0]], in->dimensions[0]);
-			vertex->uv[1] = toTexCrd(uv[cube_sides_lut[idx].uv[1]], in->dimensions[1]);
+			vertex->uv[0] = toTexCrd(uv[cube_sides_lut[idx].uv[0] * 2], in->dimensions[0]);
+			if (vertex->uv[0] < 0)
+				vertex->uv[0] = 1 << 15 - 1;
+			vertex->uv[1] = toTexCrd(uv[cube_sides_lut[idx].uv[1] * 2 + 1], in->dimensions[1]);
+			if (vertex->uv[1] < 0)
+				vertex->uv[1] = 1 << 15 - 1;
 
-            
+			if (i == 32)
+				Crash("%d UV: %d/%d: calc: %d, calc2: %f", idx, uv[cube_sides_lut[idx].uv[0] * 2], in->dimensions[0], vertex->uv[0],
+					  vertex->uv[0] / (float)(1 << 15));
+
 			// (for simplicity, using white here)
 			vertex->rgb[0] = 255;
 			vertex->rgb[1] = 255;
@@ -64,11 +72,10 @@ Cube* Cube_Init(CubeRaw* in) {
 			vertex->fxyz[0] = 0;
 			vertex->fxyz[1] = 0;
 			vertex->fxyz[2] = 0;
-             
 		}
 	}
 	C3D_Mtx matrix;
-    Mtx_Identity(&matrix);
+	Mtx_Identity(&matrix);
 	Mtx_Translate(&matrix, in->position[0], in->position[1], in->position[2], true);
 	Mtx_RotateX(&matrix, in->rotation[0], true);
 	Mtx_RotateY(&matrix, in->rotation[1], true);
@@ -112,20 +119,19 @@ void Cube_Draw(Cube* cube, int shaderUniform, C3D_Mtx* matrix) {
 	BufInfo_Add(bufInfo, vbo, sizeof(WorldVertex), 4, 0x3210);
 
 	C3D_DrawArrays(GPU_TRIANGLES, 0, CUBE_VERTICE_NUM);
-
 }
 
-void Cube_Reset(Cube* c){
+void Cube_Reset(Cube* c) {
 	Mtx_Identity(&c->localMatrix);
 }
-void Cube_ResetToInit(Cube* c){
+void Cube_ResetToInit(Cube* c) {
 	Cube_Reset(c);
 	Mtx_Copy(&c->localMatrix, &c->initialMatrix);
 }
-void Cube_SetPos(Cube* cube, float3 pos){
+void Cube_SetPos(Cube* cube, float3 pos) {
 	Mtx_Translate(&cube->localMatrix, pos.x, pos.y, pos.z, true);
 }
-void Cube_SetRot(Cube* c, float3 rot){
+void Cube_SetRot(Cube* c, float3 rot) {
 	Mtx_RotateX(&c->localMatrix, rot.x, true);
 	Mtx_RotateY(&c->localMatrix, rot.y, true);
 	Mtx_RotateZ(&c->localMatrix, rot.z, true);
