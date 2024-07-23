@@ -152,10 +152,10 @@ void Texture_MapInit(Texture_Map* map, const char** files, int num_files) {
 	const char* filename = files[filei];
 	int c				 = 0;
 	while (filename != NULL && c < (TEXTURE_MAPTILES * TEXTURE_MAPTILES) && filei < num_files) {
-		const char* filepath = String_ParsePackName(PACK_VANILLA, PATH_PACK_TEXTURES, filename);
+		filename = String_ParsePackName(PACK_VANILLA, PATH_PACK_TEXTURES, filename);
 
 		u32 *image, w, h;
-		u32 error = lodepng_decode32_file((u32**)&image, &w, &h, filepath);
+		u32 error = lodepng_decode32_file((u32**)&image, &w, &h, filename);
 		if (w == TEXTURE_TILESIZE && h == TEXTURE_TILESIZE && image != NULL && error == 0) {
 			for (int x = 0; x < TEXTURE_TILESIZE; x++) {
 				for (int y = 0; y < TEXTURE_TILESIZE; y++) {
@@ -165,11 +165,11 @@ void Texture_MapInit(Texture_Map* map, const char** files, int num_files) {
 			}
 
 			Texture_MapIcon* icon = &map->icons[c];
-			icon->textureHash	  = hash(filename);
+			icon->textureHash	  = hash(files[filei]);
 			icon->u				  = 256 * locX;
 			icon->v				  = 256 * locY;
 
-			// printf("Stiched texture %s(hash: %u) at %d, %d\n", filepath, icon->textureHash, locX, locY);
+			// printf("Stiched texture %s(hash: %u) at %d, %d\n", filename, icon->textureHash, locX, locY);
 
 			locX += TEXTURE_TILESIZE;
 			if (locX == TEXTURE_MAPSIZE) {
@@ -178,11 +178,11 @@ void Texture_MapInit(Texture_Map* map, const char** files, int num_files) {
 			}
 		} else {
 			if (error != NULL)
-				Crash("Failed to load texture %s\nCode %d", filepath, error);
+				Crash("Failed to load texture %s\nCode %d", filename, error);
 			printf("Image size(%d, %d) doesn't match or ptr null(internal error)\n'", w, h);
 		}
 		free(image);
-		filepath = files[++filei];
+		filename = files[++filei];
 		c++;
 	}
 
