@@ -14,6 +14,7 @@
 #include "client/player/PlayerController.h"
 #include "client/renderer/PolyGen.h"
 #include "client/renderer/Renderer.h"
+#include "sounds/Sound.h"
 #include "util/Paths.h"
 #include "util/StringUtils.h"
 #include "world/World.h"
@@ -118,7 +119,7 @@ int main() {
 			initBackgroundSound		   = false;
 			BackgroundSound.background = true;
 			BackgroundSound.path	   = String_ParsePackName(PACK_VANILLA, PATH_PACK_SOUNDS, "music/1.opus");
-			playopus(&BackgroundSound);
+			Sound_PlayOpus(&BackgroundSound);
 		}
 
 		DebugUI_Text("%d FPS  Usage: CPU: %5.2f%% GPU: %5.2f%% Buf: %5.2f%% Lin: %d", fps, C3D_GetProcessingTime() * 6.f,
@@ -246,24 +247,21 @@ int main() {
 
 	free(world);
 
-	if (BackgroundSound.threaid != NULL) {
-		DoQuit(0);
-		threadJoin(BackgroundSound.threaid, 50000);
-		threadFree(BackgroundSound.threaid);
-		if (BackgroundSound.opusFile) {
-			op_free(BackgroundSound.opusFile);
-		}
-		audioExit(0);
+	Sound_Quit(0);
+	threadJoin(BackgroundSound.threaid, 50000);
+	threadFree(BackgroundSound.threaid);
+	if (BackgroundSound.opusFile) {
+		op_free(BackgroundSound.opusFile);
 	}
-	if (PlayerSound.threaid != NULL) {
-		DoQuit(1);
-		threadJoin(PlayerSound.threaid, 50000);
-		threadFree(PlayerSound.threaid);
-		if (PlayerSound.opusFile) {
-			op_free(PlayerSound.opusFile);
-		}
-		audioExit(1);
+	Sound_Deinit(0);
+
+	Sound_Quit(1);
+	threadJoin(PlayerSound.threaid, 50000);
+	threadFree(PlayerSound.threaid);
+	if (PlayerSound.opusFile) {
+		op_free(PlayerSound.opusFile);
 	}
+	Sound_Deinit(1);
 
 	ndspExit();
 	sino_exit();

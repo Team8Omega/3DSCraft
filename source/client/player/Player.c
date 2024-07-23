@@ -2,6 +2,7 @@
 
 #include "client/Camera.h"
 #include "client/Crash.h"
+#include "client/gui/DebugUI.h"
 #include "client/player/Damage.h"
 #include "client/renderer/texture/TextureMap.h"
 #include "sounds/Sound.h"
@@ -24,12 +25,12 @@ void Player_InitModel(Player* player) {
 		  { 4, 12, 4 },
 		  { 16, 16 },
 		  { // not sure if correct
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 } },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo } },
 		  { -4, 0, -64 },
 		  { 0, 0, 0 } },
 		{ // right leg
@@ -37,12 +38,12 @@ void Player_InitModel(Player* player) {
 		  { 4, 12, 4 },
 		  { 16, 16 },
 		  { // not sure if correct
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 } },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo } },
 		  { 0, 0, -64 },
 		  { 0, 0, 0 } },
 		// torso
@@ -50,12 +51,12 @@ void Player_InitModel(Player* player) {
 		  { 8, 24, 4 },
 		  { 16, 16 },
 		  { // not sure if correct
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 } },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo } },
 		  { -4, 0, -64 },
 		  { 0, 0, 0 } },
 		// arms
@@ -64,12 +65,12 @@ void Player_InitModel(Player* player) {
 		  { 4, 12, 4 },
 		  { 16, 16 },
 		  { // not sure if correct
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 } },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo } },
 		  { -8, 12, -64 },
 		  { 0, 0, 0 } },
 		{ // right arm
@@ -77,12 +78,12 @@ void Player_InitModel(Player* player) {
 		  { 4, 12, 4 },
 		  { 16, 16 },
 		  { // not sure if correct
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 } },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo } },
 		  { 4, 0, -64 },
 		  { 0, 0, 0 } },
 		// head
@@ -91,12 +92,12 @@ void Player_InitModel(Player* player) {
 		  { 16, 24, 16 },
 		  { 16, 16 },
 		  { // not sure if correct
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 },
-			{ 0, 0, 16, 16 } },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo },
+			{ 0, 0, cTo, cTo } },
 		  { 4, 0, -64 },
 		  { 0, 0, 0 } },
 	};
@@ -458,7 +459,7 @@ void Player_PlaceBlock(Player* player, Sound* sound) {
 		sound->background = false;
 		sound->path		  = String_ParsePackName(PACK_VANILLA, PATH_PACK_SOUNDS, "entity/player/hit.opus");
 		// DebugUI_Log("File path for player sound %s", sound->path);
-		playopus(sound);
+		Sound_PlayOpus(sound);
 	}
 	if (player->breakPlaceTimeout < 0.f)
 		player->breakPlaceTimeout = PLAYER_PLACE_REPLACE_TIMEOUT;

@@ -54,6 +54,9 @@ extern bool showDebugInfo;
 
 extern Camera camera;
 
+void Renderer_RenderGameOverlay();
+void renderExpBar();
+
 void Renderer_Init(World* world_, Player* player_, WorkQueue* queue, GameState* gamestate_) {
 	machine = state_machine_create();
 	state_machine_set_current_state(machine, TitleScreen);
@@ -180,7 +183,7 @@ void Renderer_Render() {
 			Renderer_RenderGameOverlay();
 
 		} else {
-			CubeMap_Draw(&camera.projection, f3_new(0.f, 0.002f, 0.f));
+			CubeMap_Draw(&camera.projection, f3_new(0.f, 0.0013f, 0.f));
 
 			SpriteBatch_SetScale(2);
 

@@ -6,6 +6,10 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
+ifeq ($(strip $(CURDIR)),)
+CURDIR := $(shell pwd)
+endif
+
 TOPDIR ?= $(CURDIR)
 include $(DEVKITARM)/3ds_rules
 
@@ -39,7 +43,7 @@ BUILD			:=	build
 DATA			:=	data
 META			:=	project
 ROMFS			:=	romfs
-INCLUDES		:=	lib include ../include 3DSCraft/include
+INCLUDES		:=	lib include
 SOURCES 		:= $(shell find $(realpath lib) $(realpath source) $(realpath assets) -type d)
 SOURCES 		:= $(foreach dir, $(SOURCES), $(patsubst $(CURDIR)/%, %, $(dir)))
 
@@ -163,7 +167,7 @@ endif
 #---------------------------------------------------------------------------------------
 # Cia building preparation
 #---------------------------------------------------------------------------------------
-ifeq ($(UNAME_S),Linux)
+ifneq ($(OS),Windows_NT)
 BANNERTOOL   ?= tools/bannertool
 MAKEROM      ?= tools/makerom
 else
@@ -244,7 +248,7 @@ else
 
 DEPENDS	:=	$(OFILES:.o=.d)
 
-ifeq ($(UNAME_S),Linux)
+ifneq ($(OS),Windows_NT)
 BANNERTOOL   ?= ../tools/bannertool
 MAKEROM      ?= ../tools/makerom
 else

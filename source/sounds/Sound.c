@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "client/gui/DebugUI.h"
 #include "sounds/Sound.h"
 
 static const int SAMPLE_RATE		 = 48000;
@@ -24,7 +25,7 @@ int16_t* s_audioBuffer1 = NULL;
 LightEvent s_event, s_event1;
 volatile bool s_quit0 = false, s_quit1 = false;
 
-const char* opusStrError(int error) {
+const char* Sound_StrError(int error) {
 	switch (error) {
 		case OP_FALSE:
 			return "OP_FALSE: A request did not succeed.";
@@ -67,7 +68,7 @@ const char* opusStrError(int error) {
 	}
 }
 
-void DoQuit(int _channel) {
+void Sound_Quit(int _channel) {
 	switch (_channel) {
 		case 0:
 			s_quit0 = true;
@@ -80,7 +81,7 @@ void DoQuit(int _channel) {
 	}
 }
 
-bool audioInit(int _channel) {
+bool Sound_Init(int _channel) {
 	ndspChnReset(_channel);
 	ndspSetOutputMode(NDSP_OUTPUT_STEREO);
 	ndspChnSetInterp(_channel, NDSP_INTERP_POLYPHASE);
@@ -122,7 +123,7 @@ bool audioInit(int _channel) {
 	return true;
 }
 
-void audioExit(int _channel) {
+void Sound_Deinit(int _channel) {
 	//	ndspChnWaveBufClear(_channel);
 	//	printf("ndspChnWaveBufClear done %i\n", _channel);
 	ndspChnReset(_channel);
@@ -130,7 +131,7 @@ void audioExit(int _channel) {
 	linearFree(_channel == 0 ? s_audioBuffer0 : s_audioBuffer1);
 }
 
-bool fillBuffer(int _channel, OggOpusFile* opusFile_, ndspWaveBuf* waveBuf_) {
+bool Sound_FillBuffer(int _channel, OggOpusFile* opusFile_, ndspWaveBuf* waveBuf_) {
 	int totalSamples = 0;
 	while (totalSamples < SAMPLES_PER_BUF) {
 		int16_t* buffer			= waveBuf_->data_pcm16 + (totalSamples * CHANNELS_PER_SAMPLE);
@@ -140,7 +141,7 @@ bool fillBuffer(int _channel, OggOpusFile* opusFile_, ndspWaveBuf* waveBuf_) {
 			if (samples == 0)
 				break;
 
-			printf("op_read_stereo: error %d (%s)", samples, opusStrError(samples));
+			printf("op_read_stereo: error %d (%s)", samples, Sound_StrError(samples));
 			break;
 		}
 
@@ -154,7 +155,7 @@ bool fillBuffer(int _channel, OggOpusFile* opusFile_, ndspWaveBuf* waveBuf_) {
 	DSP_FlushDataCache(waveBuf_->data_pcm16, totalSamples * CHANNELS_PER_SAMPLE * sizeof(int16_t));
 	return true;
 }
-void audioCallback(void* const nul_) {
+void Sound_AudioCallback(void* const nul_) {
 	(void)nul_;
 	if (s_quit0) {
 		return;
@@ -162,7 +163,7 @@ void audioCallback(void* const nul_) {
 
 	LightEvent_Signal(&s_event);
 }
-void audioThread0(void* const opusFile_) {
+void Sound_AudioThread0(void* const opusFile_) {
 	OggOpusFile* const opusFile = (OggOpusFile*)opusFile_;
 
 	while (!s_quit0) {
@@ -170,14 +171,14 @@ void audioThread0(void* const opusFile_) {
 			if (s_waveBufs0[i].status != NDSP_WBUF_DONE) {
 				continue;
 			}
-			if (!fillBuffer(0, opusFile, &s_waveBufs0[i])) {
+			if (!Sound_FillBuffer(0, opusFile, &s_waveBufs0[i])) {
 				return;
 			}
 		}
 		LightEvent_Wait(&s_event);
 	}
 }
-void audioThread1(void* const opusFile_) {
+void Sound_AudioThread1(void* const opusFile_) {
 	OggOpusFile* const opusFile = (OggOpusFile*)opusFile_;
 
 	while (!s_quit1) {
@@ -185,7 +186,7 @@ void audioThread1(void* const opusFile_) {
 			if (s_waveBufs1[i].status != NDSP_WBUF_DONE) {
 				continue;
 			}
-			if (!fillBuffer(1, opusFile, &s_waveBufs1[i])) {
+			if (!Sound_FillBuffer(1, opusFile, &s_waveBufs1[i])) {
 				s_quit1 = true;
 				return;
 			}
@@ -194,18 +195,16 @@ void audioThread1(void* const opusFile_) {
 	}
 }
 
-void playopus(Sound* sound) {
-	if (sound->background == false && sound->threaid != NULL) {
-		DoQuit(1);
+void Sound_PlayOpus(Sound* sound) {
+	if (sound->background == false) {
+		Sound_Quit(1);
 		threadJoin(sound->threaid, 50000);
 		threadFree(sound->threaid);
 		DebugUI_Log("Free thread %p\n", sound->threaid);
-		sound->threaid = NULL;
 		if (sound->opusFile != NULL) {
 			op_free(sound->opusFile);
 		}
-		audioExit(1);
-		sound->threaid = NULL;
+		Sound_Deinit(1);
 	}
 	s_quit1 = false;
 	if (sound->background == true) {
@@ -219,21 +218,20 @@ void playopus(Sound* sound) {
 		DebugUI_Log("An Error occured opening file %s \n", sound->path);
 		return;
 	}
-	if (!audioInit(sound->background == true ? 0 : 1)) {
+	if (!Sound_Init(sound->background == true ? 0 : 1)) {
 		printf("Failed to initialise audio 0\n");
 		return;
 	}
 	if (sound->background == true) {
-		ndspSetCallback(audioCallback, NULL);
+		ndspSetCallback(Sound_AudioCallback, NULL);
 	}
 	int32_t priority = 0x30;
 	svcGetThreadPriority(&priority, CUR_THREAD_HANDLE);
 	priority -= 1;
-	priority = priority < 0x18 ? 0x18 : priority;
-	priority = priority > 0x3F ? 0x3F : priority;
-	Thread threadId =
-		threadCreate(sound->background == true ? audioThread0 : audioThread1, opusFile, THREAD_STACK_SZ, priority, THREAD_AFFINITY, false);
-	sound->threaid	= threadId;
+	priority		= priority < 0x18 ? 0x18 : priority;
+	priority		= priority > 0x3F ? 0x3F : priority;
+	sound->threaid	= threadCreate(sound->background == true ? Sound_AudioThread0 : Sound_AudioThread1, opusFile, THREAD_STACK_SZ, priority,
+								  THREAD_AFFINITY, false);
 	sound->opusFile = opusFile;
 	return;
 }
