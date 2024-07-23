@@ -39,7 +39,7 @@ BUILD			:=	build
 DATA			:=	data
 META			:=	project
 ROMFS			:=	romfs
-INCLUDES		:=	lib include
+INCLUDES		:=	lib include ../include 3DSCraft/include
 SOURCES 		:= $(shell find $(realpath lib) $(realpath source) $(realpath assets) -type d)
 SOURCES 		:= $(foreach dir, $(SOURCES), $(patsubst $(CURDIR)/%, %, $(dir)))
 
@@ -163,8 +163,13 @@ endif
 #---------------------------------------------------------------------------------------
 # Cia building preparation
 #---------------------------------------------------------------------------------------
+ifeq ($(UNAME_S),Linux)
+BANNERTOOL   ?= tools/bannertool
+MAKEROM      ?= tools/makerom
+else
 BANNERTOOL   ?= tools/bannertool.exe
 MAKEROM      ?= tools/makerom.exe
+endif
 
 MAKEROM_ARGS += -elf "$(TARGET).elf" -rsf "$(RSF_PATH)" -banner "$(BUILD)/banner.bnr" -icon "$(TARGET).smdh"
 MAKEROM_ARGS += -major $(VERSION_MAJOR) -minor $(VERSION_MINOR) -micro $(VERSION_MICRO) -desc app:4
@@ -239,8 +244,13 @@ else
 
 DEPENDS	:=	$(OFILES:.o=.d)
 
+ifeq ($(UNAME_S),Linux)
+BANNERTOOL   ?= ../tools/bannertool
+MAKEROM      ?= ../tools/makerom
+else
 BANNERTOOL   ?= ../tools/bannertool.exe
 MAKEROM      ?= ../tools/makerom.exe
+endif
 
 
 ifeq ($(suffix $(BANNER_IMAGE)),.cgfx)
