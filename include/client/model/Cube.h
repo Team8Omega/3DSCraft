@@ -9,10 +9,10 @@
 #define CUBE_VERTICE_NUM 6 * 6
 
 typedef struct {
-	s16 from[3], to[3];
-    s16 dimensions[2];
+	float from[3], to[3];
+	s16 dimensions[2];
 	s16 faceUV[6][4];  // pixel based coordinates
-	s16 position[3], rotation[3];
+	float position[3], rotation[3];
 } CubeRaw;
 
 typedef struct {
