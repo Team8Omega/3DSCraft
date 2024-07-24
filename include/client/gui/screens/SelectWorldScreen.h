@@ -7,8 +7,8 @@
 #include "world/World.h"
 
 typedef struct {
-		char worldName[WORLD_NAME_SIZE];
-		GeneratorSettings settings;
+	char worldName[WORLD_NAME_SIZE];
+	GeneratorSettings settings;
 } WorldSelect_Result;
 
 void SelectWorldScreen_Init();

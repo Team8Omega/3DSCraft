@@ -239,6 +239,28 @@ int SpriteBatch_CalcTextWidthVargs(const char* text, va_list args) {
 	return maxLength;
 }
 
+char* SpriteBatch_TextTruncate(const char* text, size_t length) {
+
+	const char* ellipsis = "...";
+	size_t ellipsisLength = strlen(ellipsis);
+
+	if (strlen(text) <= length) {
+		return strdup(text);
+	}
+
+	size_t truncatedLength = length + ellipsisLength;
+
+	char* truncated = (char*)malloc(truncatedLength + 1); // +1 for the null terminator
+
+	strncpy(truncated, text, length);
+
+	strcpy(truncated + length, ellipsis);
+
+	truncated[truncatedLength] = '\0';
+
+	return truncated;
+}
+
 static int compareDrawCommands(const void* a, const void* b) {
 	Sprite* ga = ((Sprite*)a);
 	Sprite* gb = ((Sprite*)b);
