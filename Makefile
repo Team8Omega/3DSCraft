@@ -65,7 +65,7 @@ ICON_FLAGS		:=	nosavebackups,visible
 #---------------------------------------------------------------------------------
 ARCH	:=	-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
 
-LDFLAGS	=	-specs=3dsx.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map) -include $(DEVKITPRO)/libctru/include/3ds/types.h
+LDFLAGS	=	-specs=3dsx.specs -z noexecstack -g $(ARCH) -Wl,-Map,$(notdir $*.map) -include $(DEVKITPRO)/libctru/include/3ds/types.h
 
 CFLAGS	:=	-g -Wall -Wno-psabi -O2 -mword-relocations \
 			-DC_V=\"$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_MICRO)\" \

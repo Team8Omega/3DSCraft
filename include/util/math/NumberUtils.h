@@ -25,6 +25,9 @@
 static inline int FastFloor(float x) {
 	return (int)(x) - (int)(x < (int)(x));
 }
+static inline int FastCeil(float x) {
+	return (int)(x) + (int)(x > (int)(x));
+}
 static inline float lerp(float start, float end, float t) {
 	return start + ((end - start) * t);
 }

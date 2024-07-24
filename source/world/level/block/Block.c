@@ -315,10 +315,11 @@ bool Block_Opaque(Block block, uint8_t metadata) {
 	return block != Block_Air && block != Block_Glass && block != Block_Door_Top && block != Block_Door_Bottom && block != Block_Leaves;
 }
 
-const char* BlockNames[Blocks_Count] = { "Air",			 "Stone",		   "Dirt",			"Grass",		"Cobblestone",	 "Sand",
-										 "Log",			 "Leaves",		   "Glass",			"Stone Bricks", "Bricks",		 "Planks",
-										 "Wool",		 "Bedrock",		   "Gravel",		"Water",		"Coarse",		 "Door_Top",
-										 "Door_Bottom",	 "Snow_Grass",	   "Snow",			"Obsidian",		"Netherrack",	 "Sandstone",
-										 "Smooth_Stone", "Crafting_Table", "Grass_Path",	"Water",		"Lava",			 "Iron_Ore",
-										 "Iron_Block",	 "Coal_Ore",	   "Coal_Block",	"Diamond_Ore",	"Diamond_Block", "Gold_Ore",
-										 "Gold_Block",	 "Emerald_Ore",	   "Emerald_Block", "Furnace" };
+const char* BlockNames[Blocks_Count] = { "Air",			 "Stone",	   "Dirt",			"Grass",		"Cobblestone",
+										 "Sand",		 "Log",		   "Gravel",		"Leaves",		"Glass",
+										 "Stone Bricks", "Bricks",	   "Planks",		"Wool",			"Bedrock",
+										 "Coarse",		 "Door_Top",   "Door_Bottom",	"Snow_Grass",	"Snow",
+										 "Obsidian",	 "Netherrack", "Sandstone",		"Smooth_Stone", "Crafting_Table",
+										 "Grass_Path",	 "Water",	   "Lava",			"Iron_Ore",		"Coal_Ore",
+										 "Diamond_Ore",	 "Gold_Ore",   "Emerald_Ore",	"Gold_Block",	"Diamond_Block",
+										 "Coal_Block",	 "Iron_Block", "Emerald_Block", "Furnace" };

@@ -4,7 +4,6 @@
 #include "client/gui/DebugUI.h"
 #include "world/level/block/BlockEvents.h"
 
-
 #include <string.h>
 
 #include <assert.h>
@@ -237,14 +236,14 @@ void World_Tick(World* world) {
 				if (clear)
 					WorkQueue_AddItem(world->workqueue, (WorkerItem){ WorkerItemType_Decorate, chunk });
 
-				int xVals[RANDOMTICKS_PER_CHUNK];
+				/*int xVals[RANDOMTICKS_PER_CHUNK];
 				int yVals[RANDOMTICKS_PER_CHUNK];
 				int zVals[RANDOMTICKS_PER_CHUNK];
 				for (int i = 0; i < RANDOMTICKS_PER_CHUNK; i++) {
 					xVals[i] = WorldToLocalCoord(Xorshift32_Next(&world->randomTickGen));
 					yVals[i] = WorldToLocalCoord(Xorshift32_Next(&world->randomTickGen));
 					zVals[i] = WorldToLocalCoord(Xorshift32_Next(&world->randomTickGen));
-				}
+				}*/
 			}
 		}
 }
