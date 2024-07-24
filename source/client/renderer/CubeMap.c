@@ -98,8 +98,6 @@ void CubeMap_Update(C3D_Mtx* projection, float3 rotationOffset) {
 		return;
 	}
 
-	GSPGPU_FlushDataCache(cubeVBO, sizeof(vertices));
-
 	C3D_Mtx model;
 	Mtx_PerspTilt(projection, C3D_AngleFromDegrees(80.0f), C3D_AspectRatioTop, 0.01f, 1000.0f, false);
 	Mtx_Identity(&model);
@@ -115,9 +113,11 @@ void CubeMap_Update(C3D_Mtx* projection, float3 rotationOffset) {
 void CubeMap_Draw() {
 	C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, projUniform, &cubeMatrix);
 
+	C3D_CullFace(GPU_CULL_FRONT_CCW);
+
 	memcpy(cubeVBO, vertices, sizeof(vertices));
 
-	C3D_CullFace(GPU_CULL_NONE);
+	GSPGPU_FlushDataCache(cubeVBO, sizeof(vertices));
 
 	C3D_BufInfo* bufInfo = C3D_GetBufInfo();
 	BufInfo_Init(bufInfo);

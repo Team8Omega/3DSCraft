@@ -153,7 +153,7 @@ void Renderer_Render() {
 		CubeMap_Update(&camera.projection, f3_new(0.f, 0.0013f, 0.f));
 
 	for (int i = 0; i < 2; i++) {
-		if (GameState_Playing) {
+		if (*gamestate == GameState_Playing) {
 			C3D_RenderTargetClear(renderTargets[i], C3D_CLEAR_ALL, CLEAR_COLOR_SKY, 0);
 		} else {
 			C3D_RenderTargetClear(renderTargets[i], C3D_CLEAR_ALL, 0x000000FF, 0);

@@ -16,9 +16,10 @@ typedef struct {
 } CubeRaw;
 
 typedef struct {
-	WorldVertex vertices[CUBE_VERTICE_NUM];
+	u16 vboIdx;
 	C3D_Mtx localMatrix;
 	C3D_Mtx initialMatrix;
+	WorldVertex* vertices;
 } Cube;
 
 static inline void Cube_Clean(CubeRaw* model) {
@@ -41,3 +42,7 @@ void Cube_SetRot(Cube* cube, float3 rot);
 void Cube_Reset(Cube* cube);
 
 void Cube_ResetToInit(Cube* cube);
+
+void Cube_InitVBOs();
+
+void Cube_DeinitVBOs();

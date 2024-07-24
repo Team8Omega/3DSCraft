@@ -20,6 +20,7 @@ typedef enum {
 } WorldGenType;
 typedef enum {
 	Gamemode_Survival,
+	Gamemode_Hardcore,
 	Gamemode_Creative,
 	Gamemode_Adventure,
 	Gamemode_Spectator,
@@ -30,7 +31,6 @@ typedef enum {
     Difficulty_Peaceful,
     Difficulty_Easy,
     Difficulty_Hard,
-    Difficulty_Hardcore,
     Difficulty_Count
 } Difficulty;
 typedef struct {

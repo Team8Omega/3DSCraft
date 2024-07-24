@@ -14,50 +14,88 @@ static C3D_Tex textureSkin;
 extern Camera camera;
 
 void Player_InitModel(Player* player) {
-	Texture_Load(&textureSkin, "block/diamond_block.png" /*"entity/player/wide/steve.png"*/);
+	Texture_Load(&textureSkin, /* "block/diamond_block.png" */ "entity/player/wide/steve.png");
 
-#define cTo 16
-#define offsetZ 32
+#define offsetZ 0
 
 	CubeRaw cubes[] = {
 		{ // torso
 		  { -3.765f, 0.f, 1.882f },
 		  { 3.765f, -11.295f, -1.882f },
-		  { 16, 16 },
+		  { 64, 64 },
 		  { //
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo } },
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 } },
 		  { 0, 22.589f, -offsetZ },
 		  { 0, 0, 0 } },
 		{ // leg l
 		  { -1.882f, 0.f, -1.882f },
 		  { 1.882f, -11.294f, 1.882f },
-		  { 16, 16 },
-		  { //
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo } },
+		  { 64, 64 },
+		  { // right, left, top, bottom, back, front
+			{ 16, 52, 20, 64 },
+			{ 24, 52, 28, 64 },
+			{ 24, 52, 20, 48 },
+			{ 28, 52, 24, 48 },
+			{ 28, 52, 32, 64 },
+			{ 20, 52, 24, 64 } },
 		  { 1.882, 11.294, -offsetZ },
 		  { 0, 0, 0 } },
 		{ // leg r
-		  { 1.882f, 0.f, 1.882f },
-		  { -1.882f, -11.294f, -1.882f },
-		  { 16, 16 },
+		  { -1.882f, 0.f, -1.882f },
+		  { 1.882f, -11.294f, 1.882f },
+		  { 64, 64 },
 		  { //
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo },
-			{ 0, 0, cTo, cTo } },
+			{ 16, 52, 20, 64 },
+			{ 24, 52, 28, 64 },
+			{ 24, 52, 20, 48 },
+			{ 28, 52, 24, 48 },
+			{ 28, 52, 32, 64 },
+			{ 20, 52, 24, 64 } },
 		  { -1.882, 11.294, -offsetZ },
+		  { 0, 0, 0 } },
+		{ // arm l
+		  { -1.882f, 1.882f, -1.882f },
+		  { 1.882f, -9.413f, 1.882f },
+		  { 64, 64 },
+		  { //
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 } },
+		  { -5.647, 20.707, -offsetZ },
+		  { 0, 0, 0 } },
+		{ // arm r
+		  { 1.882f, 1.882f, 1.882f },
+		  { -1.882f, -9.413f, -1.882f },
+		  { 64, 64 },
+		  { //
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 } },
+		  { 5.647, 20.707, -offsetZ },
+		  { 0, 0, 0 } },
+		{ // head
+		  { -3.765f, 0.f, -3.765f },
+		  { 3.765f, 7.529f, 3.765f },
+		  { 64, 64 },
+		  { //
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 },
+			{ 60, 60, 63, 63 } },
+		  { 0, 22.589, -offsetZ },
 		  { 0, 0, 0 } },
 	};
 
@@ -66,8 +104,8 @@ void Player_InitModel(Player* player) {
 
 void Player_Draw(Player* player, int projectionUniform, C3D_Mtx* matrix) {
 	CubeModel_Reset(player->model);
-	CubeModel_SetPos(player->model, player->position);
-	CubeModel_SetRotY(player->model, player->yaw);
+	CubeModel_SetPos(player->model, f3_new(0, 18, 0));
+	CubeModel_SetRotY(player->model, -player->yaw);
 	CubeModel_Draw(player->model, projectionUniform, matrix);
 }
 
@@ -155,7 +193,6 @@ void Player_Init(Player* player, World* world) {
 		for (int i = 0; i < INVENTORY_QUICKSELECT_MAXSLOTS; i++)
 			player->quickSelectBar[i] = (ItemStack){ Block_Air, 0, 0 };
 	}
-	extern bool showDebugInfo;
 
 	player->autoJumpEnabled = false;
 

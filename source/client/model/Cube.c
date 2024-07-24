@@ -1,11 +1,33 @@
 #include "client/model/Cube.h"
 
+#include "vec/vec.h"
+
 #include "client/Crash.h"
 #include "util/math/NumberUtils.h"
 
+#define CUBE_NUM_MAX 64
+
+static u16 cubeNum = 0;
+static Cube* cubeRef[CUBE_NUM_MAX];
+static WorldVertex* cubeModelVBOs[CUBE_NUM_MAX];
+
 extern const WorldVertex cube_sides_lut[CUBE_VERTICE_NUM];
 
-static WorldVertex* vbo;
+void Cube_InitVBOs() {
+	for (u16 i = 0; i < cubeNum; i++) {
+		Cube* cube = cubeRef[i];
+
+		cubeModelVBOs[i] = linearAlloc(sizeof(cube_sides_lut));
+		memcpy(cubeModelVBOs[i], cube->vertices, sizeof(cube_sides_lut));
+		free((void*)cube->vertices);
+		cube->vboIdx = i;
+	}
+}
+void Cube_DeinitVBOs() {
+	for (u16 i = 0; i < cubeNum; i++) {
+		linearFree(cubeModelVBOs[i]);
+	}
+}
 
 Cube* Cube_Init(CubeRaw* in) {
 	if (!in) {
@@ -15,8 +37,7 @@ Cube* Cube_Init(CubeRaw* in) {
 
 	Cube* cube = (Cube*)malloc(sizeof(Cube));
 
-	if (!vbo)
-		vbo = (WorldVertex*)malloc(sizeof(cube_sides_lut));
+	cube->vertices = (WorldVertex*)malloc(sizeof(cube_sides_lut));
 
 	memcpy(cube->vertices, cube_sides_lut, sizeof(cube_sides_lut));
 
@@ -32,14 +53,14 @@ Cube* Cube_Init(CubeRaw* in) {
 			vertex->pos[1] = in->from[1] + (in->to[1] - in->from[1]) * cube_sides_lut[idx].pos[1];
 			vertex->pos[2] = in->from[2] + (in->to[2] - in->from[2]) * cube_sides_lut[idx].pos[2];
 
-#define toTexCrd(x, tw) (s16)(((float)(x) / (float)(tw)) * (float)(1 << 15))
+#define toTexCrd(x, tw) (s16)(((float)(x) / (float)(tw)) * (float)((1 << 15) - 1))
 
 			vertex->uv[0] = toTexCrd(in->faceUV[face][cube_sides_lut[idx].uv[0] * 2], in->dimensions[0]);
-			if (vertex->uv[0] < 0)
-				vertex->uv[0] = (1 << 15) - 1;
 			vertex->uv[1] = toTexCrd(in->faceUV[face][cube_sides_lut[idx].uv[1] * 2 + 1], in->dimensions[1]);
-			if (vertex->uv[1] < 0)
-				vertex->uv[1] = (1 << 15) - 1;
+
+			// if (i == 2)
+			//	Crash("%d UV: %d/%d: calc: %d, calc2: %f", idx, in->faceUV[face][cube_sides_lut[idx].uv[0] * 2], in->dimensions[0],
+			//		  vertex->uv[0], vertex->uv[0] / (float)(1 << 15));
 		}
 	}
 	C3D_Mtx matrix;
@@ -52,6 +73,8 @@ Cube* Cube_Init(CubeRaw* in) {
 	Mtx_Copy(&cube->localMatrix, &matrix);
 	Mtx_Copy(&cube->initialMatrix, &matrix);
 
+	cubeRef[cubeNum] = cube;
+	cubeNum++;
 	return cube;
 }
 
@@ -64,15 +87,18 @@ void Cube_Deinit(Cube* cube) {
 }
 
 void Cube_Draw(Cube* cube, int shaderUniform, C3D_Mtx* matrix) {
-	GSPGPU_FlushDataCache(vbo, sizeof(cube_sides_lut));
-
-	memcpy(vbo, cube->vertices, sizeof(cube_sides_lut));
-
 	C3D_Mtx outMatrix;
 	Mtx_Identity(&outMatrix);
 	Mtx_Multiply(&outMatrix, matrix, &cube->localMatrix);
 
 	C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, shaderUniform, &outMatrix);
+
+	WorldVertex* vbo = cubeModelVBOs[cube->vboIdx];
+
+	if (vbo == NULL)
+		Crash("Cube Num %d has NULL VBO!", cube->vboIdx);
+
+	GSPGPU_FlushDataCache(vbo, sizeof(cube_sides_lut));
 
 	C3D_BufInfo* bufInfo = C3D_GetBufInfo();
 	BufInfo_Init(bufInfo);
