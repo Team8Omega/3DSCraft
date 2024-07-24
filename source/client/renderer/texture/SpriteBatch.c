@@ -203,7 +203,7 @@ int SpriteBatch_PushTextVargs(int x, int y, int z, int16_t color, bool shadow, i
 
 	maxWidth = MAX(maxWidth, offsetX);
 
-	if (ySize != NULL && (*ySize = 1) != NULL)
+	if (ySize != NULL && (*ySize = 1))
 		*ySize = offsetY + CHAR_HEIGHT;
 
 	return maxWidth;

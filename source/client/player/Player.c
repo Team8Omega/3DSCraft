@@ -165,7 +165,7 @@ void Player_Init(Player* player, World* world) {
 	player->experienceLevel = 5000000;
 }
 
-void Player_Update(Player* player, Sound* sound, Damage* dmg) {
+void Player_Update(Player* player, Sound* sound) {
 	player->view = f3_new(-sinf(player->yaw) * cosf(player->pitch), sinf(player->pitch), -cosf(player->yaw) * cosf(player->pitch));
 	player->blockInSight =
 		Raycast_Cast(player->world, f3_new(player->position.x, player->position.y + PLAYER_EYEHEIGHT, player->position.z), player->view,
@@ -174,7 +174,7 @@ void Player_Update(Player* player, Sound* sound, Damage* dmg) {
 	// if (player->gamemode!=1){
 	// Fall damage
 	if (player->velocity.y <= -12) {
-		player->rndy;
+		// player->rndy;
 		player->rndy = round(player->velocity.y);
 		if (World_GetBlock(player->world, player->position.x, player->position.y - 1, player->position.z) != Block_Air) {
 			player->hp	 = player->hp + player->rndy;
@@ -185,7 +185,8 @@ void Player_Update(Player* player, Sound* sound, Damage* dmg) {
 	if (World_GetBlock(player->world, f3_unpack(player->position)) ==
 		Block_Lava /*||World_GetBlock(player->world,f3_unpack(player->position)) == Block_Fire*/) {
 		DebugUI_Log("ur burning lol");
-		OvertimeDamage("Fire", 10);
+		player->dmg = (Damage){ .cause = DAMAGECAUSE_FIRE, .time = 10 };
+		OvertimeDamage(player);
 	}
 	// Hunger
 	// if (player->difficulty!=0){
@@ -207,16 +208,11 @@ void Player_Update(Player* player, Sound* sound, Damage* dmg) {
 	// Respawning stuff
 	if (player->hp <= 0 /*&&player->totem==false*/) {
 		if (player->difficulty != 4) {
-			if (dmg == NULL) {
-				DebugUI_Log("Player DMG IS NULL(error)");
-				return;
-			}
-
-			if (player->spawnset = 0) {
-				if (dmg->cause == NULL)
+			if (player->spawnset == 0) {
+				if (player->dmg.cause == DAMAGECAUSE_NONE)
 					DebugUI_Log("Player died");
 				else
-					DebugUI_Log("Died by %s", dmg->cause);
+					DebugUI_Log("Died by %s", player->dmg.cause);
 
 				DebugUI_Log("No spawn was set");
 				player->position.x = 0.0;
@@ -229,11 +225,11 @@ void Player_Update(Player* player, Sound* sound, Damage* dmg) {
 				player->position.y = shouldOffset ? spawnY + 1 : spawnY;
 				player->position.z = 0.0;
 			}
-			if (player->spawnset = 1) {
-				if (dmg->cause == NULL) {
+			if (player->spawnset == 1) {
+				if (player->dmg.cause == DAMAGECAUSE_NONE) {
 					DebugUI_Log("Player died");
 				} else {
-					DebugUI_Log("Died by %s", dmg->cause);
+					DebugUI_Log("Died by %s", player->dmg.cause);
 				}
 				player->position.x = player->spawnx;
 				World* world	   = player->world;
@@ -245,9 +241,9 @@ void Player_Update(Player* player, Sound* sound, Damage* dmg) {
 				player->position.y = shouldOffset ? spawnY + 1 : spawnY;
 				player->position.z = player->spawnz;
 			}
-			player->hp	   = 20;
-			player->hunger = 20;
-			dmg->cause	   = NULL;
+			player->hp		  = 20;
+			player->hunger	  = 20;
+			player->dmg.cause = DAMAGECAUSE_NONE;
 		} else {
 			DebugUI_Log("lol ur world is gone");
 			/*char buffer[512];

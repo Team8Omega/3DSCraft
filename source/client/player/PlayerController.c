@@ -248,11 +248,10 @@ void PlayerController_Init(PlayerController* ctrl, Player* player) {
 	ctrl->flyTimer = -1.f;
 }
 
-void PlayerController_Update(PlayerController* ctrl, Sound* sound, InputData input, float dt) {
+void PlayerController_Update(PlayerController* ctrl, Sound* sound, float dt) {
 	Player* player = ctrl->player;
-	Damage* dmg;
 	PlatformAgnosticInput agnosticInput;
-	convertPlatformInput(&input, agnosticInput.keys, agnosticInput.keysdown, agnosticInput.keysup);
+	convertPlatformInput(&gInput, agnosticInput.keys, agnosticInput.keysdown, agnosticInput.keysup);
 
 	float jump	 = IsKeyDown(ctrl->controlScheme.jump, &agnosticInput);
 	float crouch = IsKeyDown(ctrl->controlScheme.crouch, &agnosticInput);
@@ -332,5 +331,5 @@ void PlayerController_Update(PlayerController* ctrl, Sound* sound, InputData inp
 	}
 
 	Player_Move(player, dt, movement);
-	Player_Update(player, sound, dmg);
+	Player_Update(player, sound);
 }

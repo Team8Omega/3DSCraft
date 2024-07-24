@@ -5,7 +5,7 @@
 
 #include "client/gui/Inventory.h"
 #include "client/model/CubeModel.h"
-#include "client/player/Damage.h"
+#include "client/player/DamageDef.h"
 
 #include "sounds/Sound.h"
 #include "util/math/VecMath.h"
@@ -63,6 +63,8 @@ typedef struct {
 	ItemStack inventory[64];
 
 	CubeModel* model;
+
+	Damage dmg;
 } Player;
 
 void Player_Init(Player* player, World* world);
@@ -71,7 +73,7 @@ void Player_InitModel(Player* player);
 
 void Player_Draw(Player* player, int projectionUniform, C3D_Mtx* matrix);
 
-void Player_Update(Player* player, Sound* sound, Damage* dmg);
+void Player_Update(Player* player, Sound* sound);
 
 void Player_Move(Player* player, float dt, float3 accl);
 

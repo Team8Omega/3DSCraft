@@ -1,8 +1,5 @@
 #pragma once
 
-typedef struct {
-	char* cause;
-	int time;
-} Damage;
+#include "client/player/Player.h"
 
-void OvertimeDamage(const char* cause, int time);
+void OvertimeDamage(Player* player);

@@ -8,28 +8,28 @@
 
 typedef int KeyCombo;
 typedef struct {
-		KeyCombo forward, backward, strafeLeft, strafeRight;
-		KeyCombo lookLeft, lookRight, lookUp, lookDown;
+	KeyCombo forward, backward, strafeLeft, strafeRight;
+	KeyCombo lookLeft, lookRight, lookUp, lookDown;
 
-		KeyCombo placeBlock, breakBlock;
-		KeyCombo jump;
+	KeyCombo placeBlock, breakBlock;
+	KeyCombo jump;
 
-		KeyCombo switchBlockLeft;
-		KeyCombo switchBlockRight;
+	KeyCombo switchBlockLeft;
+	KeyCombo switchBlockRight;
 
-		KeyCombo openCmd;
+	KeyCombo openCmd;
 
-		KeyCombo crouch;
+	KeyCombo crouch;
 } PlayerControlScheme;
 typedef struct {
-		Player* player;
-		PlayerControlScheme controlScheme;
+	Player* player;
+	PlayerControlScheme controlScheme;
 
-		float breakPlaceTimeout;
-		bool openedCmd;
+	float breakPlaceTimeout;
+	bool openedCmd;
 
-		float flyTimer;
+	float flyTimer;
 } PlayerController;
 
 void PlayerController_Init(PlayerController* ctrl, Player* player);
-void PlayerController_Update(PlayerController* ctrl, Sound* sound, InputData input, float dt);
+void PlayerController_Update(PlayerController* ctrl, Sound* sound, float dt);

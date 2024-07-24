@@ -3,8 +3,11 @@
 #include <stdint.h>
 
 typedef struct {
-	uint32_t keysheld, keysdown, keysup;
-	int16_t circlePadX, circlePadY;
-	uint16_t touchX, touchY;
-	int16_t cStickX, cStickY;
+	u32 keysheld, keysdown, keysup;
+	s16 circlePadX, circlePadY;
+	u16 touchX, touchY;
+	s16 cStickX, cStickY;
 } InputData;
+
+extern InputData gInput;
+extern InputData gInputOld;

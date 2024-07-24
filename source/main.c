@@ -31,7 +31,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#undef MAIN_C
+
 bool showDebugInfo = true;
+InputData gInput, gInputOld;
 
 void releaseWorld(ChunkWorker* chunkWorker, SaveManager* savemgr, World* world) {
 	for (int i = 0; i < CHUNKCACHE_SIZE; i++) {
@@ -46,12 +49,20 @@ void releaseWorld(ChunkWorker* chunkWorker, SaveManager* savemgr, World* world) 
 }
 
 void initCheck() {
+	// Check for block asset
 	if (access(PATH_PACKS PACK_VANILLA "/" PATH_PACK_TEXTURES "/"
 									   "block/stone.png",
 			   F_OK))
 		Crash(
 			"Please provide assets, check\n \'github.com/Team8Omega/3DSCraft-ResourcePacker\'\nfor infos.\n\nFILENOTFOUND: "
 			"block/stone.png");
+
+	// Check for valid license
+	if (access("romfs:/licenses.txt", F_OK))
+		Crash(
+			"This build is shipped without license information for third parties, and is therefore not legit.\nPlease build with "
+			"\'licenses.txt\' in "
+			"romfs, and retry.");
 }
 
 int main() {
@@ -109,19 +120,15 @@ int main() {
 	ChunkWorker_AddHandler(&chunkWorker, WorkerItemType_Load, (WorkerFuncObj){ &SaveManager_LoadChunk, &savemgr, true });
 	ChunkWorker_AddHandler(&chunkWorker, WorkerItemType_Save, (WorkerFuncObj){ &SaveManager_SaveChunk, &savemgr, true });
 
+	BackgroundSound.background = true;
+	BackgroundSound.path	   = String_ParsePackName(PACK_VANILLA, PATH_PACK_SOUNDS, "music/1.opus");
+	Sound_PlayOpus(&BackgroundSound);
+
 	u64 lastTime = svcGetSystemTick();
 	float dt = 0.f, timeAccum = 0.f, fpsClock = 0.f;
 	int frameCounter = 0, fps = 0;
-	bool initBackgroundSound = true;
 
 	while (aptMainLoop()) {
-		if (initBackgroundSound) {
-			initBackgroundSound		   = false;
-			BackgroundSound.background = true;
-			BackgroundSound.path	   = String_ParsePackName(PACK_VANILLA, PATH_PACK_SOUNDS, "music/1.opus");
-			Sound_PlayOpus(&BackgroundSound);
-		}
-
 		DebugUI_Text("%d FPS  Usage: CPU: %5.2f%% GPU: %5.2f%% Buf: %5.2f%% Lin: %d", fps, C3D_GetProcessingTime() * 6.f,
 					 C3D_GetDrawingTime() * 6.f, C3D_GetCmdBufUsage() * 100.f, linearSpaceFree());
 		DebugUI_Text("X: %f, Y: %f, Z: %f", f3_unpack(player.position));
@@ -148,10 +155,19 @@ int main() {
 			fpsClock	 = 0.f;
 		}
 
-		hidScanInput();
-		u32 keysheld = hidKeysHeld(), keysdown = hidKeysDown();
+		circlePosition circlePos, cstickPos;
+		touchPosition touchPos;
 
-		if (keysdown & KEY_START) {
+		hidScanInput();
+		hidCircleRead(&circlePos);
+		hidCstickRead(&cstickPos);
+		hidTouchRead(&touchPos);
+
+		gInputOld = gInput;
+		gInput	  = (InputData){ hidKeysHeld(), hidKeysDown(), hidKeysUp(),	 circlePos.dx, circlePos.dy,
+								 touchPos.px,	touchPos.py,   cstickPos.dx, cstickPos.dy };
+
+		if (gInput.keysdown & KEY_START) {
 			if (gamestate == GameState_SelectWorld)
 				break;
 			else if (gamestate == GameState_Playing) {
@@ -165,18 +181,6 @@ int main() {
 			}
 		}
 
-		circlePosition circlePos;
-		hidCircleRead(&circlePos);
-
-		circlePosition cstickPos;
-		hidCstickRead(&cstickPos);
-
-		touchPosition touchPos;
-		hidTouchRead(&touchPos);
-
-		InputData inputData = (InputData){ keysheld,	keysdown,	 hidKeysUp(),  circlePos.dx, circlePos.dy,
-										   touchPos.px, touchPos.py, cstickPos.dx, cstickPos.dy };
-
 		if (gamestate == GameState_Playing) {
 			while (timeAccum >= 1.f / 20.f) {
 				World_Tick(world);
@@ -184,7 +188,7 @@ int main() {
 				timeAccum -= 1.f / 20.f;
 			}
 
-			PlayerController_Update(&playerCtrl, &PlayerSound, inputData, dt);
+			PlayerController_Update(&playerCtrl, &PlayerSound, dt);
 
 			World_UpdateChunkCache(world, WorldToChunkCoord(FastFloor(player.position.x)), WorldToChunkCoord(FastFloor(player.position.z)));
 		} else if (gamestate == GameState_SelectWorld) {
@@ -234,7 +238,6 @@ int main() {
 				lastTime  = svcGetSystemTick();	 // fix timing
 			}
 		}
-		Gui_InputData(inputData);
 	}
 
 	if (gamestate == GameState_Playing) {

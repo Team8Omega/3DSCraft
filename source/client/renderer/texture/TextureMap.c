@@ -15,7 +15,7 @@
 #include "util/Paths.h"
 #include "util/StringUtils.h"
 
-u32 hash(char* str) {
+u32 hash(const char* str) {
 	unsigned long hash = 5381;
 	int c;
 	while ((c = *str++))

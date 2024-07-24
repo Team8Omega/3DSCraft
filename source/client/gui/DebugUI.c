@@ -2,6 +2,7 @@
 #include "client/renderer/texture/SpriteBatch.h"
 
 #include "client/gui/DebugUI.h"
+#include "client/player/InputData.h"
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -14,6 +15,8 @@
 static char* statusLines[STATUS_LINES];
 static char* logLines[LOG_LINES];
 static int currentStatusLine = 0;
+
+static bool isShowing = false;
 
 void DebugUI_Init() {
 	for (int i = 0; i < LOG_LINES; i++) {
