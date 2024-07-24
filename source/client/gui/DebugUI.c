@@ -11,6 +11,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+#ifdef _DEBUG
 #define STATUS_LINES (240 / 8 / 2)
 #define LOG_LINES 30
 #define LOG_LINE_LENGTH 128
@@ -60,8 +61,9 @@ static const DebugUI_Menu debugMenus[MENUSTATE_COUNT - 2] = { { // Root Menu
 																	{ 0, NULL, "none" }	  // close
 																},
 																"Sub Test Menu" } };
-
+#endif
 void DebugUI_Init() {
+#ifdef _DEBUG
 	for (int i = 0; i < LOG_LINES; i++) {
 		logLines[i] = malloc(LOG_LINE_LENGTH);
 		memset(logLines[i], 0x0, LOG_LINE_LENGTH);
@@ -70,15 +72,19 @@ void DebugUI_Init() {
 		statusLines[i] = malloc(STATUS_LINE_LENGTH);
 		memset(statusLines[i], 0x0, STATUS_LINE_LENGTH);
 	}
+#endif
 }
 void DebugUI_Deinit() {
+#ifdef _DEBUG
 	for (int i = 0; i < LOG_LINES; i++)
 		free(logLines[i]);
 	for (int i = 0; i < STATUS_LINES; i++)
 		free(statusLines[i]);
+#endif
 }
 
 void DebugUI_Text(const char* text, ...) {
+#ifdef _DEBUG
 	if (currentStatusLine >= STATUS_LINES)
 		return;
 	va_list args;
@@ -87,9 +93,11 @@ void DebugUI_Text(const char* text, ...) {
 	vsprintf(statusLines[currentStatusLine++], text, args);
 
 	va_end(args);
+#endif
 }
 
 void DebugUI_Log(const char* text, ...) {
+#ifdef _DEBUG
 	if (strlen(text) < 0)
 		return;
 
@@ -113,8 +121,10 @@ void DebugUI_Log(const char* text, ...) {
 	logLines[0][LOG_LINE_LENGTH - 1] = '\0';
 
 	va_end(args);
+#endif
 }
 
+#ifdef _DEBUG
 void DebugUI_DrawInfo() {
 	u8 infoNum;
 	u8 yOffset = 0;
@@ -192,8 +202,10 @@ void DebugUI_DrawMenu() {
 	if (Gui_Button(true, 10, OFFSET_Y_MAX, 100, 100, "Back"))
 		DebugUI_MenuSet(menuStateLast);
 }
+#endif
 
 void DebugUI_Draw() {
+#ifdef _DEBUG
 	SpriteBatch_SetScale(1);
 
 	if (gInput.keysdown)
@@ -220,4 +232,5 @@ void DebugUI_Draw() {
 			DebugUI_DrawMenu();
 			break;
 	}
+#endif
 }

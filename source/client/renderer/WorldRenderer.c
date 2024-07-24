@@ -219,7 +219,7 @@ void WorldRenderer_Render(float iod) {
 
 	renderWorld();
 
-	// Player_Draw(player, projectionUniform, &camera.vp);
+	Player_Draw(player, projectionUniform, &camera.vp);
 
 	Clouds_Render(projectionUniform, &camera.vp, world, player->position.x, player->position.z);
 

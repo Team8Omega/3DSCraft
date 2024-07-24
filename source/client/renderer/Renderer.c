@@ -149,6 +149,8 @@ void Renderer_Render() {
 
 	if (*gamestate == GameState_Playing)
 		PolyGen_Harvest();
+	else
+		CubeMap_Update(&camera.projection, f3_new(0.f, 0.0013f, 0.f));
 
 	for (int i = 0; i < 2; i++) {
 		if (GameState_Playing) {
@@ -177,7 +179,7 @@ void Renderer_Render() {
 			Renderer_RenderGameOverlay();
 
 		} else {
-			CubeMap_Draw(&camera.projection, f3_new(0.f, 0.0013f, 0.f));
+			CubeMap_Draw();
 
 			SpriteBatch_SetScale(2);
 
