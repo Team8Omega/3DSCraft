@@ -151,9 +151,9 @@ void Renderer_Render() {
 		PolyGen_Harvest();
 
 	for (int i = 0; i < 2; i++) {
-		if(GameState_Playing){
+		if (GameState_Playing) {
 			C3D_RenderTargetClear(renderTargets[i], C3D_CLEAR_ALL, CLEAR_COLOR_SKY, 0);
-		}else{
+		} else {
 			C3D_RenderTargetClear(renderTargets[i], C3D_CLEAR_ALL, 0x000000FF, 0);
 		}
 
