@@ -22,8 +22,6 @@ CubeModel* CubeModel_Init(CubeModelRaw* model);
 
 static inline CubeModel* createModel(CubeRaw* models, u8 numModels, C3D_Tex* texture) {
 	CubeRaw** pointers = (CubeRaw**)malloc(sizeof(CubeRaw*) * numModels);
-	if (!pointers)
-		return NULL;
 
 	for (u8 i = 0; i < numModels; ++i) {
 		pointers[i] = &models[i];

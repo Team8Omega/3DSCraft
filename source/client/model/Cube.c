@@ -13,14 +13,12 @@ Cube* Cube_Init(CubeRaw* in) {
 		return NULL;
 	}
 
-	Cube* cube = linearAlloc(sizeof(Cube));
-	if (!cube) {
-		Crash("Could not allocate memory for cube");
-		return NULL;
-	}
+	Cube* cube = (Cube*)malloc(sizeof(Cube));
 
 	if (!vbo)
-		vbo = linearAlloc(sizeof(cube_sides_lut));
+		vbo = (WorldVertex*)malloc(sizeof(cube_sides_lut));
+
+	memcpy(cube->vertices, cube_sides_lut, sizeof(cube_sides_lut));
 
 	for (u8 face = 0; face < 6; ++face) {
 		u8 lutStartIndex = face * 6;
@@ -42,15 +40,6 @@ Cube* Cube_Init(CubeRaw* in) {
 			vertex->uv[1] = toTexCrd(in->faceUV[face][cube_sides_lut[idx].uv[1] * 2 + 1], in->dimensions[1]);
 			if (vertex->uv[1] < 0)
 				vertex->uv[1] = (1 << 15) - 1;
-
-			// (for simplicity, using white here)
-			vertex->rgb[0] = 255;
-			vertex->rgb[1] = 255;
-			vertex->rgb[2] = 255;
-
-			vertex->fxyz[0] = 0;
-			vertex->fxyz[1] = 0;
-			vertex->fxyz[2] = 0;
 		}
 	}
 	C3D_Mtx matrix;
@@ -75,14 +64,6 @@ void Cube_Deinit(Cube* cube) {
 }
 
 void Cube_Draw(Cube* cube, int shaderUniform, C3D_Mtx* matrix) {
-	if (cube == NULL) {
-		Crash("Cube is NULL!");
-		return;
-	}
-
-	if (!vbo)
-		vbo = linearAlloc(sizeof(cube_sides_lut));
-
 	GSPGPU_FlushDataCache(vbo, sizeof(cube_sides_lut));
 
 	memcpy(vbo, cube->vertices, sizeof(cube_sides_lut));

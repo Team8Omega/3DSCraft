@@ -65,6 +65,7 @@ static int projUniform;
 static WorldVertex* cubeVBO;
 static C3D_Tex cubeTextures[6];
 static float3 rotation;
+static C3D_Mtx cubeMatrix;
 
 void CubeMap_Init(int projUniform_) {
 	projUniform = projUniform_;
@@ -91,7 +92,7 @@ void CubeMap_Deinit() {
 	}
 }
 
-void CubeMap_Draw(C3D_Mtx* projection, float3 rotationOffset) {
+void CubeMap_Update(C3D_Mtx* projection, float3 rotationOffset) {
 	if (cubeVBO == NULL) {
 		Crash("CubeMap not set!");
 		return;
@@ -99,7 +100,7 @@ void CubeMap_Draw(C3D_Mtx* projection, float3 rotationOffset) {
 
 	GSPGPU_FlushDataCache(cubeVBO, sizeof(vertices));
 
-	C3D_Mtx model, out;
+	C3D_Mtx model;
 	Mtx_PerspTilt(projection, C3D_AngleFromDegrees(80.0f), C3D_AspectRatioTop, 0.01f, 1000.0f, false);
 	Mtx_Identity(&model);
 	Mtx_Translate(&model, 0.f, 0.f, 0.f, true);
@@ -109,9 +110,10 @@ void CubeMap_Draw(C3D_Mtx* projection, float3 rotationOffset) {
 	Mtx_RotateY(&model, rotation.y, true);
 	Mtx_RotateZ(&model, rotation.z, true);
 
-	Mtx_Multiply(&out, projection, &model);
-
-	C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, projUniform, &out);
+	Mtx_Multiply(&cubeMatrix, projection, &model);
+}
+void CubeMap_Draw() {
+	C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, projUniform, &cubeMatrix);
 
 	memcpy(cubeVBO, vertices, sizeof(vertices));
 
@@ -121,7 +123,7 @@ void CubeMap_Draw(C3D_Mtx* projection, float3 rotationOffset) {
 	BufInfo_Init(bufInfo);
 	BufInfo_Add(bufInfo, cubeVBO, sizeof(WorldVertex), 4, 0x3210);
 
-	//ToDo: find Alternative method to disable fog
+	// ToDo: find Alternative method to disable fog
 	C3D_FogGasMode(false, 0, false);
 
 	for (u8 i = 0; i < 6; i++) {
