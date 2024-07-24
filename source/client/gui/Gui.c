@@ -68,17 +68,23 @@ bool Gui_Button(bool enabled, int x, int y, int width, int z, const char* label)
 	return false;
 }
 
-bool Gui_IconButton(int x, int y, int width, int height, const char* label) {
+bool Gui_IconButton(int x, int y, int width, int height, int z, bool centered, uint32_t tintColor, const char* label) {
 	// TODO: Redesign
 
 	bool pressed = Gui_IsCursorInside(x, y, width, height);
 
-	SpriteBatch_BindGuiTexture(GuiTexture_Widgets);
+	int textWidth = SpriteBatch_CalcTextWidth(label);
 
 	if (pressed) {
-		Gui_DrawTint(x, y, width, height, SHADER_RGB(20, 20, 20));
+		Gui_DrawTint(x, y, width, height, z - 1, tintColor);
 	}
-	SpriteBatch_PushText(x + 24, (y + (height - CHAR_HEIGHT) / 2), -1, SHADER_RGB(31, 31, 31), false, INT_MAX, NULL, label);
+
+	if (centered) {
+		SpriteBatch_PushText((x + (width - textWidth) / 2), (y + (height - CHAR_HEIGHT) / 2), z, SHADER_RGB(31, 31, 31), false, INT_MAX,
+							 NULL, label);
+	} else {
+		SpriteBatch_PushText(x + 24, (y + (height - CHAR_HEIGHT) / 2), z, SHADER_RGB(31, 31, 31), false, INT_MAX, NULL, label);
+	}
 
 	if (gInput.keysup & KEY_TOUCH && Gui_WasCursorInside(x, y, width, height))
 		return true;
@@ -115,19 +121,23 @@ void Gui_GetCursorMovement(int* x, int* y) {
 	*y = gInput.touchY / SpriteBatch_GetScale() - gInputOld.touchY / SpriteBatch_GetScale();
 }
 
-void Gui_DrawOutline(int x, int y, int width, int height, uint32_t color) {
-	// Top border
-	SpriteBatch_PushSingleColorQuad(x, y, -3, width, 1, color);
-	// Bottom border
-	SpriteBatch_PushSingleColorQuad(x, y + height, -3, width + 1, 1, color);
-	// Left border
-	SpriteBatch_PushSingleColorQuad(x, y, -3, 1, height, color);
-	// Right border
-	SpriteBatch_PushSingleColorQuad(x + width, y, -3, 1, height, color);
+void Gui_DrawLine(int x, int y, int width, int thickness, int z, uint32_t color) {
+	SpriteBatch_PushSingleColorQuad(x, y, z, width, thickness, color);
 }
 
-void Gui_DrawTint(int x, int y, int width, int height, uint32_t color) {
-	SpriteBatch_PushSingleColorQuad(x, y, -3, width, height, color);
+void Gui_DrawOutline(int x, int y, int width, int height, int thickness, int z, uint32_t color) {
+	// Top border
+	SpriteBatch_PushSingleColorQuad(x, y, z, width, thickness, color);
+	// Bottom border
+	SpriteBatch_PushSingleColorQuad(x, y + height, z, width + 1, thickness, color);
+	// Left border
+	SpriteBatch_PushSingleColorQuad(x, y, z, thickness, height, color);
+	// Right border
+	SpriteBatch_PushSingleColorQuad(x + width, y, z, thickness, height, color);
+}
+
+void Gui_DrawTint(int x, int y, int width, int height, int z, uint32_t color) {
+	SpriteBatch_PushSingleColorQuad(x, y, z, width, height, color);
 }
 
 void Gui_DrawBackground(int background, int x, int y, int z) {

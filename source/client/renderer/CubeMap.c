@@ -100,8 +100,9 @@ void CubeMap_Draw(C3D_Mtx* projection, float3 rotationOffset) {
 	GSPGPU_FlushDataCache(cubeVBO, sizeof(vertices));
 
 	C3D_Mtx model, out;
+	Mtx_PerspTilt(projection, C3D_AngleFromDegrees(80.0f), C3D_AspectRatioTop, 0.01f, 1000.0f, false);
 	Mtx_Identity(&model);
-	Mtx_Translate(&model, 0.1f, 0.5f, -2.1f, true);
+	Mtx_Translate(&model, 0.f, 0.f, 0.f, true);
 
 	rotation = f3_add(rotation, rotationOffset);
 	Mtx_RotateX(&model, rotation.x, true);
@@ -119,6 +120,9 @@ void CubeMap_Draw(C3D_Mtx* projection, float3 rotationOffset) {
 	C3D_BufInfo* bufInfo = C3D_GetBufInfo();
 	BufInfo_Init(bufInfo);
 	BufInfo_Add(bufInfo, cubeVBO, sizeof(WorldVertex), 4, 0x3210);
+
+	//ToDo: find Alternative method to disable fog
+	C3D_FogGasMode(false, 0, false);
 
 	for (u8 i = 0; i < 6; i++) {
 		C3D_TexBind(0, &cubeTextures[i]);
