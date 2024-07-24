@@ -7,7 +7,8 @@
 
 typedef uint8_t Block;
 
-enum {
+enum
+{
 	Block_Air,
 	Block_Stone,
 	Block_Dirt,
