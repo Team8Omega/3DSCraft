@@ -112,6 +112,8 @@ typedef enum
 	MenuState_WorldOptions
 } MenuState;
 
+int worldsAmnt = 0;
+
 static int scroll		 = 0;
 static float velocity	 = 0.f;
 static int selectedWorld = 0;
@@ -137,9 +139,9 @@ static Difficulty difficulty = Difficulty_Normal;
 
 static char* worldGenTypesStr[] = { "Default", "Superflat" };
 
-static char* gamemodeTypesStr[] = { "Survival", "Creative", "Adventure", "Spectator" };
+static char* gamemodeTypesStr[] = { "Survival", "Hardcore", "Creative", "Spectator" };
 
-static char* difficultyTypesStr[] = { "Normal", "Peaceful", "Easy", "Hard", "Hardcore" };
+static char* difficultyTypesStr[] = { "Normal", "Hard", "Peaceful", "Easy", };
 
 static float max_velocity = 20.f;
 
@@ -155,7 +157,6 @@ void SelectWorldScreen(state_machine_t* sm) {
 	}
 
 	if (menustate == MenuState_SelectWorld) {
-		int i		  = 0;
 		int boxOffset = 5;
 		int boxWidth  = 60;
 		int boxHeight = 75;
@@ -181,13 +182,14 @@ void SelectWorldScreen(state_machine_t* sm) {
 
 		Gui_Label_Centered(SpriteBatch_GetWidth(), 4, 0, 0, false, SHADER_RGB(4, 4, 4), "Singleplayer");
 
-		vec_foreach (&worlds, info, i) {
+		vec_foreach (&worlds, info, worldsAmnt) {
+
 			int x;
 			if (worlds.length == 1) {
 				// Center the single box
 				x = (SpriteBatch_GetWidth() - boxWidth) / 2 + scroll;
 			} else {
-				x = i * (boxWidth + boxMargin) + boxOffset + boxMargin + scroll;  // Adjusted x position calculation
+				x = worldsAmnt * (boxWidth + boxMargin) + boxOffset + boxMargin + scroll;  // Adjusted x position calculation
 			}
 
 			Gui_DrawTint(x, boxY, boxWidth, boxHeight, -4, SHADER_RGB(6, 6, 6));
@@ -210,9 +212,9 @@ void SelectWorldScreen(state_machine_t* sm) {
 
 			// TODO: Delete button to link to Edit GUI; build Edit GUI
 			if (Gui_EnteredCursorInside(x, 20, boxWidth, boxHeight)) {
-				selectedWorld = i;
+				selectedWorld = worldsAmnt;
 			}
-			if (selectedWorld == i) {
+			if (selectedWorld == worldsAmnt) {
 				clicked_delete_world = Gui_IconButton(x, 77, boxWidth, 16, -1, true, SHADER_RGB(20, 20, 20), "Delete");
 				clicked_play		 = Gui_IconButton(x, boxY, boxWidth, 60, -2, true, SHADER_RGB(20, 20, 20), "");
 				clicked_play		 = Gui_Button(true, x + ((boxWidth / 2) - 10), 25, 20, 0, "|>");
@@ -223,8 +225,12 @@ void SelectWorldScreen(state_machine_t* sm) {
 			}
 		}
 
-		int maximumSize = ((i * (boxWidth + boxMargin) + boxOffset + boxMargin) - SpriteBatch_GetWidth()) +
-						  boxOffset;  // Adjusted maximum size calculation
+		if(worldsAmnt == 0){
+			menustate = MenuState_WorldOptions;
+		}
+
+		int maximumSize = ((worldsAmnt * (boxWidth + boxMargin) + boxOffset + boxMargin) - SpriteBatch_GetWidth()) + boxOffset;  // Adjusted maximum size calculation
+
 		if (scroll < -maximumSize)
 			scroll = -maximumSize;
 		if (scroll > 0)
@@ -251,10 +257,15 @@ void SelectWorldScreen(state_machine_t* sm) {
 
 		Gui_Label(5, 40, 0, 0, true, INT16_MAX, "Game Mode:");
 		if (Gui_Button(true, 95, 35, 60, 0, gamemodeTypesStr[gamemode])) {
+
 			gamemode++;
 
+			//Spectator mode doesnt need to be rendered
+			if(gamemode == Gamemode_Spectator){
+				gamemode++;
+			}
 			// player->gamemode = gamemode;
-			if (gamemode == Gamemode_Count)
+			if (gamemode >= Gamemode_Count)
 				gamemode = 0;
 		}
 
@@ -362,8 +373,13 @@ bool SelectWorldScreen_Update(char* out_worldpath, char* out_name, WorldGenType*
 		menustate		  = MenuState_SelectWorld;
 	}
 	if (canceled_world_options) {
-		canceled_world_options = false;
-		menustate			   = MenuState_SelectWorld;
+		if(worldsAmnt == 0){
+			canceled_world_options = false;
+			state_machine_set_current_state(machine, TitleScreen);
+		}else{
+			canceled_world_options = false;
+			menustate			   = MenuState_SelectWorld;
+		}
 	}
 
 	return false;

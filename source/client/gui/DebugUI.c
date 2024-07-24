@@ -49,18 +49,22 @@ static DebugUI_State menuState	   = MENUSTATE_NONE;
 static DebugUI_State menuStateLast = MENUSTATE_NONE;
 static u8 debugMenuOptionNum	   = 0;
 
-static const DebugUI_Menu debugMenus[MENUSTATE_COUNT - 2] = { { // Root Menu
-																{
-																	{ 3, NULL, "sub" },	 // to sub menu
-																	{ 1, NULL, "log" }	 // to log
-																},
-																"Root" },
-															  { // Sub Test Menu
-																{
-																	{ 2, NULL, "root" },  // back to root
-																	{ 0, NULL, "none" }	  // close
-																},
-																"Sub Test Menu" } };
+static const DebugUI_Menu debugMenus[MENUSTATE_COUNT - 2] = {
+	{ // Root Menu
+	  	{
+		  	{ 3, NULL, "sub" },	 // to sub menu
+		  	{ 1, NULL, "log" }	 // to log
+	  	},
+	  	"Root"
+	},
+	{ // Sub Test Menu
+	  	{
+		  	{ 2, NULL, "root" },  // back to root
+		  	{ 0, NULL, "close" }	  // close
+	  	},
+	  	"Sub Test Menu"
+	}
+};
 #endif
 void DebugUI_Init() {
 #ifdef _DEBUG
@@ -187,11 +191,11 @@ void DebugUI_DrawMenu() {
 
 	SpriteBatch_PushText(0, 0, 100, INT16_MAX, false, 320, 0, " 3DSCraft Debug Menu:   %s", menu->name);
 
-	u8 yOffset = 18;
+	u8 yOffset =20;
 	for (u8 i = 0; i < debugMenuOptionNum; ++i) {
 		const DebugUI_MenuOption* option = &menu->options[i];
 
-		if (Gui_Button(true, 10, yOffset, 200, 100, option->label))
+		if (Gui_Button(true, 10, yOffset, 100, 100, option->label))
 			DebugUI_MenuCall(option);
 
 #define OFFSET_Y_MAX 220
