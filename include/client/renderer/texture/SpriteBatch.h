@@ -35,6 +35,8 @@ int SpriteBatch_PushText(int x, int y, int z, int16_t color, bool shadow, int wr
 int SpriteBatch_CalcTextWidthVargs(const char* text, va_list args);
 int SpriteBatch_CalcTextWidth(const char* text, ...);
 
+char* SpriteBatch_TextTruncate(const char* text, size_t length);
+
 bool SpriteBatch_RectIsVisible(int x, int y, int w, int h);
 
 void SpriteBatch_SetScale(int scale);

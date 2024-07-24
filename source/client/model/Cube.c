@@ -38,10 +38,10 @@ Cube* Cube_Init(CubeRaw* in) {
 
 			vertex->uv[0] = toTexCrd(in->faceUV[face][cube_sides_lut[idx].uv[0] * 2], in->dimensions[0]);
 			if (vertex->uv[0] < 0)
-				vertex->uv[0] = 1 << 15 - 1;
+				vertex->uv[0] = (1 << 15) - 1;
 			vertex->uv[1] = toTexCrd(in->faceUV[face][cube_sides_lut[idx].uv[1] * 2 + 1], in->dimensions[1]);
 			if (vertex->uv[1] < 0)
-				vertex->uv[1] = 1 << 15 - 1;
+				vertex->uv[1] = (1 << 15) - 1;
 
 			// (for simplicity, using white here)
 			vertex->rgb[0] = 255;

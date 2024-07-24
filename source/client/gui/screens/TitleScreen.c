@@ -18,8 +18,8 @@ void TitleScreen(state_machine_t *machine) {
 		}
 	}
 
-	clicked_play = Gui_IconButton(0,32,240,21, "Singleplayer");
-	clicked_quit = Gui_IconButton(0,54,240,21,"Quit");
+	clicked_play = Gui_IconButton(0,45,160,20,0,true,SHADER_RGB(20,20,20), "Singleplayer");
+	clicked_quit = Gui_IconButton(0,65,160,20,0,true,SHADER_RGB(20,20,20),"Quit");
 
 	if (clicked_play) {
         clicked_play = false;

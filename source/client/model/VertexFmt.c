@@ -43,8 +43,8 @@ int16_t RGB16_ToHSV(uint16_t rgb) {
 }
 
 int16_t HSV16_ToRGB(int16_t hsv) {
-	int16_t r, g, b;
-	int16_t in_h = SHADER_R(hsv), in_s = SHADER_G(hsv), in_v = SHADER_B(hsv);
+	s16 r = 0, g = 0, b = 0;
+	s16 in_h = SHADER_R(hsv), in_s = SHADER_G(hsv), in_v = SHADER_B(hsv);
 
 	if (in_s == 0) {
 		r = g = b = in_v;

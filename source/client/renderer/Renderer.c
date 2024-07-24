@@ -4,7 +4,6 @@
 #include <client/gui/DebugUI.h>
 #include <client/gui/Gui.h>
 #include <client/gui/Inventory.h>
-#include <client/gui/screens/SelectWorldScreen.h>
 #include <client/renderer/Clouds.h>
 #include <client/renderer/CubeMap.h>
 #include <client/renderer/Cursor.h>
@@ -152,7 +151,12 @@ void Renderer_Render() {
 		PolyGen_Harvest();
 
 	for (int i = 0; i < 2; i++) {
-		C3D_RenderTargetClear(renderTargets[i], C3D_CLEAR_ALL, CLEAR_COLOR_SKY, 0);
+		if(GameState_Playing){
+			C3D_RenderTargetClear(renderTargets[i], C3D_CLEAR_ALL, CLEAR_COLOR_SKY, 0);
+		}else{
+			C3D_RenderTargetClear(renderTargets[i], C3D_CLEAR_ALL, 0x000000FF, 0);
+		}
+
 		C3D_FrameDrawOn(renderTargets[i]);
 
 		SpriteBatch_StartFrame(400, 240);
