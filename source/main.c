@@ -9,6 +9,7 @@
 #include "client/gui/DebugUI.h"
 #include "client/gui/Gui.h"
 #include "client/gui/screens/SelectWorldScreen.h"
+#include "client/model/Cube.h"
 #include "client/player/Damage.h"
 #include "client/player/Player.h"
 #include "client/player/PlayerController.h"
@@ -124,6 +125,8 @@ int main() {
 	BackgroundSound.path	   = String_ParsePackName(PACK_VANILLA, PATH_PACK_SOUNDS, "music/1.opus");
 	Sound_PlayOpus(&BackgroundSound);
 
+	Cube_InitVBOs();
+
 	u64 lastTime = svcGetSystemTick();
 	float dt = 0.f, timeAccum = 0.f, fpsClock = 0.f;
 	int frameCounter = 0, fps = 0;
@@ -131,7 +134,6 @@ int main() {
 	while (aptMainLoop()) {
 		DebugUI_Text("%d FPS  CPU: %5.2f%% GPU: %5.2f%% Buf: %5.2f%% Lin: %d", fps, C3D_GetProcessingTime() * 6.f,
 					 C3D_GetDrawingTime() * 6.f, C3D_GetCmdBufUsage() * 100.f, linearSpaceFree());
-
 		if (gamestate == GameState_Playing) {
 			DebugUI_Text("X: %f, Y: %f, Z: %f", f3_unpack(player.position));
 			DebugUI_Text("HP: %i", player.hp);
@@ -279,6 +281,8 @@ int main() {
 	ChunkWorker_Deinit(&chunkWorker);
 
 	Renderer_Deinit();
+
+	Cube_DeinitVBOs();
 
 	romfsExit();
 

@@ -185,7 +185,7 @@ endif
 .PHONY: $(BUILD) clean all
 
 #---------------------------------------------------------------------------------
-all: $(BUILD) cxi cfa cia
+all: $(BUILD) 
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
@@ -202,14 +202,16 @@ run:
 rund: #run dima
 	@3dslink $(TARGET).3dsx -a 192.168.178.37
 
-cxi:
+cia: $(TARGET).cia
+
+$(TARGET).cxi:
 	@$(MAKEROM) -o $(TARGET).cxi $(MAKEROM_ARGS)
 	@echo built ... $(TARGET).cxi
-cfa:
+$(TARGET).cfa:
 	@$(MAKEROM) -o $(TARGET).cfa -rsf $(RSF_PATH) -target t
 	@echo built ... $(TARGET).cfa
 
-cia:
+$(TARGET).cia: $(TARGET).3dsx $(TARGET).cxi $(TARGET).cfa
 	@$(MAKEROM) -f cia -o $(TARGET).cia -target t -i $(TARGET).cxi:0:0 -i $(TARGET).cfa:1:1
 	@echo built ... $(TARGET).cia
 
@@ -272,15 +274,17 @@ endif
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
+3dsx: $(OUTPUT).3dsx
+
 ifeq ($(strip $(NO_SMDH)),)
-$(OUTPUT).3dsx	:	$(OUTPUT).elf $(OUTPUT).smdh $(BUILD)/banner.bnr
+$(OUTPUT).3dsx	:	$(OUTPUT).elf $(OUTPUT).smdh banner.bnr
 else
-$(OUTPUT).3dsx	:	$(OUTPUT).elf $(BUILD)/banner.bnr
+$(OUTPUT).3dsx	:	$(OUTPUT).elf banner.bnr
 endif
 
 $(OUTPUT).elf	:	$(OFILES)
 
-$(BUILD)/banner.bnr:
+banner.bnr:
 	@$(BANNERTOOL) makebanner $(BANNER_IMAGE_ARG) "../$(BANNER_IMAGE)" $(BANNER_AUDIO_ARG) "../$(BANNER_AUDIO)" -o "banner.bnr"
 
 $(OUTPUT).smdh:
