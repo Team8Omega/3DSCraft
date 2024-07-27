@@ -191,9 +191,12 @@ $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 #---------------------------------------------------------------------------------
-clean: clean-lib
+clean: clean-exe
 	@echo clean ...
-	@rm -rf $(BUILD) $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf $(TARGET).cia $(TARGET).cxi $(TARGET).cfa $(TARGET).lst
+	@rm -rf $(BUILD) 
+	
+clean-exe:
+	@rm -f $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf $(TARGET).cia $(TARGET).cxi $(TARGET).cfa $(TARGET).lst
 #---------------------------------------------------------------------------------
 run:
 	@echo running...
@@ -214,36 +217,6 @@ $(TARGET).cfa:
 $(TARGET).cia: $(TARGET).3dsx $(TARGET).cxi $(TARGET).cfa
 	@$(MAKEROM) -f cia -o $(TARGET).cia -target t -i $(TARGET).cxi:0:0 -i $(TARGET).cfa:1:1
 	@echo built ... $(TARGET).cia
-
-
-#---------------------------------------------------------------------------------------
-# Library
-#---------------------------------------------------------------------------------------
-
-#LIBSOURCES := $(wildcard lib/**/*.cpp lib/**/*.c)
-#LIBSOURCES += $(wildcard lib/*/*/*.cpp lib/*/*/*.c)
-#LIBOBJS := $(patsubst %.cpp, %.o, $(patsubst %.c, %.o, $(LIBSOURCES)))
-
-#AR := $(DEVKITARM)/bin/arm-none-eabi-ar.exe
-
-lib: lib/libgame.a
-
-lib/libgame.a: $(LIBOBJS)
-	@echo Building libraries...
-	@$(AR) rcs lib/libgame.a $^
-	@echo built ... lib/libgame.a
-
-#lib/%.o: lib/%.cpp
-#	@echo $@...
-#	@$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -o $@
-
-lib/%.o: lib/%.c
-	@echo $@...
-	@$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
-
-clean-lib:
-	@rm -f lib/**/*.o
-	@rm -f lib/libgame.o
 
 #---------------------------------------------------------------------------------
 else
