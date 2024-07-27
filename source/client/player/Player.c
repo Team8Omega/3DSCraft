@@ -16,7 +16,7 @@ extern Camera camera;
 void Player_InitModel(Player* player) {
 	Texture_Load(&textureSkin, /* "block/diamond_block.png" */ "entity/player/wide/steve.png");
 
-#define offsetZ 64
+#define offsetZ 0
 
 	CubeRaw cubes[] = {
 		{ // head 1

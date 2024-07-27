@@ -31,6 +31,7 @@
 #include <sino/sino.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "client/language/LanguageManager.h"
 
 #undef MAIN_C
 
@@ -67,6 +68,9 @@ void initCheck() {
 }
 
 int main() {
+
+	test();
+
 	GameState gamestate = GameState_SelectWorld;
 	// printf("gfxinit\n");
 	gfxInitDefault();
