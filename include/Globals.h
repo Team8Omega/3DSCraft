@@ -4,8 +4,9 @@
 
 typedef enum
 {
-	GameState_SelectWorld,
-	GameState_Playing
+	GameState_Menu,
+	GameState_Playing,
+	GameState_Paused,
 } GameState;
 
 #ifdef _DEBUG

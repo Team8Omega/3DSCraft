@@ -147,13 +147,13 @@ void Renderer_Render() {
 
 	C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 
-	if (*gamestate == GameState_Playing)
+	if (*gamestate == GameState_Playing || *gamestate == GameState_Paused)
 		PolyGen_Harvest();
 	else
 		CubeMap_Update(&camera.projection, f3_new(0.f, 0.0013f, 0.f));
 
 	for (int i = 0; i < 2; i++) {
-		if (*gamestate == GameState_Playing) {
+		if (*gamestate == GameState_Playing || *gamestate == GameState_Paused) {
 			C3D_RenderTargetClear(renderTargets[i], C3D_CLEAR_ALL, CLEAR_COLOR_SKY, 0);
 		} else {
 			C3D_RenderTargetClear(renderTargets[i], C3D_CLEAR_ALL, 0x000000FF, 0);
@@ -171,12 +171,16 @@ void Renderer_Render() {
 		C3D_BindProgram(&world_shader);
 		C3D_SetAttrInfo(&world_vertexAttribs);
 
-		if (*gamestate == GameState_Playing) {
+		if (*gamestate == GameState_Playing ) {
 			C3D_TexBind(0, Block_GetTextureMap());
 
 			WorldRenderer_Render(!i ? -iod : iod);
 
 			Renderer_RenderGameOverlay();
+
+		} else if (*gamestate == GameState_Paused) {
+			C3D_TexBind(0, Block_GetTextureMap());
+			WorldRenderer_Render(!i ? -iod : iod);
 
 		} else {
 			CubeMap_Draw();
@@ -208,9 +212,13 @@ void Renderer_Render() {
 
 	SpriteBatch_StartFrame(320, 240);
 
-	if (*gamestate == GameState_SelectWorld) {
+	if (*gamestate == GameState_Menu) {
 		state_machine_run(machine);
-	} else {
+	} else if (*gamestate == GameState_Paused) {
+
+		PauseScreen(gamestate);
+
+	} else if(*gamestate == GameState_Playing) {
 		SpriteBatch_SetScale(2);
 		player->quickSelectBarSlots = 9;
 		Inventory_DrawQuickSelect(160 / 2 - Inventory_QuickSelectCalcWidth(player->quickSelectBarSlots) / 2,
@@ -219,6 +227,8 @@ void Renderer_Render() {
 		player->inventorySite =
 			Inventory_Draw(16, 0, 160, player->inventory, sizeof(player->inventory) / sizeof(ItemStack), player->inventorySite);
 	}
+
+
 
 	if (showDebugInfo)
 		DebugUI_Draw();

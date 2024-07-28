@@ -69,9 +69,9 @@ void initCheck() {
 
 int main() {
 
-	test();
 
-	GameState gamestate = GameState_SelectWorld;
+
+	GameState gamestate = GameState_Menu;
 	// printf("gfxinit\n");
 	gfxInitDefault();
 
@@ -115,6 +115,8 @@ int main() {
 	Renderer_Init(world, &player, &chunkWorker.queue, &gamestate);
 
 	DebugUI_Init();
+
+	test();
 
 	SelectWorldScreen_Init();
 
@@ -177,16 +179,18 @@ int main() {
 								 touchPos.px,	touchPos.py,   cstickPos.dx, cstickPos.dy };
 
 		if (gInput.keysdown & KEY_START) {
-			if (gamestate == GameState_SelectWorld)
+			if (gamestate == GameState_Menu)
 				break;
-			else if (gamestate == GameState_Playing) {
+			else if (gamestate == GameState_Paused) {
 				releaseWorld(&chunkWorker, &savemgr, world);
 
-				gamestate = GameState_SelectWorld;
+				gamestate = GameState_Menu;
 
 				SelectWorldScreen_ScanWorlds();
 
 				lastTime = svcGetSystemTick();
+			}else if (gamestate == GameState_Playing) {
+				gamestate = GameState_Paused;
 			}
 		}
 
@@ -200,7 +204,9 @@ int main() {
 			PlayerController_Update(&playerCtrl, &PlayerSound, dt);
 
 			World_UpdateChunkCache(world, WorldToChunkCoord(FastFloor(player.position.x)), WorldToChunkCoord(FastFloor(player.position.z)));
-		} else if (gamestate == GameState_SelectWorld) {
+		}else if (gamestate == GameState_Paused) {
+			World_UpdateChunkCache(world, WorldToChunkCoord(FastFloor(player.position.x)), WorldToChunkCoord(FastFloor(player.position.z)));
+		} else if (gamestate == GameState_Menu) {
 			char path[256];
 			char name[WORLD_NAME_SIZE] = { '\0' };
 			WorldGenType worldType;
