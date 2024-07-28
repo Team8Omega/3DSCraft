@@ -3,6 +3,7 @@
 #include "vec/vec.h"
 
 #include "client/Crash.h"
+#include "core/Direction.h"
 #include "util/math/NumberUtils.h"
 
 #define CUBE_NUM_MAX 64
@@ -11,7 +12,62 @@ static u16 cubeNum = 0;
 static Cube* cubeRef[CUBE_NUM_MAX];
 static WorldVertex* cubeModelVBOs[CUBE_NUM_MAX];
 
-extern const WorldVertex cube_sides_lut[CUBE_VERTICE_NUM];
+const WorldVertex cube_sides_lut[] = {
+	// Fourth face (MX) - West
+	// First triangle
+	{ { 0, 0, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 0, 1 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 1, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Second triangle
+	{ { 0, 1, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 1, 0 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 0, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Third face (PX) - East
+	// First triangle
+	{ { 1, 0, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 1, 0 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 1, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Second triangle
+	{ { 1, 1, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 0, 1 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 0, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Sixth face (MY) - Down
+	// First triangle
+	{ { 0, 0, 0 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 0, 0 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 0, 1 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Second triangle
+	{ { 1, 0, 1 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 0, 1 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 0, 0 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Fifth face (PY) - Up
+	// First triangle
+	{ { 0, 1, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 1, 1 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 1, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Second triangle
+	{ { 1, 1, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 1, 0 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 1, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Second face (MZ) - North
+	// First triangle
+	{ { 0, 0, 1 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 0, 1 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 1, 1 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Second triangle
+	{ { 1, 1, 1 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 1, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 0, 1 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// First face (PZ) - South
+	// First triangle
+	{ { 0, 0, 0 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 0, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 1, 0 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Second triangle
+	{ { 1, 1, 0 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 1, 0 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 0, 0 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+};
 
 void Cube_InitVBOs() {
 	for (u16 i = 0; i < cubeNum; i++) {
@@ -29,7 +85,7 @@ void Cube_DeinitVBOs() {
 	}
 }
 
-Cube* Cube_Init(CubeRaw* in) {
+Cube* Cube_Init(const CubeRaw* in, s16 texwidth, s16 texheight) {
 	if (!in) {
 		Crash("Passed unbaked CubeRaw is NULL!");
 		return NULL;
@@ -41,37 +97,88 @@ Cube* Cube_Init(CubeRaw* in) {
 
 	memcpy(cube->vertices, cube_sides_lut, sizeof(cube_sides_lut));
 
+#define VERTEX_SCALE 0.941f
+
+	float from[3], to[3];
+	for (u8 i = 0; i < 3; ++i) {
+		from[i] = in->from[i] * VERTEX_SCALE;
+		to[i]	= in->to[i] * VERTEX_SCALE;
+	}
+
+	const s16 length = to[0] / VERTEX_SCALE;
+	const s16 width	 = to[2] / VERTEX_SCALE;
+	const s16 height = to[1] / VERTEX_SCALE;
+
+	s16 faceUV[4];
 	for (u8 face = 0; face < 6; ++face) {
-		u8 lutStartIndex = face * 6;
+		const u8 lutStartIndex = face * 6;
+
+		// Calculate Texture offsets using Coordinates(1 2DP=1 3DP)
+		switch (face) {
+			case Direction_West:
+				faceUV[0] = in->texOffset[0] + width;
+				faceUV[1] = in->texOffset[1] + width * 2;
+				faceUV[2] = in->texOffset[0];
+				faceUV[3] = in->texOffset[1] + width;
+				break;
+			case Direction_East:
+				faceUV[0] = in->texOffset[0] + width + length;
+				faceUV[1] = in->texOffset[1] + width + height;
+				faceUV[2] = in->texOffset[0] + width * 2 + length;
+				faceUV[3] = in->texOffset[1] + width;
+				break;
+			case Direction_Bottom:
+				faceUV[0] = in->texOffset[0] + width;
+				faceUV[1] = in->texOffset[1] + width;
+				faceUV[2] = in->texOffset[0] + width + length;
+				faceUV[3] = in->texOffset[1];
+				break;
+			case Direction_Top:
+				faceUV[0] = in->texOffset[0] + width + length;
+				faceUV[1] = in->texOffset[1];
+				faceUV[2] = in->texOffset[0] + width * 2 + length;
+				faceUV[3] = in->texOffset[1] + width;
+				break;
+			case Direction_North:
+				faceUV[0] = in->texOffset[0] + width * 2 + length * 2;
+				faceUV[1] = in->texOffset[1] + width + height;
+				faceUV[2] = in->texOffset[0] + width * 2 + length;
+				faceUV[3] = in->texOffset[1] + width;
+				break;
+			case Direction_South:
+				faceUV[0] = in->texOffset[0] + width;
+				faceUV[1] = in->texOffset[1] + width + height;
+				faceUV[2] = in->texOffset[0] + width + length;
+				faceUV[3] = in->texOffset[1] + width;
+				break;
+		}
 
 		// Apply transformations for each vertex in the LUT
 		for (int i = 0; i < 6; ++i) {
 			u8 idx				= lutStartIndex + i;
 			WorldVertex* vertex = &cube->vertices[idx];
 
-			vertex->pos[0] = in->from[0] + (in->to[0] - in->from[0]) * cube_sides_lut[idx].pos[0];
-			vertex->pos[1] = in->from[1] + (in->to[1] - in->from[1]) * cube_sides_lut[idx].pos[1];
-			vertex->pos[2] = in->from[2] + (in->to[2] - in->from[2]) * cube_sides_lut[idx].pos[2];
+			vertex->pos[0] = -(in->mirrored ? -from[0] : from[0] + (cube_sides_lut[idx].pos[0] ? in->mirrored ? -to[0] : to[0] : 0));
+			vertex->pos[1] = -(from[1] + (cube_sides_lut[idx].pos[1] ? to[1] : 0));
+			vertex->pos[2] = -(from[2] + (cube_sides_lut[idx].pos[2] ? to[2] : 0));
 
 #define toTexCrd(x, tw) (s16)(((float)(x) / (float)(tw)) * (float)((1 << 15) - 1))
 
-			vertex->uv[0] = toTexCrd(in->faceUV[face][cube_sides_lut[idx].uv[0] * 2], in->dimensions[0]);
-			vertex->uv[1] = toTexCrd(in->faceUV[face][cube_sides_lut[idx].uv[1] * 2 + 1], in->dimensions[1]);
+			s16 u = faceUV[cube_sides_lut[idx].uv[0] * 2], v = faceUV[cube_sides_lut[idx].uv[1] * 2 + 1];
+			u = v;
+			v = u;
 
-			// if (i == 2)
-			//	Crash("%d UV: %d/%d: calc: %d, calc2: %f", idx, in->faceUV[face][cube_sides_lut[idx].uv[0] * 2], in->dimensions[0],
-			//		  vertex->uv[0], vertex->uv[0] / (float)(1 << 15));
+			vertex->uv[0] = toTexCrd(faceUV[cube_sides_lut[idx].uv[0] * 2], texwidth);
+			vertex->uv[1] = toTexCrd(faceUV[cube_sides_lut[idx].uv[1] * 2 + 1], texheight);
 		}
 	}
 	C3D_Mtx matrix;
 	Mtx_Identity(&matrix);
-	Mtx_Translate(&matrix, in->position[0], in->position[1], in->position[2], true);
 	Mtx_RotateX(&matrix, in->rotation[0], true);
 	Mtx_RotateY(&matrix, in->rotation[1], true);
 	Mtx_RotateZ(&matrix, in->rotation[2], true);
 
 	Mtx_Copy(&cube->localMatrix, &matrix);
-	Mtx_Copy(&cube->initialMatrix, &matrix);
 
 	cubeRef[cubeNum] = cube;
 	cubeNum++;
@@ -109,10 +216,6 @@ void Cube_Draw(Cube* cube, int shaderUniform, C3D_Mtx* matrix) {
 
 void Cube_Reset(Cube* c) {
 	Mtx_Identity(&c->localMatrix);
-}
-void Cube_ResetToInit(Cube* c) {
-	Cube_Reset(c);
-	Mtx_Copy(&c->localMatrix, &c->initialMatrix);
 }
 void Cube_SetPos(Cube* cube, float3 pos) {
 	Mtx_Translate(&cube->localMatrix, pos.x, pos.y, pos.z, true);

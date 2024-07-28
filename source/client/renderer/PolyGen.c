@@ -11,8 +11,8 @@
 
 #include <3ds.h>
 
-const WorldVertex cube_sides_lut[] = {
-	// Fourth face (MX)
+const WorldVertex block_sides_lut[] = {
+	// Fourth face (MX) - West
 	// First triangle
 	{ { 0, 0, 0 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
 	{ { 0, 0, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
@@ -21,7 +21,7 @@ const WorldVertex cube_sides_lut[] = {
 	{ { 0, 1, 1 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
 	{ { 0, 1, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
 	{ { 0, 0, 0 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	// Third face (PX)
+	// Third face (PX) - East
 	// First triangle
 	{ { 1, 0, 0 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
 	{ { 1, 1, 0 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
@@ -30,7 +30,7 @@ const WorldVertex cube_sides_lut[] = {
 	{ { 1, 1, 1 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
 	{ { 1, 0, 1 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
 	{ { 1, 0, 0 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	// Sixth face (MY)
+	// Sixth face (MY) - Down
 	// First triangle
 	{ { 0, 0, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
 	{ { 1, 0, 0 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
@@ -39,7 +39,7 @@ const WorldVertex cube_sides_lut[] = {
 	{ { 1, 0, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
 	{ { 0, 0, 1 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
 	{ { 0, 0, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	// Fifth face (PY)
+	// Fifth face (PY) - Up
 	// First triangle
 	{ { 0, 1, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
 	{ { 0, 1, 1 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
@@ -48,7 +48,7 @@ const WorldVertex cube_sides_lut[] = {
 	{ { 1, 1, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
 	{ { 1, 1, 0 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
 	{ { 0, 1, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	// Second face (MZ)
+	// Second face (MZ) - North
 	// First triangle
 	{ { 0, 0, 0 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
 	{ { 0, 1, 0 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
@@ -57,7 +57,7 @@ const WorldVertex cube_sides_lut[] = {
 	{ { 1, 1, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
 	{ { 1, 0, 0 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
 	{ { 0, 0, 0 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	// First face (PZ)
+	// First face (PZ) - South
 	// First triangle
 	{ { 0, 0, 1 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
 	{ { 1, 0, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
@@ -337,7 +337,7 @@ void PolyGen_GeneratePolygons(WorkQueue* queue, WorkerItem item, void* this) {
 					Block_GetTexture(face.block, face.direction, face.metadata, iconUV);
 
 					WorldVertex* data = face.transparent ? transparentData : opaqueData;
-					memcpy(data, &cube_sides_lut[face.direction * 6], sizeof(WorldVertex) * 6);
+					memcpy(data, &block_sides_lut[face.direction * 6], sizeof(WorldVertex) * 6);
 
 #define oneDivIconsPerRow (32768 / 8)
 #define halfTexel (6)

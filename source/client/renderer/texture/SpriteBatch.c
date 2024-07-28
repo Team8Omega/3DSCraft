@@ -109,11 +109,11 @@ void SpriteBatch_PushQuadColor(int x, int y, int z, int w, int h, int rx, int ry
 }
 
 static float rot = 0.f;
-extern const WorldVertex cube_sides_lut[6 * 6];
+extern const WorldVertex block_sides_lut[6 * 6];
 // TODO: Größe konfigurierbar machen
 void SpriteBatch_PushIcon(Block block, uint8_t metadata, int x, int y, int z) {
 	WorldVertex vertices[6 * 6];
-	memcpy(vertices, cube_sides_lut, sizeof(cube_sides_lut));
+	memcpy(vertices, block_sides_lut, sizeof(block_sides_lut));
 	for (int i = 0; i < 6; i++) {
 		if (i != Direction_Top && i != Direction_South && i != Direction_West)
 			continue;
@@ -240,8 +240,7 @@ int SpriteBatch_CalcTextWidthVargs(const char* text, va_list args) {
 }
 
 char* SpriteBatch_TextTruncate(const char* text, size_t length) {
-
-	const char* ellipsis = "...";
+	const char* ellipsis  = "...";
 	size_t ellipsisLength = strlen(ellipsis);
 
 	if (strlen(text) <= length) {
@@ -250,7 +249,7 @@ char* SpriteBatch_TextTruncate(const char* text, size_t length) {
 
 	size_t truncatedLength = length + ellipsisLength;
 
-	char* truncated = (char*)malloc(truncatedLength + 1); // +1 for the null terminator
+	char* truncated = (char*)malloc(truncatedLength + 1);  // +1 for the null terminator
 
 	strncpy(truncated, text, length);
 

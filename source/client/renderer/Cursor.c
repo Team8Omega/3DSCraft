@@ -6,11 +6,11 @@
 
 static WorldVertex* cursorVBO;
 
-extern const WorldVertex cube_sides_lut[6 * 6];
+extern const WorldVertex block_sides_lut[6 * 6];
 
 void Cursor_Init() {
-	cursorVBO = linearAlloc(sizeof(cube_sides_lut));
-	memcpy(cursorVBO, cube_sides_lut, sizeof(cube_sides_lut));
+	cursorVBO = linearAlloc(sizeof(block_sides_lut));
+	memcpy(cursorVBO, block_sides_lut, sizeof(block_sides_lut));
 
 	for (int i = 0; i < 6 * 6; i++) {
 		cursorVBO[i].rgb[0] = 255;
@@ -36,7 +36,7 @@ void Cursor_Draw(int projUniform, C3D_Mtx* projectionview, World* world, int x, 
 	for (int i = 0; i < 6; i++) {
 		const int* offset = DirectionToOffset[i];
 		if (World_GetBlock(world, x + offset[0], y + offset[1], z + offset[2]) == Block_Air) {
-			memcpy(vtx, &cube_sides_lut[i * 6], sizeof(WorldVertex) * 6);
+			memcpy(vtx, &block_sides_lut[i * 6], sizeof(WorldVertex) * 6);
 			uint8_t color = i == highlight ? 65 : 32;
 			for (int j = 0; j < 6; j++) {
 				vtx[j].rgb[0] = color;

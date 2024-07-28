@@ -10,7 +10,7 @@ CubeModel* CubeModel_Init(CubeModelRaw* in) {
 	if (!in) {
 		Crash("Passed raw Model is NULL!");
 		return NULL;
-	} else if (!in->cubes) {
+	} else if (!in->modeldef->cubes[0].from[0]) {
 		Crash("Passed cubes for raw Model is NULL");
 		return NULL;
 	}
@@ -32,10 +32,10 @@ CubeModel* CubeModel_Init(CubeModelRaw* in) {
 	}
 
 	for (u8 i = 0; i < model->cubeNum; ++i) {
-		if (!in->cubes[i]) {
-			Crash("Cube %d for Model is NULL!\n Total: %d\n in->cubes: %08x", i, model->cubeNum, in->cubes);
+		if (!in->modeldef->cubes[i].to[0]) {
+			Crash("Cube %d for Model is NULL!\n Total: %d\n in->modeldef->cubes: %08x", i, model->cubeNum, in->modeldef->cubes);
 		}
-		model->cubes[i] = Cube_Init(in->cubes[i]);
+		model->cubes[i] = Cube_Init(&in->modeldef->cubes[i], in->modeldef->dimensions[0], in->modeldef->dimensions[1]);
 	}
 
 	CubeModel_Clean(in);

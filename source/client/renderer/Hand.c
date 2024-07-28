@@ -10,10 +10,10 @@
 static WorldVertex* handVBO;
 static C3D_Tex SkinTexture;
 
-extern const WorldVertex cube_sides_lut[6 * 6];
+extern const WorldVertex block_sides_lut[6 * 6];
 
 void Hand_Init() {
-	handVBO = linearAlloc(sizeof(cube_sides_lut));
+	handVBO = linearAlloc(sizeof(block_sides_lut));
 
 	Texture_Load(&SkinTexture, "entity/player/wide/steve.png");
 }
@@ -44,7 +44,7 @@ void Hand_Draw(int projUniform, C3D_Mtx* projection, ItemStack stack, Player* pl
 
 	C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, projUniform, &pm);
 
-	memcpy(handVBO, cube_sides_lut, sizeof(cube_sides_lut));
+	memcpy(handVBO, block_sides_lut, sizeof(block_sides_lut));
 	for (int i = 0; i < 6; i++) {
 		if (stack.amount > 0) {
 			int16_t iconUV[2];

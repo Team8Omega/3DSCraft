@@ -13,21 +13,23 @@ typedef struct {
 
 typedef struct {
 	u8 cubeNum;
-	CubeRaw** cubes;
+	CubeModelDef* modeldef;
 
 	C3D_Tex* texture;
 } CubeModelRaw;
 
 CubeModel* CubeModel_Init(CubeModelRaw* model);
 
-static inline CubeModel* createModel(CubeRaw* models, u8 numModels, C3D_Tex* texture) {
-	CubeRaw** pointers = (CubeRaw**)malloc(sizeof(CubeRaw*) * numModels);
+#define CUBE_MAX_NUM 16	 // adjust as needed.
 
-	for (u8 i = 0; i < numModels; ++i) {
-		pointers[i] = &models[i];
+static inline CubeModel* createModel(CubeModelDef* modeldef, C3D_Tex* texture) {
+	u8 numModels = 0;
+	for (u8 i = 0; i < CUBE_MAX_NUM; ++i) {
+		if (modeldef->cubes[i].to[0] != 0)
+			numModels++;
 	}
 
-	CubeModelRaw preModel = { .cubeNum = numModels, .cubes = pointers, .texture = texture };
+	CubeModelRaw preModel = { .cubeNum = numModels, .modeldef = &*modeldef, .texture = texture };
 
 	return CubeModel_Init(&preModel);
 }
@@ -35,10 +37,6 @@ static inline void CubeModel_Clean(CubeModelRaw* model) {
 	if (model == NULL)
 		return;
 
-	for (u8 i = 0; i < model->cubeNum; ++i)
-		Cube_Clean(model->cubes[i]);
-
-	linearFree(model->cubes);
 	linearFree(model);
 }
 static inline void CubeModel_SetTexture(CubeModel* m, C3D_Tex* tex) {

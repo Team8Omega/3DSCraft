@@ -43,7 +43,7 @@ BUILD			:=	build
 DATA			:=	data
 META			:=	project
 ROMFS			:=	romfs
-INCLUDES		:=	lib include
+INCLUDES		:=	lib include .
 SOURCES 		:= $(shell find $(realpath lib) $(realpath source) $(realpath assets) -type d)
 SOURCES 		:= $(foreach dir, $(SOURCES), $(patsubst $(CURDIR)/%, %, $(dir)))
 

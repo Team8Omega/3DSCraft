@@ -141,7 +141,12 @@ static char* worldGenTypesStr[] = { "Default", "Superflat" };
 
 static char* gamemodeTypesStr[] = { "Survival", "Hardcore", "Creative", "Spectator" };
 
-static char* difficultyTypesStr[] = { "Normal", "Hard", "Peaceful", "Easy", };
+static char* difficultyTypesStr[] = {
+	"Normal",
+	"Hard",
+	"Peaceful",
+	"Easy",
+};
 
 static float max_velocity = 20.f;
 
@@ -176,6 +181,8 @@ void SelectWorldScreen(state_machine_t* sm) {
 
 		WorldInfo info;
 
+		SpriteBatch_PushSingleColorQuad(0, 0, 0, 320, 14, SHADER_RGB(25, 25, 25));
+
 		// ToDo: Add fancy shmancy top texture
 
 		clicked_back = Gui_IconButton(0, 0, 15, 15, 0, true, SHADER_RGB(20, 20, 20), "<");
@@ -183,7 +190,6 @@ void SelectWorldScreen(state_machine_t* sm) {
 		Gui_Label_Centered(SpriteBatch_GetWidth(), 4, 0, 0, false, SHADER_RGB(4, 4, 4), "Singleplayer");
 
 		vec_foreach (&worlds, info, worldsAmnt) {
-
 			int x;
 			if (worlds.length == 1) {
 				// Center the single box
@@ -225,11 +231,12 @@ void SelectWorldScreen(state_machine_t* sm) {
 			}
 		}
 
-		if(worldsAmnt == 0){
+		if (worldsAmnt == 0) {
 			menustate = MenuState_WorldOptions;
 		}
 
-		int maximumSize = ((worldsAmnt * (boxWidth + boxMargin) + boxOffset + boxMargin) - SpriteBatch_GetWidth()) + boxOffset;  // Adjusted maximum size calculation
+		int maximumSize = ((worldsAmnt * (boxWidth + boxMargin) + boxOffset + boxMargin) - SpriteBatch_GetWidth()) +
+						  boxOffset;  // Adjusted maximum size calculation
 
 		if (scroll < -maximumSize)
 			scroll = -maximumSize;
@@ -257,11 +264,10 @@ void SelectWorldScreen(state_machine_t* sm) {
 
 		Gui_Label(5, 40, 0, 0, true, INT16_MAX, "Game Mode:");
 		if (Gui_Button(true, 95, 35, 60, 0, gamemodeTypesStr[gamemode])) {
-
 			gamemode++;
 
-			//Spectator mode doesnt need to be rendered
-			if(gamemode == Gamemode_Spectator){
+			// Spectator mode doesnt need to be rendered
+			if (gamemode == Gamemode_Spectator) {
 				gamemode++;
 			}
 			// player->gamemode = gamemode;
@@ -373,10 +379,10 @@ bool SelectWorldScreen_Update(char* out_worldpath, char* out_name, WorldGenType*
 		menustate		  = MenuState_SelectWorld;
 	}
 	if (canceled_world_options) {
-		if(worldsAmnt == 0){
+		if (worldsAmnt == 0) {
 			canceled_world_options = false;
 			state_machine_set_current_state(machine, TitleScreen);
-		}else{
+		} else {
 			canceled_world_options = false;
 			menustate			   = MenuState_SelectWorld;
 		}
