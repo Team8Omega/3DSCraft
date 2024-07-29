@@ -49,6 +49,8 @@ typedef struct {
 
 #define WORLD_NAME_SIZE 256
 typedef struct {
+	bool active;
+
 	int HighestBlock;
 
 	char name[WORLD_NAME_SIZE];

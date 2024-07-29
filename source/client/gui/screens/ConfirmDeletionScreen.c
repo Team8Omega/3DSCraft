@@ -53,7 +53,7 @@ static void delete_folder(const char* path) {
 }
 
 void ConfirmDeletionScreen_Draw() {
-	Gui_DrawBackgroundFull(0);
+	Gui_DrawBackgroundFull(0, -5);
 	char* label = "Are you sure?";
 
 	Gui_Label((SpriteBatch_GetWidth() / 2) - (SpriteBatch_CalcTextWidth(label) / 2), 20, 1, 0, true, INT16_MAX, label);

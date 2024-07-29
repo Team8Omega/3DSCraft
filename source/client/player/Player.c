@@ -15,7 +15,6 @@
 Player gPlayer;
 
 static C3D_Tex textureSkin;
-extern Camera camera;
 
 void Player_InitModel() {
 	Texture_Load(&textureSkin, "entity/player/wide/steve.png");

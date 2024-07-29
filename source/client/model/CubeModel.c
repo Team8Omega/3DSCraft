@@ -4,8 +4,6 @@
 #include "client/Crash.h"
 #include "client/renderer/texture/TextureMap.h"
 
-extern Camera camera;
-
 CubeModel* CubeModel_Init(CubeModelRaw* in) {
 	if (!in) {
 		Crash("Passed raw Model is NULL!");

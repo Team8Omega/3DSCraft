@@ -43,6 +43,7 @@ void Crash(const char* reason, ...) {
 	}
 	gfxExit();
 	gfxInitDefault();
+	gfxSet3D(true);
 }
 
 void Log(const char* reason, ...) {

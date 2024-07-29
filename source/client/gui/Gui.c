@@ -140,10 +140,10 @@ void Gui_DrawTint(int x, int y, int width, int height, int z, uint32_t color) {
 	SpriteBatch_PushSingleColorQuad(x, y, z, width, height, color);
 }
 
-void Gui_DrawBackgroundFull(u8 index) {
+void Gui_DrawBackgroundFull(u8 index, s8 z) {
 	for (int i = 0; i < 160 / 16 + 1; i++) {
 		for (int j = 0; j < 120 / 16 + 1; j++) {
-			Gui_DrawBackground(index, i, j, -5);
+			Gui_DrawBackground(index, i, j, z);
 		}
 	}
 }

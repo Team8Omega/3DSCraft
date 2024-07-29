@@ -48,8 +48,10 @@ typedef struct {
 	float near, far, fov;
 } Camera;
 
-void Camera_Init(Camera* cam);
-void Camera_Update(Camera* cam, float iod);
+extern Camera gCamera;
 
-bool Camera_IsPointVisible(Camera* cam, C3D_FVec point);
-bool Camera_IsAABBVisible(Camera* cam, C3D_FVec orgin, C3D_FVec size);
+void Camera_Init();
+void Camera_Update(float iod);
+
+bool Camera_IsPointVisible(C3D_FVec point);
+bool Camera_IsAABBVisible(C3D_FVec orgin, C3D_FVec size);

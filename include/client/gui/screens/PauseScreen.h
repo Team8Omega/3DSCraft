@@ -1,5 +1,5 @@
 #pragma once
 
-#include "Globals.h"
+#include "client/gui/ScreenManager.h"
 
-void PauseScreen();
+extern Screen sPauseScreen;

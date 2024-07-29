@@ -22,8 +22,6 @@ int sky_time = 0;
 
 static WorkQueue* workqueue;
 
-Camera camera;
-
 static int projectionUniform;
 
 typedef struct {
@@ -53,7 +51,7 @@ void WorldRenderer_Init(WorkQueue* workqueue_, int projectionUniform_) {
 	vec_init(&renderingQueue);
 	vec_init(&transparentClusters);
 
-	Camera_Init(&camera);
+	Camera_Init();
 
 	Player_InitModel();
 
@@ -158,7 +156,7 @@ static void renderWorld() {
 				continue;
 
 			C3D_FVec chunkPosition = FVec3_New(newX * CHUNK_SIZE, newY * CHUNK_SIZE, newZ * CHUNK_SIZE);
-			if (!Camera_IsAABBVisible(&camera, chunkPosition, FVec3_New(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE)))
+			if (!Camera_IsAABBVisible(chunkPosition, FVec3_New(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE)))
 				continue;
 
 			clusterWasRendered(newX, newY, newZ) |= 1;
@@ -208,21 +206,21 @@ static void renderWorld() {
 }
 
 void WorldRenderer_Render(float iod) {
-	Camera_Update(&camera, iod);
+	Camera_Update(iod);
 
 	C3D_TexBind(0, Block_GetTextureMap());
 
-	C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, projectionUniform, &camera.vp);
+	C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, projectionUniform, &gCamera.vp);
 
 	renderWorld();
 
-	Player_Draw(projectionUniform, &camera.vp);
+	Player_Draw(projectionUniform, &gCamera.vp);
 
-	Clouds_Render(projectionUniform, &camera.vp, gPlayer.position.x, gPlayer.position.z);
+	Clouds_Render(projectionUniform, &gCamera.vp, gPlayer.position.x, gPlayer.position.z);
 
-	Hand_Draw(projectionUniform, &camera.projection, gPlayer.quickSelectBar[gPlayer.quickSelectBarSlot]);
+	Hand_Draw(projectionUniform, &gCamera.projection, gPlayer.quickSelectBar[gPlayer.quickSelectBarSlot]);
 
 	if (gPlayer.blockInActionRange)
-		Cursor_Draw(projectionUniform, &camera.vp, gPlayer.viewRayCast.x, gPlayer.viewRayCast.y, gPlayer.viewRayCast.z,
+		Cursor_Draw(projectionUniform, &gCamera.vp, gPlayer.viewRayCast.x, gPlayer.viewRayCast.y, gPlayer.viewRayCast.z,
 					gPlayer.viewRayCast.direction);
 }

@@ -6,12 +6,13 @@
 
 #include "client/player/InputData.h"
 
+#include "Globals.h"
 #include "util/math/NumberUtils.h"
 
 #include <stdarg.h>
 #include <stdlib.h>
 
-#ifdef _DEBUG
+#ifdef DEBUG_UI
 #define STATUS_LINES (240 / 8 / 2)
 #define LOG_LINES 30
 #define LOG_LINE_LENGTH 128
@@ -49,29 +50,27 @@ static DebugUI_State menuState	   = MENUSTATE_NONE;
 static DebugUI_State menuStateLast = MENUSTATE_NONE;
 static u8 debugMenuOptionNum	   = 0;
 
-static const DebugUI_Menu debugMenus[MENUSTATE_COUNT - 2] = {
-	{ // Root Menu
-	  	{
-		  	{ 3, NULL, "sub" },	 // to sub menu
-		  	{ 1, NULL, "log" }	 // to log
-	  	},
-	  	"Root"
-	},
-	{ // Sub Test Menu
-	  	{
-		  	{ 2, NULL, "root" },  // back to root
-		  	{ 0, NULL, "close" }	  // close
-	  	},
-	  	"Sub Test Menu"
-	}
-};
+static const DebugUI_Menu debugMenus[MENUSTATE_COUNT - 2] = { { // Root Menu
+																{
+																	{ 3, NULL, "sub" },	 // to sub menu
+																	{ 1, NULL, "log" }	 // to log
+																},
+																"Root" },
+															  { // Sub Test Menu
+																{
+																	{ 2, NULL, "root" },  // back to root
+																	{ 0, NULL, "close" }  // close
+																},
+																"Sub Test Menu" } };
 #endif
 void DebugUI_Init() {
-#ifdef _DEBUG
+#ifdef DEBUG_LOG
 	for (int i = 0; i < LOG_LINES; i++) {
 		logLines[i] = malloc(LOG_LINE_LENGTH);
 		memset(logLines[i], 0x0, LOG_LINE_LENGTH);
 	}
+#endif
+#ifdef DEBUG_INFO
 	for (int i = 0; i < STATUS_LINES; i++) {
 		statusLines[i] = malloc(STATUS_LINE_LENGTH);
 		memset(statusLines[i], 0x0, STATUS_LINE_LENGTH);
@@ -79,16 +78,18 @@ void DebugUI_Init() {
 #endif
 }
 void DebugUI_Deinit() {
-#ifdef _DEBUG
+#ifdef DEBUG_LOG
 	for (int i = 0; i < LOG_LINES; i++)
 		free(logLines[i]);
+#endif
+#ifdef DEBUG_INFO
 	for (int i = 0; i < STATUS_LINES; i++)
 		free(statusLines[i]);
 #endif
 }
 
 void DebugUI_Text(const char* text, ...) {
-#ifdef _DEBUG
+#ifdef DEBUG_INFO
 	if (currentStatusLine >= STATUS_LINES)
 		return;
 	va_list args;
@@ -101,7 +102,7 @@ void DebugUI_Text(const char* text, ...) {
 }
 
 void DebugUI_Log(const char* text, ...) {
-#ifdef _DEBUG
+#ifdef DEBUG_LOG
 	if (strlen(text) < 0)
 		return;
 
@@ -128,7 +129,7 @@ void DebugUI_Log(const char* text, ...) {
 #endif
 }
 
-#ifdef _DEBUG
+#ifdef DEBUG_INFO
 void DebugUI_DrawInfo() {
 	u8 infoNum;
 	u8 yOffset = 0;
@@ -147,6 +148,8 @@ void DebugUI_DrawInfo() {
 	if (isInfoBG)
 		SpriteBatch_PushSingleColorQuad(0, 0, 97, 320, (8 * (infoNum + 1)) + 4, SHADER_RGB(2, 2, 2));
 }
+#endif
+#ifdef DEBUG_LOG
 void DebugUI_DrawLog() {
 	u8 yOffset = 12;
 	SpriteBatch_PushSingleColorQuad(0, 0, 99, 320, 240, SHADER_RGB(2, 2, 2));
@@ -162,7 +165,8 @@ void DebugUI_DrawLog() {
 			break;
 	}
 }
-
+#endif
+#ifdef DEBUG_UI
 void DebugUI_MenuSet(DebugUI_State menuid) {
 	menuStateLast = menuState;
 	menuState	  = menuid;
@@ -191,7 +195,7 @@ void DebugUI_DrawMenu() {
 
 	SpriteBatch_PushText(0, 0, 100, INT16_MAX, false, 320, 0, " 3DSCraft Debug Menu:   %s", menu->name);
 
-	u8 yOffset =20;
+	u8 yOffset = 20;
 	for (u8 i = 0; i < debugMenuOptionNum; ++i) {
 		const DebugUI_MenuOption* option = &menu->options[i];
 
@@ -209,7 +213,7 @@ void DebugUI_DrawMenu() {
 #endif
 
 void DebugUI_Draw() {
-#ifdef _DEBUG
+#ifdef DEBUG_UI
 	SpriteBatch_SetScale(1);
 
 	if (gInput.keysdown)
@@ -224,17 +228,25 @@ void DebugUI_Draw() {
 		if (Gui_Button(true, 320 - 32, 38, 32, 100, "INFO"))
 			isInfoBG = isInfoBG ? false : true;
 	}
+#endif
 
+#ifdef _DEBUG
 	switch (menuState) {
+#ifdef DEBUG_LOG
 		case MENUSTATE_LOG:
 			DebugUI_DrawLog();
 			break;
+#endif
+#ifdef DEBUG_INFO
 		case MENUSTATE_NONE:
 			DebugUI_DrawInfo();
 			break;
+#endif
+#ifdef DEBUG_UI
 		default:
 			DebugUI_DrawMenu();
 			break;
+#endif
 	}
 #endif
 }

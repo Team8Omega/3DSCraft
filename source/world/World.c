@@ -13,8 +13,6 @@
 World gWorld;
 
 void World_Init(WorkQueue* workqueue) {
-	strcpy(gWorld.name, "TestWelt");
-
 	gWorld.workqueue = workqueue;
 
 	gWorld.genSettings.seed = 28112000;
@@ -38,6 +36,10 @@ void World_Reset() {
 	}
 
 	gWorld.randomTickGen = Xorshift32_New();
+
+	strcpy(gWorld.name, "");
+
+	gWorld.active = false;
 }
 
 Chunk* World_LoadChunk(int x, int z) {

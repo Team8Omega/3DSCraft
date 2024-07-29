@@ -36,7 +36,7 @@ void CreateWorldScreen(u16 selectedIdx, u16 worldNo) {
 }
 
 void CreateWorldScreen_Draw() {
-	Gui_DrawBackgroundFull(0);
+	Gui_DrawBackgroundFull(0, -5);
 	Gui_Label(5, 15, 0, 0, true, INT16_MAX, "World type:");
 	if (Gui_Button(true, 95, 10, 60, 0, worldGenTypesStr[worldGenType])) {
 		worldGenType++;

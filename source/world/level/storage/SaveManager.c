@@ -30,11 +30,11 @@ void SaveManager_Deinit(SaveManager* mgr) {
 		 : (default_))
 
 void SaveManager_Load(SaveManager* mgr, const char* path) {
-	char buffer[256];
+	if (mgr == NULL)
+		Crash("Unable to load World \"%s\"\nSaveManager is NULL.", path);
 
-	sprintf(buffer, PATH_SAVES "%s", path);
-	mkdir(buffer, mkdirFlags);
-	chdir(buffer);
+	mkdir(path, mkdirFlags);
+	chdir(path);
 
 	mkdir("superchunks", mkdirFlags);
 

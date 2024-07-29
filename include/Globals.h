@@ -2,19 +2,12 @@
 
 #include "util/StringUtils.h"
 
-typedef enum
-{
-	GameState_Menu,
-	GameState_Playing,
-	GameState_Paused,
-	GameState_None
-} GameState;
-
-extern GameState gGamestate;
-
 #ifdef _DEBUG
 
 #define DEBUG_BLOCKPLACE 1
+#define DEBUG_INFO 1
+#define DEBUG_LOG 1
+#define DEBUG_UI 1
 //#define DEBUG_WORLDNAME
 #endif
 

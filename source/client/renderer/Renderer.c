@@ -42,19 +42,10 @@ static C3D_AttrInfo world_vertexAttribs, gui_vertexAttribs;
 
 static WorkQueue* workqueue;
 
-// static state_machine_t* machine;
-
-extern bool showDebugInfo;
-
-extern Camera camera;
-
 void Renderer_RenderGameOverlay();
 void renderExpBar();
 
 void Renderer_Init(WorkQueue* queue) {
-	// machine = state_machine_create();
-	// state_machine_set_current_state(machine, TitleScreen);
-
 	workqueue = queue;
 
 	C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
@@ -107,8 +98,6 @@ void Renderer_Init(WorkQueue* queue) {
 }
 
 void Renderer_Deinit() {
-	// state_machine_delete(machine);
-
 	Item_Deinit();
 
 	Block_Deinit();
@@ -136,17 +125,13 @@ void Renderer_Render() {
 
 	C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 
-	if (gGamestate == GameState_Playing || gGamestate == GameState_Paused)
+	if (gWorld.active)
 		PolyGen_Harvest();
 	else
-		CubeMap_Update(&camera.projection, f3_new(0.f, 0.0013f, 0.f));
+		CubeMap_Update(&gCamera.projection, f3_new(0.f, 0.0013f, 0.f));
 
 	for (int i = 0; i < 2; i++) {
-		if (gGamestate == GameState_Playing || gGamestate == GameState_Paused) {
-			C3D_RenderTargetClear(renderTargets[i], C3D_CLEAR_ALL, CLEAR_COLOR_SKY, 0);
-		} else {
-			C3D_RenderTargetClear(renderTargets[i], C3D_CLEAR_ALL, 0x000000FF, 0);
-		}
+		C3D_RenderTargetClear(renderTargets[i], C3D_CLEAR_ALL, gWorld.active ? CLEAR_COLOR_SKY : 0x000000FF, 0);
 
 		C3D_FrameDrawOn(renderTargets[i]);
 
@@ -160,18 +145,18 @@ void Renderer_Render() {
 		C3D_BindProgram(&world_shader);
 		C3D_SetAttrInfo(&world_vertexAttribs);
 
-		if (gGamestate == GameState_Playing) {
-			C3D_TexBind(0, Block_GetTextureMap());
-
-			WorldRenderer_Render(!i ? -iod : iod);
-
-			Renderer_RenderGameOverlay();
-
-		} else if (gGamestate == GameState_Paused) {
+		if (gWorld.active) {
 			C3D_TexBind(0, Block_GetTextureMap());
 			WorldRenderer_Render(!i ? -iod : iod);
+
+			if (!currentScreen)
+				Renderer_RenderGameOverlay();
+		} else {
+			CubeMap_Draw();
 		}
-		ScreenManager_DrawUp();
+
+		if (currentScreen)
+			ScreenManager_DrawUp();
 
 		C3D_BindProgram(&gui_shader);
 		C3D_SetAttrInfo(&gui_vertexAttribs);
@@ -187,12 +172,7 @@ void Renderer_Render() {
 
 	SpriteBatch_StartFrame(320, 240);
 
-	if (gGamestate == GameState_Menu) {
-		// state_machine_run(machine);
-	} else if (gGamestate == GameState_Paused) {
-		PauseScreen();
-
-	} else if (gGamestate == GameState_Playing) {
+	if (gWorld.active) {
 		SpriteBatch_SetScale(2);
 		gPlayer.quickSelectBarSlots = 9;
 		Inventory_DrawQuickSelect(160 / 2 - Inventory_QuickSelectCalcWidth(gPlayer.quickSelectBarSlots) / 2,
@@ -202,10 +182,10 @@ void Renderer_Render() {
 			Inventory_Draw(16, 0, 160, gPlayer.inventory, sizeof(gPlayer.inventory) / sizeof(ItemStack), gPlayer.inventorySite);
 	}
 
-	ScreenManager_DrawDown();
+	if (currentScreen)
+		ScreenManager_DrawDown();
 
-	if (showDebugInfo)
-		DebugUI_Draw();
+	DebugUI_Draw();
 
 	SpriteBatch_Render(GFX_BOTTOM);
 

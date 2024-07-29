@@ -97,7 +97,7 @@ static bool clicked_back		 = false;
 static float max_velocity = 20.f;
 
 void SelectWorldScreen_DrawDown() {
-	Gui_DrawBackgroundFull(0);
+	Gui_DrawBackgroundFull(0, -5);
 
 	int boxOffset = 5;
 	int boxWidth  = 60;

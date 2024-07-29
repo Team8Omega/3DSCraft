@@ -15,6 +15,7 @@
 #include "client/gui/DebugUI.h"
 #include "client/gui/Gui.h"
 #include "client/gui/ScreenManager.h"
+#include "client/gui/screens/PauseScreen.h"
 #include "client/gui/screens/TitleScreen.h"
 #include "client/model/Cube.h"
 #include "client/player/Damage.h"
@@ -25,43 +26,27 @@
 #include "sounds/Sound.h"
 #include "util/Paths.h"
 #include "util/StringUtils.h"
-#include "world/chunk/ChunkWorker.h"
 #include "world/level/levelgen/SmeaGen.h"
 #include "world/level/levelgen/SuperFlatGen.h"
-#include "world/level/storage/SaveManager.h"
 #include "world/level/storage/SuperChunk.h"
 
 #include "client/language/LanguageManager.h"
 
 #include "Globals.h"
 
-bool showDebugInfo = true;
 InputData gInput, gInputOld;
-GameState gGamestate;
 
-ChunkWorker chunkWorker;
-SuperFlatGen flatGen;
-SmeaGen smeaGen;
-Sound BackgroundSound;
-Sound PlayerSound;
-PlayerController playerCtrl;
-SaveManager savemgr;
+static ChunkWorker chunkWorker;
+static SuperFlatGen flatGen;
+static SmeaGen smeaGen;
+static Sound BackgroundSound;
+static Sound PlayerSound;
+static PlayerController playerCtrl;
+static SaveManager savemgr;
 
-u64 lastTime, currentTime;
-float dt = 0.f, timeAccum = 0.f, fpsClock = 0.f;
-int frameCounter = 0, fps = 0;
-
-void releaseWorld(ChunkWorker* chunkWorker, SaveManager* savemgr) {
-	for (int i = 0; i < CHUNKCACHE_SIZE; i++) {
-		for (int j = 0; j < CHUNKCACHE_SIZE; j++) {
-			World_UnloadChunk(gWorld.chunkCache[i][j]);
-		}
-	}
-	ChunkWorker_Finish(chunkWorker);
-	World_Reset();
-
-	SaveManager_Unload(savemgr);
-}
+static u64 lastTime, currentTime;
+static float dt = 0.f, timeAccum = 0.f, fpsClock = 0.f;
+static int frameCounter = 0, fps = 0;
 
 void initCheck() {
 	// Check for block asset
@@ -81,19 +66,13 @@ void initCheck() {
 }
 
 int main() {
-	gGamestate = GameState_None;
-	// printf("gfxinit\n");
 	gfxInitDefault();
-
-	// Enable N3DS 804MHz operation, where available
-	osSetSpeedupEnable(true);
-
-	// consoleInit(GFX_TOP, NULL);
-	gfxSet3D(true);
-	// printf("romfsinit\n");
 	romfsInit();
 
 	initCheck();
+
+	osSetSpeedupEnable(true);  // Enable N3DS 804MHz operation, where available
+	gfxSet3D(true);
 
 	SuperChunk_InitPools();
 
@@ -145,7 +124,7 @@ int main() {
 			// DebugUI_Text("Damage Time: %i Cause: %c",dmg->time,dmg->cause);
 			// DebugUI_Text("Spawn X: %f Y: %f Z: %f",gPlayer.spawnx,gPlayer.spawny,gPlayer.spawnz);
 			DebugUI_Text("Hunger: %i Hungertimer: %i", gPlayer.hunger, gPlayer.hungertimer);
-			DebugUI_Text("Gamemode: %i", gPlayer.gamemode);
+			// DebugUI_Text("Gamemode: %i", gPlayer.gamemode);
 			// DebugUI_Text("quickbar %i",gPlayer.quickSelectBarSlot);}
 		}
 
@@ -176,40 +155,26 @@ int main() {
 		gInput	  = (InputData){ hidKeysHeld(), hidKeysDown(), hidKeysUp(),	 circlePos.dx, circlePos.dy,
 								 touchPos.px,	touchPos.py,   cstickPos.dx, cstickPos.dy };
 
-		ScreenManager_Update();
-
-		/*if (gInput.keysdown & KEY_START) {
-			if (gGamestate == GameState_Menu)
-				break;
-			else if (gGamestate == GameState_Paused) {
-				releaseWorld(&chunkWorker, &savemgr, world);
-
-				ScreenManager_SetScreen(yk);
-
-				lastTime = svcGetSystemTick();
-			} else if (gGamestate == GameState_Playing) {
-				gGamestate = GameState_Paused;
+		if (currentScreen) {
+			ScreenManager_Update();
+		} else {
+			if (gInput.keysdown & KEY_START) {
+				ScreenManager_SetScreen(&sPauseScreen);
 			}
-		}*/
-
-		if (!currentScreen) {}
-		if (gGamestate == GameState_Playing) {
 			while (timeAccum >= 1.f / 20.f) {
 				World_Tick();
 
 				timeAccum -= 1.f / 20.f;
 			}
-
 			PlayerController_Update(&playerCtrl, &PlayerSound, dt);
+		}
 
-			World_UpdateChunkCache(WorldToChunkCoord(FastFloor(gPlayer.position.x)), WorldToChunkCoord(FastFloor(gPlayer.position.z)));
-		} else if (gGamestate == GameState_Paused)
+		if (gWorld.active)
 			World_UpdateChunkCache(WorldToChunkCoord(FastFloor(gPlayer.position.x)), WorldToChunkCoord(FastFloor(gPlayer.position.z)));
 	}
 
-	if (gGamestate == GameState_Playing) {
-		releaseWorld(&chunkWorker, &savemgr);
-	}
+	if (gWorld.active)
+		Game_ReleaseWorld(&chunkWorker, &savemgr);
 
 	SaveManager_Deinit(&savemgr);
 
@@ -246,6 +211,18 @@ int main() {
 
 	gfxExit();
 	return 0;
+}
+
+void Game_ReleaseWorld() {
+	for (int i = 0; i < CHUNKCACHE_SIZE; i++) {
+		for (int j = 0; j < CHUNKCACHE_SIZE; j++) {
+			World_UnloadChunk(gWorld.chunkCache[i][j]);
+		}
+	}
+	ChunkWorker_Finish(&chunkWorker);
+	World_Reset();
+
+	SaveManager_Unload(&savemgr);
 }
 
 void Game_LoadWorld(char* path, char* name, WorldGenType worldType, bool newWorld) {
@@ -287,6 +264,7 @@ void Game_LoadWorld(char* path, char* name, WorldGenType worldType, bool newWorl
 		gPlayer.hp		   = 20;
 		gPlayer.position.y = (float)highestblock + 0.2f;
 	}
-	gGamestate = GameState_Playing;
-	lastTime   = svcGetSystemTick();  // fix timing
+	ScreenManager_SetScreen(NULL);
+	gWorld.active = true;
+	lastTime	  = svcGetSystemTick();	 // fix timing
 }
