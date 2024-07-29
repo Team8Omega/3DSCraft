@@ -15,11 +15,12 @@
 
 #include <citro3d.h>
 
-#include <client/gui/screens/SelectWorldScreen.h>
-#include <client/gui/screens/TitleScreen.h>
+#include "client/gui/screens/PauseScreen.h"
+#include "client/gui/screens/SelectWorldScreen.h"
+#include "client/gui/screens/TitleScreen.h"
 
-#include <gui_shbin.h>
-#include <world_shbin.h>
+#include "gui_shbin.h"
+#include "world_shbin.h"
 
 #define DISPLAY_TRANSFER_FLAGS                                                                                                             \
 	(GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) | GX_TRANSFER_RAW_COPY(0) | GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) |        \
@@ -171,7 +172,7 @@ void Renderer_Render() {
 		C3D_BindProgram(&world_shader);
 		C3D_SetAttrInfo(&world_vertexAttribs);
 
-		if (*gamestate == GameState_Playing ) {
+		if (*gamestate == GameState_Playing) {
 			C3D_TexBind(0, Block_GetTextureMap());
 
 			WorldRenderer_Render(!i ? -iod : iod);
@@ -215,10 +216,9 @@ void Renderer_Render() {
 	if (*gamestate == GameState_Menu) {
 		state_machine_run(machine);
 	} else if (*gamestate == GameState_Paused) {
-
 		PauseScreen(gamestate);
 
-	} else if(*gamestate == GameState_Playing) {
+	} else if (*gamestate == GameState_Playing) {
 		SpriteBatch_SetScale(2);
 		player->quickSelectBarSlots = 9;
 		Inventory_DrawQuickSelect(160 / 2 - Inventory_QuickSelectCalcWidth(player->quickSelectBarSlots) / 2,
@@ -227,8 +227,6 @@ void Renderer_Render() {
 		player->inventorySite =
 			Inventory_Draw(16, 0, 160, player->inventory, sizeof(player->inventory) / sizeof(ItemStack), player->inventorySite);
 	}
-
-
 
 	if (showDebugInfo)
 		DebugUI_Draw();

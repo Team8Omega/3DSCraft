@@ -1,10 +1,5 @@
-//
-// Created by Elias on 29.07.2024.
-//
+#pragma once
 
-#ifndef INC_3DSCRAFT_PAUSESCREEN_H
-#define INC_3DSCRAFT_PAUSESCREEN_H
+#include "Globals.h"
 
-#endif	// INC_3DSCRAFT_PAUSESCREEN_H
-
-void PauseScreen(Gamestate** gamestate);
+void PauseScreen(GameState* gamestate);
