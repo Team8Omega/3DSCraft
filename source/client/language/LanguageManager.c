@@ -11,7 +11,7 @@ void test() {
 	// Load the file
 	FILE *file = fopen(String_ParsePackName("minecraft", "language", "en_us.mp"), "rb");
 	if (!file) {
-		// Crash("Failed to open file for language, testing.");
+		Crash("Failed to open file for language, testing.");
 		return;
 	}
 

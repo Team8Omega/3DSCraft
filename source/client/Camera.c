@@ -10,6 +10,8 @@ void Camera_Init(Camera* cam) {
 	cam->fov  = C3D_AngleFromDegrees(60.f);
 	cam->near = 0.2f, cam->far = 8.f * CHUNK_SIZE;
 
+	cam->mode = CameraMode_First;
+
 	Mtx_PerspTilt(&cam->projection, cam->fov, ((400.f) / (240.f)), cam->near, cam->far, false);
 }
 
@@ -21,9 +23,20 @@ void Camera_Update(Camera* cam, Player* player, float iod) {
 							   player->position.z);
 
 	Mtx_Identity(&cam->view);
-	Mtx_RotateX(&cam->view, -player->pitch, true);
-	Mtx_RotateY(&cam->view, -player->yaw, true);
-	Mtx_Translate(&cam->view, -playerHead.x, -playerHead.y, -playerHead.z, true);
+
+	switch (cam->mode) {
+		case CameraMode_First:
+			Mtx_RotateX(&cam->view, -player->pitch, true);
+			Mtx_RotateY(&cam->view, -player->yaw, true);
+			Mtx_Translate(&cam->view, -playerHead.x, -playerHead.y, -playerHead.z, true);
+			break;
+
+		case CameraMode_Second:
+			break;
+
+		case CameraMode_Third:
+			break;
+	}
 
 	C3D_Mtx vp;
 	Mtx_Multiply(&vp, &cam->projection, &cam->view);

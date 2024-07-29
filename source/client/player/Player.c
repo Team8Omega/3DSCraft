@@ -23,8 +23,8 @@ void Player_InitModel(Player* player) {
 
 void Player_Draw(Player* player, int projectionUniform, C3D_Mtx* matrix) {
 	CubeModel_Reset(player->model);
-	CubeModel_SetPos(player->model, f3_new(0, 18, 0));
-	CubeModel_SetRotY(player->model, -player->yaw);
+	CubeModel_SetPos(player->model, f3_new(player->position.x, player->position.y + 6, player->position.z));
+	CubeModel_SetRotY(player->model, player->yaw);
 	CubeModel_Draw(player->model, projectionUniform, matrix);
 }
 

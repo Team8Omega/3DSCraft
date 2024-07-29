@@ -38,6 +38,7 @@ void Crash(const char* reason, ...) {
 			break;
 #endif
 	}
+	gfxInitDefault();
 }
 
 void Log(const char* reason, ...) {
