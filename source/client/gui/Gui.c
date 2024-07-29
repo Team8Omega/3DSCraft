@@ -140,26 +140,35 @@ void Gui_DrawTint(int x, int y, int width, int height, int z, uint32_t color) {
 	SpriteBatch_PushSingleColorQuad(x, y, z, width, height, color);
 }
 
-void Gui_DrawBackground(int background, int x, int y, int z) {
+void Gui_DrawBackgroundFull(u8 index) {
+	for (int i = 0; i < 160 / 16 + 1; i++) {
+		for (int j = 0; j < 120 / 16 + 1; j++) {
+			Gui_DrawBackground(index, i, j, -5);
+		}
+	}
+}
+
+void Gui_DrawBackground(u8 background, int x, int y, int z) {
 	if (background <= 0)
 		background = 0;
 
-	if (background == 0) {
-		SpriteBatch_BindGuiTexture(GuiTexture_MenuBackground);
-		SpriteBatch_PushQuadColor(x * 32, y * 32, z, 32, 32, 0, 0, 16, 16, INT16_MAX);
+	switch (background) {
+		default:
+		case 0:
+			SpriteBatch_BindGuiTexture(GuiTexture_MenuBackground);
+			SpriteBatch_PushQuadColor(x * 32, y * 32, z, 32, 32, 0, 0, 16, 16, INT16_MAX);
+			break;
+		case 1:
+			SpriteBatch_BindGuiTexture(GuiTexture_MenuBackground);
+			SpriteBatch_PushQuadColor(x * 32, y * 32, z, 32, 32, 16, 0, 16, 16, INT16_MAX);
+			break;
+		case 2:
+			SpriteBatch_BindGuiTexture(GuiTexture_MenuBackground);
+			SpriteBatch_PushQuadColor(x * 32, y * 32, z, 32, 32, 0, 16, 16, 16, INT16_MAX);
+			break;
+		case 3:
+			SpriteBatch_BindGuiTexture(GuiTexture_MenuBackground);
+			SpriteBatch_PushQuadColor(x * 32, y * 32, z, 32, 32, 16, 16, 16, 16, INT16_MAX);
+			break;
 	}
-	if (background == 1) {
-		SpriteBatch_BindGuiTexture(GuiTexture_MenuBackground);
-		SpriteBatch_PushQuadColor(x * 32, y * 32, z, 32, 32, 16, 0, 16, 16, INT16_MAX);
-	}
-	if (background == 2) {
-		SpriteBatch_BindGuiTexture(GuiTexture_MenuBackground);
-		SpriteBatch_PushQuadColor(x * 32, y * 32, z, 32, 32, 0, 16, 16, 16, INT16_MAX);
-	}
-	if (background == 3) {
-		SpriteBatch_BindGuiTexture(GuiTexture_MenuBackground);
-		SpriteBatch_PushQuadColor(x * 32, y * 32, z, 32, 32, 16, 16, 16, 16, INT16_MAX);
-	}
-	if (background >= 3)
-		background = 3;
 }

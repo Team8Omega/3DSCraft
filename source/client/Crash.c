@@ -9,6 +9,9 @@
 #include "util/Paths.h"
 
 void Crash(const char* reason, ...) {
+	if (gfxGetFramebuffer(0, 0, 0, 0) == NULL)
+		gfxInitDefault();
+
 	consoleInit(GFX_TOP, NULL);
 
 	va_list vl;
@@ -38,6 +41,7 @@ void Crash(const char* reason, ...) {
 			break;
 #endif
 	}
+	gfxExit();
 	gfxInitDefault();
 }
 

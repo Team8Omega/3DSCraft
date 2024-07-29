@@ -49,7 +49,7 @@ typedef struct {
 } Camera;
 
 void Camera_Init(Camera* cam);
-void Camera_Update(Camera* cam, Player* player, float iod);
+void Camera_Update(Camera* cam, float iod);
 
 bool Camera_IsPointVisible(Camera* cam, C3D_FVec point);
 bool Camera_IsAABBVisible(Camera* cam, C3D_FVec orgin, C3D_FVec size);

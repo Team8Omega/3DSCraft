@@ -22,17 +22,17 @@ void Hand_Deinit() {
 	C3D_TexDelete(&SkinTexture);
 }
 
-void Hand_Draw(int projUniform, C3D_Mtx* projection, ItemStack stack, Player* player) {
+void Hand_Draw(int projUniform, C3D_Mtx* projection, ItemStack stack) {
 	C3D_Mtx pm;
 	C3D_Mtx model;
 	Mtx_Identity(&model);
-	Mtx_Translate(&model, 0.5f + sinf(player->bobbing) * 0.03f + (stack.amount == 0) * 0.2f, -0.68f + ABS(sinf(player->bobbing)) * 0.01f,
+	Mtx_Translate(&model, 0.5f + sinf(gPlayer.bobbing) * 0.03f + (stack.amount == 0) * 0.2f, -0.68f + ABS(sinf(gPlayer.bobbing)) * 0.01f,
 				  -1.2f - (stack.amount == 0) * 0.4f, true);
 	Mtx_RotateX(&model, M_PI / 18.f + (stack.amount == 0) * M_PI / 5.f, true);
 	Mtx_RotateY(&model, M_PI / 18.f, true);
-	if (player->breakPlaceTimeout > -0.1f) {
-		float dist = sinf((player->breakPlaceTimeout + 0.1f) / (PLAYER_PLACE_REPLACE_TIMEOUT + 0.1f) * M_PI);
-		float h	   = cosf((player->breakPlaceTimeout + 0.1f) / (PLAYER_PLACE_REPLACE_TIMEOUT + 0.1f) * M_PI);
+	if (gPlayer.breakPlaceTimeout > -0.1f) {
+		float dist = sinf((gPlayer.breakPlaceTimeout + 0.1f) / (PLAYER_PLACE_REPLACE_TIMEOUT + 0.1f) * M_PI);
+		float h	   = cosf((gPlayer.breakPlaceTimeout + 0.1f) / (PLAYER_PLACE_REPLACE_TIMEOUT + 0.1f) * M_PI);
 		Mtx_RotateX(&model, -dist, true);
 		Mtx_Translate(&model, 0.f, -h * 0.3f, -dist * 0.25f, true);
 	}

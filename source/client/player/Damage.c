@@ -5,23 +5,23 @@
 #include "client/player/DamageDef.h"
 #include "client/player/Player.h"
 
-void OvertimeDamage(Player* player) {
-	if (player->dmg.cause == DAMAGECAUSE_FIRE) {
+void OvertimeDamage() {
+	if (gPlayer.dmg.cause == DAMAGECAUSE_FIRE) {
 		while (time < 0) {
-			player->hp -= 1;
+			gPlayer.hp -= 1;
 			// sleep(1);
 			svcSleepThread(1000000000);
-			player->dmg.time -= 1;
+			gPlayer.dmg.time -= 1;
 		}
 		// cause == NULL;
 		// time == NULL;
 	}
-	if (player->dmg.cause == DAMAGECAUSE_POISON) {
+	if (gPlayer.dmg.cause == DAMAGECAUSE_POISON) {
 		while (time < 0) {
-			player->hp -= 1;
+			gPlayer.hp -= 1;
 			// sleep(1);
 			svcSleepThread(1000000000);
-			player->dmg.time -= 1;
+			gPlayer.dmg.time -= 1;
 		}
 	}
 }

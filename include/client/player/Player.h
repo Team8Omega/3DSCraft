@@ -24,7 +24,6 @@ typedef struct {
 	float pitch, yaw;
 	float bobbing, fovAdd, crouchAdd;
 	bool grounded, jumped, sprinting, flying, crouching;
-	World* world;
 
 	float3 view;
 
@@ -67,19 +66,21 @@ typedef struct {
 	Damage dmg;
 } Player;
 
-void Player_Init(Player* player, World* world);
+extern Player gPlayer;
 
-void Player_InitModel(Player* player);
+void Player_Init();
 
-void Player_Draw(Player* player, int projectionUniform, C3D_Mtx* matrix);
+void Player_InitModel();
 
-void Player_Update(Player* player, Sound* sound);
+void Player_Draw(int projectionUniform, C3D_Mtx* matrix);
 
-void Player_Move(Player* player, float dt, float3 accl);
+void Player_Update(Sound* sound);
 
-void Player_PlaceBlock(Player* player, Sound* sound);
-void Player_BreakBlock(Player* player);
+void Player_Move(float dt, float3 accl);
 
-void Player_Jump(Player* player, float3 accl);
+void Player_PlaceBlock(Sound* sound);
+void Player_BreakBlock();
 
-void Player_Deinit(Player* player);
+void Player_Jump(float3 accl);
+
+void Player_Deinit();

@@ -1,8 +1,9 @@
-#include "world/worldgen/SmeaGen.h"
+#include "world/level/levelgen/SmeaGen.h"
 
 #include <sino/sino.h>
 
-void SmeaGen_Init(SmeaGen* gen, World* world) { gen->world = world; }
+void SmeaGen_Init(SmeaGen* gen) {
+}
 
 // based off https://github.com/smealum/3dscraft/blob/master/source/generation.c
 void SmeaGen_Generate(WorkQueue* queue, WorkerItem item, void* this) {
@@ -13,8 +14,8 @@ void SmeaGen_Generate(WorkQueue* queue, WorkerItem item, void* this) {
 
 			const int smeasClusterSize = 8;
 			const int smeasChunkHeight = 16;
-			int height = (int)(sino_2d((px) / (smeasClusterSize * 4), (pz) / (smeasClusterSize * 4)) * smeasClusterSize) +
-				     (smeasChunkHeight * smeasClusterSize / 2);
+			int height				   = (int)(sino_2d((px) / (smeasClusterSize * 4), (pz) / (smeasClusterSize * 4)) * smeasClusterSize) +
+						 (smeasChunkHeight * smeasClusterSize / 2);
 
 			for (int y = 0; y < height - 3; y++) {
 				Chunk_SetBlock(item.chunk, x, y, z, Block_Stone);

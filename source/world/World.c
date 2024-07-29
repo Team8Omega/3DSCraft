@@ -10,52 +10,54 @@
 #include <limits.h>
 #include <stdint.h>
 
-void World_Init(World* world, WorkQueue* workqueue) {
-	strcpy(world->name, "TestWelt");
+World gWorld;
 
-	world->workqueue = workqueue;
+void World_Init(WorkQueue* workqueue) {
+	strcpy(gWorld.name, "TestWelt");
 
-	world->genSettings.seed = 28112000;
-	world->genSettings.type = WorldGen_SuperFlat;
+	gWorld.workqueue = workqueue;
 
-	vec_init(&world->freeChunks);
+	gWorld.genSettings.seed = 28112000;
+	gWorld.genSettings.type = WorldGen_SuperFlat;
 
-	World_Reset(world);
+	vec_init(&gWorld.freeChunks);
+
+	World_Reset();
 }
 
-void World_Reset(World* world) {
-	world->cacheTranslationX = 0;
-	world->cacheTranslationZ = 0;
+void World_Reset() {
+	gWorld.cacheTranslationX = 0;
+	gWorld.cacheTranslationZ = 0;
 
-	vec_clear(&world->freeChunks);
+	vec_clear(&gWorld.freeChunks);
 
 	for (size_t i = 0; i < CHUNKPOOL_SIZE; i++) {
-		world->chunkPool[i].x = INT_MAX;
-		world->chunkPool[i].z = INT_MAX;
-		vec_push(&world->freeChunks, &world->chunkPool[i]);
+		gWorld.chunkPool[i].x = INT_MAX;
+		gWorld.chunkPool[i].z = INT_MAX;
+		vec_push(&gWorld.freeChunks, &gWorld.chunkPool[i]);
 	}
 
-	world->randomTickGen = Xorshift32_New();
+	gWorld.randomTickGen = Xorshift32_New();
 }
 
-Chunk* World_LoadChunk(World* world, int x, int z) {
-	for (int i = 0; i < world->freeChunks.length; i++) {
-		if (world->freeChunks.data[i]->x == x && world->freeChunks.data[i]->z == z) {
-			Chunk* chunk = world->freeChunks.data[i];
-			vec_splice(&world->freeChunks, i, 1);
+Chunk* World_LoadChunk(int x, int z) {
+	for (int i = 0; i < gWorld.freeChunks.length; i++) {
+		if (gWorld.freeChunks.data[i]->x == x && gWorld.freeChunks.data[i]->z == z) {
+			Chunk* chunk = gWorld.freeChunks.data[i];
+			vec_splice(&gWorld.freeChunks, i, 1);
 
 			chunk->references++;
 			return chunk;
 		}
 	}
 
-	for (int i = 0; i < world->freeChunks.length; i++) {
-		if (!world->freeChunks.data[i]->tasksRunning) {
-			Chunk* chunk = world->freeChunks.data[i];
-			vec_splice(&world->freeChunks, i, 1);
+	for (int i = 0; i < gWorld.freeChunks.length; i++) {
+		if (!gWorld.freeChunks.data[i]->tasksRunning) {
+			Chunk* chunk = gWorld.freeChunks.data[i];
+			vec_splice(&gWorld.freeChunks, i, 1);
 
 			Chunk_Init(chunk, x, z);
-			WorkQueue_AddItem(world->workqueue, (WorkerItem){ WorkerItemType_Load, chunk });
+			WorkQueue_AddItem(gWorld.workqueue, (WorkerItem){ WorkerItemType_Load, chunk });
 			DebugUI_Text("loading world");
 			chunk->references++;
 			return chunk;
@@ -64,31 +66,27 @@ Chunk* World_LoadChunk(World* world, int x, int z) {
 
 	return NULL;
 }
-void World_UnloadChunk(World* world, Chunk* chunk) {
-	WorkQueue_AddItem(world->workqueue, (WorkerItem){ WorkerItemType_Save, chunk });
-	vec_push(&world->freeChunks, chunk);
+void World_UnloadChunk(Chunk* chunk) {
+	WorkQueue_AddItem(gWorld.workqueue, (WorkerItem){ WorkerItemType_Save, chunk });
+	vec_push(&gWorld.freeChunks, chunk);
 	chunk->references--;
 }
 
-Chunk* World_GetChunk(World* world, int x, int z) {
-	if (world == NULL) {
-		Crash("World is NULL when calling GetChunk x%d z%d", x, z);
-		return NULL;
-	}
+Chunk* World_GetChunk(int x, int z) {
 	int halfS = CHUNKCACHE_SIZE / 2;
-	int lowX  = world->cacheTranslationX - halfS;
-	int lowZ  = world->cacheTranslationZ - halfS;
-	int highX = world->cacheTranslationX + halfS;
-	int highZ = world->cacheTranslationZ + halfS;
+	int lowX  = gWorld.cacheTranslationX - halfS;
+	int lowZ  = gWorld.cacheTranslationZ - halfS;
+	int highX = gWorld.cacheTranslationX + halfS;
+	int highZ = gWorld.cacheTranslationZ + halfS;
 	if (x >= lowX && z >= lowZ && x <= highX && z <= highZ)
-		return world->chunkCache[x - lowX][z - lowZ];
+		return gWorld.chunkCache[x - lowX][z - lowZ];
 	return NULL;
 }
 
-Block World_GetBlock(World* world, int x, int y, int z) {
+Block World_GetBlock(int x, int y, int z) {
 	if (y < 0 || y >= CHUNK_HEIGHT)
 		return Block_Air;
-	Chunk* chunk = World_GetChunk(world, WorldToChunkCoord(x), WorldToChunkCoord(z));
+	Chunk* chunk = World_GetChunk(WorldToChunkCoord(x), WorldToChunkCoord(z));
 	if (chunk)
 		return Chunk_GetBlock(chunk, WorldToLocalCoord(x), y, WorldToLocalCoord(z));
 	return Block_Air;
@@ -96,7 +94,7 @@ Block World_GetBlock(World* world, int x, int y, int z) {
 
 #define NOTIFY_NEIGHTBOR(axis, comp, xDiff, zDiff)                                                                                         \
 	if (axis == comp) {                                                                                                                    \
-		Chunk* neightborChunk = World_GetChunk(world, cX + xDiff, cZ + zDiff);                                                             \
+		Chunk* neightborChunk = World_GetChunk(cX + xDiff, cZ + zDiff);                                                                    \
 		if (neightborChunk)                                                                                                                \
 			Chunk_RequestGraphicsUpdate(neightborChunk, y / CHUNK_SIZE);                                                                   \
 	}
@@ -111,12 +109,12 @@ Block World_GetBlock(World* world, int x, int y, int z) {
 	if (WorldToLocalCoord(y) == 15 && y / CHUNK_SIZE + 1 < CLUSTER_PER_CHUNK)                                                              \
 		Chunk_RequestGraphicsUpdate(chunk, y / CHUNK_SIZE + 1);
 
-void World_SetBlock(World* world, int x, int y, int z, Block block) {
+void World_SetBlock(int x, int y, int z, Block block) {
 	if (y < 0 || y >= CHUNK_HEIGHT)
 		return;
 	int cX		 = WorldToChunkCoord(x);
 	int cZ		 = WorldToChunkCoord(z);
-	Chunk* chunk = World_GetChunk(world, cX, cZ);
+	Chunk* chunk = World_GetChunk(cX, cZ);
 	if (chunk) {
 		int lX = WorldToLocalCoord(x);
 		int lZ = WorldToLocalCoord(z);
@@ -126,12 +124,12 @@ void World_SetBlock(World* world, int x, int y, int z, Block block) {
 	}
 }
 
-void World_SetBlockAndMeta(World* world, int x, int y, int z, Block block, uint8_t metadata) {
+void World_SetBlockAndMeta(int x, int y, int z, Block block, uint8_t metadata) {
 	if (y < 0 || y >= CHUNK_HEIGHT)
 		return;
 	int cX		 = WorldToChunkCoord(x);
 	int cZ		 = WorldToChunkCoord(z);
-	Chunk* chunk = World_GetChunk(world, cX, cZ);
+	Chunk* chunk = World_GetChunk(cX, cZ);
 	if (chunk) {
 		int lX = WorldToLocalCoord(x);
 		int lZ = WorldToLocalCoord(z);
@@ -141,21 +139,21 @@ void World_SetBlockAndMeta(World* world, int x, int y, int z, Block block, uint8
 	}
 }
 
-uint8_t World_GetMetadata(World* world, int x, int y, int z) {
+uint8_t World_GetMetadata(int x, int y, int z) {
 	if (y < 0 || y >= CHUNK_HEIGHT)
 		return 0;
-	Chunk* chunk = World_GetChunk(world, WorldToChunkCoord(x), WorldToChunkCoord(z));
+	Chunk* chunk = World_GetChunk(WorldToChunkCoord(x), WorldToChunkCoord(z));
 	if (chunk)
 		return Chunk_GetMetadata(chunk, WorldToLocalCoord(x), y, WorldToLocalCoord(z));
 	return 0;
 }
 
-void World_SetMetadata(World* world, int x, int y, int z, uint8_t metadata) {
+void World_SetMetadata(int x, int y, int z, uint8_t metadata) {
 	if (y < 0 || y >= CHUNK_HEIGHT)
 		return;
 	int cX		 = WorldToChunkCoord(x);
 	int cZ		 = WorldToChunkCoord(z);
-	Chunk* chunk = World_GetChunk(world, cX, cZ);
+	Chunk* chunk = World_GetChunk(cX, cZ);
 	if (chunk) {
 		int lX = WorldToLocalCoord(x);
 		int lZ = WorldToLocalCoord(z);
@@ -165,10 +163,10 @@ void World_SetMetadata(World* world, int x, int y, int z, uint8_t metadata) {
 	}
 }
 
-int World_GetHeight(World* world, int x, int z) {
+int World_GetHeight(int x, int z) {
 	int cX		 = WorldToChunkCoord(x);
 	int cZ		 = WorldToChunkCoord(z);
-	Chunk* chunk = World_GetChunk(world, cX, cZ);
+	Chunk* chunk = World_GetChunk(cX, cZ);
 	if (chunk) {
 		int lX = WorldToLocalCoord(x);
 		int lZ = WorldToLocalCoord(z);
@@ -178,16 +176,16 @@ int World_GetHeight(World* world, int x, int z) {
 	return 0;
 }
 
-void World_UpdateChunkCache(World* world, int orginX, int orginZ) {
-	if (orginX != world->cacheTranslationX || orginZ != world->cacheTranslationZ) {
+void World_UpdateChunkCache(int orginX, int orginZ) {
+	if (orginX != gWorld.cacheTranslationX || orginZ != gWorld.cacheTranslationZ) {
 		Chunk* tmpBuffer[CHUNKCACHE_SIZE][CHUNKCACHE_SIZE];
-		memcpy(tmpBuffer, world->chunkCache, sizeof(tmpBuffer));
+		memcpy(tmpBuffer, gWorld.chunkCache, sizeof(tmpBuffer));
 
-		int oldBufferStartX = world->cacheTranslationX - CHUNKCACHE_SIZE / 2;
-		int oldBufferStartZ = world->cacheTranslationZ - CHUNKCACHE_SIZE / 2;
+		int oldBufferStartX = gWorld.cacheTranslationX - CHUNKCACHE_SIZE / 2;
+		int oldBufferStartZ = gWorld.cacheTranslationZ - CHUNKCACHE_SIZE / 2;
 
-		int diffX = orginX - world->cacheTranslationX;
-		int diffZ = orginZ - world->cacheTranslationZ;
+		int diffX = orginX - gWorld.cacheTranslationX;
+		int diffZ = orginZ - gWorld.cacheTranslationZ;
 
 		for (int i = 0; i < CHUNKCACHE_SIZE; i++) {
 			for (int j = 0; j < CHUNKCACHE_SIZE; j++) {
@@ -195,10 +193,10 @@ void World_UpdateChunkCache(World* world, int orginX, int orginZ) {
 				int wz = orginZ + (j - CHUNKCACHE_SIZE / 2);
 				if (wx >= oldBufferStartX && wx < oldBufferStartX + CHUNKCACHE_SIZE && wz >= oldBufferStartZ &&
 					wz < oldBufferStartZ + CHUNKCACHE_SIZE) {
-					world->chunkCache[i][j]			= tmpBuffer[i + diffX][j + diffZ];
+					gWorld.chunkCache[i][j]			= tmpBuffer[i + diffX][j + diffZ];
 					tmpBuffer[i + diffX][j + diffZ] = NULL;
 				} else {
-					world->chunkCache[i][j] = World_LoadChunk(world, wx, wz);
+					gWorld.chunkCache[i][j] = World_LoadChunk(wx, wz);
 				}
 			}
 		}
@@ -206,43 +204,43 @@ void World_UpdateChunkCache(World* world, int orginX, int orginZ) {
 		for (int i = 0; i < CHUNKCACHE_SIZE; i++) {
 			for (int j = 0; j < CHUNKCACHE_SIZE; j++) {
 				if (tmpBuffer[i][j] != NULL) {
-					World_UnloadChunk(world, tmpBuffer[i][j]);
+					World_UnloadChunk(tmpBuffer[i][j]);
 				}
 			}
 		}
 
-		world->cacheTranslationX = orginX;
-		world->cacheTranslationZ = orginZ;
+		gWorld.cacheTranslationX = orginX;
+		gWorld.cacheTranslationZ = orginZ;
 	}
 }
 
-void World_Tick(World* world) {
+void World_Tick() {
 	for (int x = 0; x < CHUNKCACHE_SIZE; x++)
 		for (int z = 0; z < CHUNKCACHE_SIZE; z++) {
-			Chunk* chunk = world->chunkCache[x][z];
+			Chunk* chunk = gWorld.chunkCache[x][z];
 
 			if (chunk->genProgress == ChunkGen_Empty && !chunk->tasksRunning)
-				WorkQueue_AddItem(world->workqueue, (WorkerItem){ WorkerItemType_BaseGen, chunk });
+				WorkQueue_AddItem(gWorld.workqueue, (WorkerItem){ WorkerItemType_BaseGen, chunk });
 
 			if (x > 0 && z > 0 && x < CHUNKCACHE_SIZE - 1 && z < CHUNKCACHE_SIZE - 1 && chunk->genProgress == ChunkGen_Terrain &&
 				!chunk->tasksRunning) {
 				bool clear = true;
 				for (int xOff = -1; xOff < 2 && clear; xOff++)
 					for (int zOff = -1; zOff < 2 && clear; zOff++) {
-						Chunk* borderChunk = world->chunkCache[x + xOff][z + zOff];
+						Chunk* borderChunk = gWorld.chunkCache[x + xOff][z + zOff];
 						if (borderChunk->genProgress == ChunkGen_Empty || !borderChunk->tasksRunning)
 							clear = false;
 					}
 				if (clear)
-					WorkQueue_AddItem(world->workqueue, (WorkerItem){ WorkerItemType_Decorate, chunk });
+					WorkQueue_AddItem(gWorld.workqueue, (WorkerItem){ WorkerItemType_Decorate, chunk });
 
 				/*int xVals[RANDOMTICKS_PER_CHUNK];
 				int yVals[RANDOMTICKS_PER_CHUNK];
 				int zVals[RANDOMTICKS_PER_CHUNK];
 				for (int i = 0; i < RANDOMTICKS_PER_CHUNK; i++) {
-					xVals[i] = WorldToLocalCoord(Xorshift32_Next(&world->randomTickGen));
-					yVals[i] = WorldToLocalCoord(Xorshift32_Next(&world->randomTickGen));
-					zVals[i] = WorldToLocalCoord(Xorshift32_Next(&world->randomTickGen));
+					xVals[i] = WorldToLocalCoord(Xorshift32_Next(&gWorld.randomTickGen));
+					yVals[i] = WorldToLocalCoord(Xorshift32_Next(&gWorld.randomTickGen));
+					zVals[i] = WorldToLocalCoord(Xorshift32_Next(&gWorld.randomTickGen));
 				}*/
 			}
 		}

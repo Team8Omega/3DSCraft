@@ -6,7 +6,7 @@
 
 #include "client/model/VertexFmt.h"
 
-void PolyGen_Init(World* world_, Player* player_);
+void PolyGen_Init();
 void PolyGen_Deinit();
 
 void PolyGen_Harvest();

@@ -10,7 +10,8 @@
 
 #include <3ds.h>
 
-typedef enum {
+typedef enum
+{
 	WorkerItemType_Load,
 	WorkerItemType_Save,
 	WorkerItemType_BaseGen,
@@ -20,16 +21,16 @@ typedef enum {
 } WorkerItemType;
 
 typedef struct {
-		WorkerItemType type;
-		Chunk* chunk;
-		uint32_t uuid;
+	WorkerItemType type;
+	Chunk* chunk;
+	u32 uuid;
 } WorkerItem;
 
 typedef struct {
-		vec_t(WorkerItem) queue;
+	vec_t(WorkerItem) queue;
 
-		LightEvent itemAddedEvent;
-		LightLock listInUse;
+	LightEvent itemAddedEvent;
+	LightLock listInUse;
 } WorkQueue;
 
 static inline void WorkQueue_Init(WorkQueue* queue) {

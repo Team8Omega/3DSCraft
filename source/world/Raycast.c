@@ -8,7 +8,7 @@
 
 #define INF (CHUNKCACHE_SIZE / 2 * CHUNK_SIZE)
 
-bool Raycast_Cast(World* world, float3 inpos, float3 raydir, Raycast_Result* out) {
+bool Raycast_Cast(float3 inpos, float3 raydir, Raycast_Result* out) {
 	int mapX = FastFloor(inpos.x), mapY = FastFloor(inpos.y), mapZ = FastFloor(inpos.z);
 
 	float xSqr = raydir.x * raydir.x;
@@ -58,9 +58,9 @@ bool Raycast_Cast(World* world, float3 inpos, float3 raydir, Raycast_Result* out
 			mapZ += stepZ;
 			side = 2;
 		}
-		if (World_GetBlock(world, mapX, mapY, mapZ) != Block_Air || World_GetBlock(world, mapX, mapY, mapZ) == Block_Lava)
+		if (World_GetBlock(mapX, mapY, mapZ) != Block_Air || World_GetBlock(mapX, mapY, mapZ) == Block_Lava)
 			hit = 1;
-		// if (world->errFlags & World_ErrUnloadedBlockRequested) break;
+		// if (gWorld.errFlags & World_ErrUnloadedBlockRequested) break;
 
 		if (steps++ > INF)
 			break;

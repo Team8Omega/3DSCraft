@@ -39,13 +39,9 @@ static int world_shader_uLocProjection, gui_shader_uLocProjection;
 
 static C3D_AttrInfo world_vertexAttribs, gui_vertexAttribs;
 
-static C3D_Tex logoTex;
-
-static World* world;
-static Player* player;
 static WorkQueue* workqueue;
 
-static state_machine_t* machine;
+// static state_machine_t* machine;
 
 extern bool showDebugInfo;
 
@@ -54,12 +50,10 @@ extern Camera camera;
 void Renderer_RenderGameOverlay();
 void renderExpBar();
 
-void Renderer_Init(World* world_, Player* player_, WorkQueue* queue) {
-	machine = state_machine_create();
-	state_machine_set_current_state(machine, TitleScreen);
+void Renderer_Init(WorkQueue* queue) {
+	// machine = state_machine_create();
+	// state_machine_set_current_state(machine, TitleScreen);
 
-	world	  = world_;
-	player	  = player_;
 	workqueue = queue;
 
 	C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
@@ -92,11 +86,11 @@ void Renderer_Init(World* world_, Player* player_, WorkQueue* queue) {
 	AttrInfo_AddLoader(&gui_vertexAttribs, 0, GPU_SHORT, 3);
 	AttrInfo_AddLoader(&gui_vertexAttribs, 1, GPU_SHORT, 3);
 
-	PolyGen_Init(world, player_);
+	PolyGen_Init();
 
 	CubeMap_Init(world_shader_uLocProjection);
 
-	WorldRenderer_Init(player, world, workqueue, world_shader_uLocProjection);
+	WorldRenderer_Init(gWorld.workqueue, world_shader_uLocProjection);
 
 	SpriteBatch_Init(gui_shader_uLocProjection);
 
@@ -108,15 +102,11 @@ void Renderer_Init(World* world_, Player* player_, WorkQueue* queue) {
 
 	Item_Init();
 
-	Texture_Load(&logoTex, "gui/title/minecraft.png");
-
 	CubeMap_Set("gui/title/background/panorama", f3_new(0.f, 0.f, 0.f));
 }
 
 void Renderer_Deinit() {
-	state_machine_delete(machine);
-
-	C3D_TexDelete(&logoTex);
+	// state_machine_delete(machine);
 
 	Item_Deinit();
 
@@ -179,22 +169,8 @@ void Renderer_Render() {
 		} else if (gGamestate == GameState_Paused) {
 			C3D_TexBind(0, Block_GetTextureMap());
 			WorldRenderer_Render(!i ? -iod : iod);
-
-		} else {
-			CubeMap_Draw();
-
-			SpriteBatch_SetScale(2);
-
-			SpriteBatch_BindTexture(&logoTex);
-
-			SpriteBatch_PushQuad(36, 35, 0, 128, 32, 0, 0, 1024, 256);
-
-			SpriteBatch_PushText(0, 112, 0, INT16_MAX, false, INT_MAX, NULL, APP_VERSION);
-
-			SpriteBatch_PushText(210 - 70, 112, 0, INT16_MAX, false, INT_MAX, NULL, AUTHOR);
-
-			SpriteBatch_SetScale(1);
 		}
+		ScreenManager_DrawUp();
 
 		C3D_BindProgram(&gui_shader);
 		C3D_SetAttrInfo(&gui_vertexAttribs);
@@ -211,19 +187,21 @@ void Renderer_Render() {
 	SpriteBatch_StartFrame(320, 240);
 
 	if (gGamestate == GameState_Menu) {
-		state_machine_run(machine);
+		// state_machine_run(machine);
 	} else if (gGamestate == GameState_Paused) {
-		PauseScreen(gGamestate);
+		PauseScreen();
 
 	} else if (gGamestate == GameState_Playing) {
 		SpriteBatch_SetScale(2);
-		player->quickSelectBarSlots = 9;
-		Inventory_DrawQuickSelect(160 / 2 - Inventory_QuickSelectCalcWidth(player->quickSelectBarSlots) / 2,
-								  120 - INVENTORY_QUICKSELECT_HEIGHT, player->quickSelectBar, player->quickSelectBarSlots,
-								  &player->quickSelectBarSlot);
-		player->inventorySite =
-			Inventory_Draw(16, 0, 160, player->inventory, sizeof(player->inventory) / sizeof(ItemStack), player->inventorySite);
+		gPlayer.quickSelectBarSlots = 9;
+		Inventory_DrawQuickSelect(160 / 2 - Inventory_QuickSelectCalcWidth(gPlayer.quickSelectBarSlots) / 2,
+								  120 - INVENTORY_QUICKSELECT_HEIGHT, gPlayer.quickSelectBar, gPlayer.quickSelectBarSlots,
+								  &gPlayer.quickSelectBarSlot);
+		gPlayer.inventorySite =
+			Inventory_Draw(16, 0, 160, gPlayer.inventory, sizeof(gPlayer.inventory) / sizeof(ItemStack), gPlayer.inventorySite);
 	}
+
+	ScreenManager_DrawDown();
 
 	if (showDebugInfo)
 		DebugUI_Draw();
@@ -250,7 +228,7 @@ void renderExpBar() {
 
 	if (barCap > 0) {
 		int barLength = 182;
-		int xpFill	  = (int)(player->experience * (float)(barLength + 1));
+		int xpFill	  = (int)(gPlayer.experience * (float)(barLength + 1));
 
 		int y = 120 - 8;
 		SpriteBatch_PushQuad(200 / 2 - 182 / 2, y, 0, barLength, 5, 0, 64, barLength, 5);
@@ -260,10 +238,10 @@ void renderExpBar() {
 		}
 	}
 
-	if (player->experienceLevel > 0) {
+	if (gPlayer.experienceLevel > 0) {
 		char experienceStr[20];	 // buffer to hold the string representation of experience level
 
-		int experienceInt = (int)player->experienceLevel;
+		int experienceInt = (int)gPlayer.experienceLevel;
 		snprintf(experienceStr, sizeof(experienceStr), "%d", experienceInt);  // Format as integer
 
 		int textWidth = SpriteBatch_CalcTextWidth(experienceStr);

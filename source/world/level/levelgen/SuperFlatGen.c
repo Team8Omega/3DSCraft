@@ -1,8 +1,8 @@
-#include "world/worldgen/SuperFlatGen.h"
+#include "world/level/levelgen/SuperFlatGen.h"
 
 #include "util/math/NumberUtils.h"
 
-void SuperFlatGen_Init(SuperFlatGen* gen, World* world) {
+void SuperFlatGen_Init(SuperFlatGen* gen) {
 }
 
 void SuperFlatGen_Generate(WorkQueue* queue, WorkerItem item, void* this) {

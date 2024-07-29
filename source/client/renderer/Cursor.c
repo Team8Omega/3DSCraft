@@ -23,7 +23,7 @@ void Cursor_Deinit() {
 	linearFree(cursorVBO);
 }
 
-void Cursor_Draw(int projUniform, C3D_Mtx* projectionview, World* world, int x, int y, int z, Direction highlight) {
+void Cursor_Draw(int projUniform, C3D_Mtx* projectionview, int x, int y, int z, Direction highlight) {
 	C3D_Mtx model;
 	Mtx_Identity(&model);
 	Mtx_Translate(&model, x, y, z, true);
@@ -35,7 +35,7 @@ void Cursor_Draw(int projUniform, C3D_Mtx* projectionview, World* world, int x, 
 	WorldVertex* vtx = cursorVBO;
 	for (int i = 0; i < 6; i++) {
 		const int* offset = DirectionToOffset[i];
-		if (World_GetBlock(world, x + offset[0], y + offset[1], z + offset[2]) == Block_Air) {
+		if (World_GetBlock(x + offset[0], y + offset[1], z + offset[2]) == Block_Air) {
 			memcpy(vtx, &block_sides_lut[i * 6], sizeof(WorldVertex) * 6);
 			uint8_t color = i == highlight ? 65 : 32;
 			for (int j = 0; j < 6; j++) {

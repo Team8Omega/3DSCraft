@@ -15,19 +15,19 @@ void Camera_Init(Camera* cam) {
 	Mtx_PerspTilt(&cam->projection, cam->fov, ((400.f) / (240.f)), cam->near, cam->far, false);
 }
 
-void Camera_Update(Camera* cam, Player* player, float iod) {
-	float fov = cam->fov + C3D_AngleFromDegrees(12.f) * player->fovAdd;
+void Camera_Update(Camera* cam, float iod) {
+	float fov = cam->fov + C3D_AngleFromDegrees(12.f) * gPlayer.fovAdd;
 	Mtx_PerspStereoTilt(&cam->projection, fov, ((400.f) / (240.f)), cam->near, cam->far, iod, 1.f, false);
 
-	float3 playerHead = f3_new(player->position.x, player->position.y + PLAYER_EYEHEIGHT + sinf(player->bobbing) * 0.1f + player->crouchAdd,
-							   player->position.z);
+	float3 playerHead = f3_new(gPlayer.position.x, gPlayer.position.y + PLAYER_EYEHEIGHT + sinf(gPlayer.bobbing) * 0.1f + gPlayer.crouchAdd,
+							   gPlayer.position.z);
 
 	Mtx_Identity(&cam->view);
 
 	switch (cam->mode) {
 		case CameraMode_First:
-			Mtx_RotateX(&cam->view, -player->pitch, true);
-			Mtx_RotateY(&cam->view, -player->yaw, true);
+			Mtx_RotateX(&cam->view, -gPlayer.pitch, true);
+			Mtx_RotateY(&cam->view, -gPlayer.yaw, true);
 			Mtx_Translate(&cam->view, -playerHead.x, -playerHead.y, -playerHead.z, true);
 			break;
 
@@ -54,8 +54,8 @@ void Camera_Update(Camera* cam, Player* player, float iod) {
 	cam->frustumPlanes[Frustum_Bottom] = FVec4_Normalize(FVec4_Subtract(rowW, rowY));
 	cam->frustumPlanes[Frustum_Far]	   = FVec4_Normalize(FVec4_Add(rowW, rowZ));
 
-	float3 forward = player->view;
-	float3 right   = f3_crs(f3_new(0, 1, 0), f3_new(sinf(player->yaw), 0.f, cosf(player->yaw)));
+	float3 forward = gPlayer.view;
+	float3 right   = f3_crs(f3_new(0, 1, 0), f3_new(sinf(gPlayer.yaw), 0.f, cosf(gPlayer.yaw)));
 	float3 up	   = f3_crs(forward, right);
 
 	float ar = 400.f / 240.f;

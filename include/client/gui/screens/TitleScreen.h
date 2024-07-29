@@ -1,8 +1,8 @@
-#ifndef STATE1_H
-#define STATE1_H
+#pragma once
 
-#include "client/gui/state_machine/state_machine.h"
+#include "client/gui/ScreenManager.h"
+#include <citro3d.h>
 
-void TitleScreen(state_machine_t *machine);
+extern Screen sTitleScreen;
 
-#endif
+extern C3D_Tex texLogo;

@@ -7,6 +7,7 @@ typedef enum
 	GameState_Menu,
 	GameState_Playing,
 	GameState_Paused,
+	GameState_None
 } GameState;
 
 extern GameState gGamestate;
@@ -14,6 +15,7 @@ extern GameState gGamestate;
 #ifdef _DEBUG
 
 #define DEBUG_BLOCKPLACE 1
+//#define DEBUG_WORLDNAME
 #endif
 
 // GET VERSION FROM MAKEFILE

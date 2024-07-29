@@ -47,7 +47,7 @@ void Clouds_Deinit() {
 	linearFree(cloudVBO);
 }
 
-void Clouds_Render(int projUniform, C3D_Mtx* projectionview, World* world, float tx, float tz) {
+void Clouds_Render(int projUniform, C3D_Mtx* projectionview, float tx, float tz) {
 	C3D_Mtx model;
 	Mtx_Identity(&model);
 	Mtx_Translate(&model, tx, 90.f, tz, true);

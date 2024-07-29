@@ -13,12 +13,14 @@
 
 #define CHUNKPOOL_SIZE (CHUNKCACHE_SIZE * CHUNKCACHE_SIZE + UNDEADCHUNKS_COUNT)
 
-typedef enum {
+typedef enum
+{
 	WorldGen_Default,
 	WorldGen_SuperFlat,
 	WorldGenTypes_Count
 } WorldGenType;
-typedef enum {
+typedef enum
+{
 	Gamemode_Survival,
 	Gamemode_Hardcore,
 	Gamemode_Creative,
@@ -26,44 +28,47 @@ typedef enum {
 	Gamemode_Spectator,
 	Gamemode_Count
 } Gamemode;
-typedef enum {
-    Difficulty_Normal,
-    Difficulty_Peaceful,
-    Difficulty_Easy,
-    Difficulty_Hard,
-    Difficulty_Count
+typedef enum
+{
+	Difficulty_Normal,
+	Difficulty_Peaceful,
+	Difficulty_Easy,
+	Difficulty_Hard,
+	Difficulty_Count
 } Difficulty;
 typedef struct {
-		uint64_t seed;
-		WorldGenType type;
-		// gamemode type;
-		union {
-				struct {
-						// Keine Einstellungen...
-				} superflat;
-		} settings;
+	uint64_t seed;
+	WorldGenType type;
+	// gamemode type;
+	union {
+		struct {
+			// Keine Einstellungen...
+		} superflat;
+	} settings;
 } GeneratorSettings;
 
 #define WORLD_NAME_SIZE 256
 typedef struct {
-		int HighestBlock;
+	int HighestBlock;
 
-		char name[WORLD_NAME_SIZE];
+	char name[WORLD_NAME_SIZE];
 
-		GeneratorSettings genSettings;
+	GeneratorSettings genSettings;
 
-		int cacheTranslationX, cacheTranslationZ;
+	int cacheTranslationX, cacheTranslationZ;
 
-		Chunk chunkPool[CHUNKPOOL_SIZE];
-		Chunk* chunkCache[CHUNKCACHE_SIZE][CHUNKCACHE_SIZE];
-		vec_t(Chunk*) freeChunks;
+	Chunk chunkPool[CHUNKPOOL_SIZE];
+	Chunk* chunkCache[CHUNKCACHE_SIZE][CHUNKCACHE_SIZE];
+	vec_t(Chunk*) freeChunks;
 
-		WorkQueue* workqueue;
+	WorkQueue* workqueue;
 
-		Xorshift32 randomTickGen;
+	Xorshift32 randomTickGen;
 
-		int weather;
+	int weather;
 } World;
+
+extern World gWorld;
 
 static inline int WorldToChunkCoord(int x) {
 	return (x + (int)(x < 0)) / CHUNK_SIZE - (int)(x < 0);
@@ -72,24 +77,24 @@ static inline int WorldToLocalCoord(int x) {
 	return x - WorldToChunkCoord(x) * CHUNK_SIZE;
 }
 
-void World_Init(World* world, WorkQueue* workqueue);
+void World_Init(WorkQueue* workqueue);
 
-void World_Reset(World* world);
+void World_Reset();
 
-void World_Tick(World* world);
+void World_Tick();
 
-Chunk* World_LoadChunk(World* world, int x, int z);
-void World_UnloadChunk(World* world, Chunk* chunk);
+Chunk* World_LoadChunk(int x, int z);
+void World_UnloadChunk(Chunk* chunk);
 
-Chunk* World_GetChunk(World* world, int x, int z);
+Chunk* World_GetChunk(int x, int z);
 
-Block World_GetBlock(World* world, int x, int y, int z);
-void World_SetBlock(World* world, int x, int y, int z, Block block);
-uint8_t World_GetMetadata(World* world, int x, int y, int z);
-void World_SetMetadata(World* world, int x, int y, int z, uint8_t metadata);
+Block World_GetBlock(int x, int y, int z);
+void World_SetBlock(int x, int y, int z, Block block);
+uint8_t World_GetMetadata(int x, int y, int z);
+void World_SetMetadata(int x, int y, int z, uint8_t metadata);
 
-void World_SetBlockAndMeta(World* world, int x, int y, int z, Block block, uint8_t metadata);
+void World_SetBlockAndMeta(int x, int y, int z, Block block, uint8_t metadata);
 
-void World_UpdateChunkCache(World* world, int orginX, int orginZ);
+void World_UpdateChunkCache(int orginX, int orginZ);
 
-int World_GetHeight(World* world, int x, int z);
+int World_GetHeight(int x, int z);

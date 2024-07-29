@@ -2,4 +2,4 @@
 
 #include "client/player/Player.h"
 
-void OvertimeDamage(Player* player);
+void OvertimeDamage();

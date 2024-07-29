@@ -30,4 +30,6 @@ void Gui_DrawOutline(int x, int y, int width, int height, int thickness, int z, 
 
 void Gui_DrawTint(int x, int y, int width, int height, int z, uint32_t color);
 
-void Gui_DrawBackground(int background, int x, int y, int z);
+void Gui_DrawBackgroundFull(u8 background);
+
+void Gui_DrawBackground(u8 background, int x, int y, int z);

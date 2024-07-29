@@ -89,19 +89,16 @@ typedef struct {
 	bool transparent;
 } Face;
 
-static inline Block fastBlockFetch(World* world, Chunk* chunk, Cluster* cluster, int x, int y, int z) {
+static inline Block fastBlockFetch(Chunk* chunk, Cluster* cluster, int x, int y, int z) {
 	return (x < 0 || y < 0 || z < 0 || x >= CHUNK_SIZE || y >= CHUNK_SIZE || z >= CHUNK_SIZE)
-			   ? World_GetBlock(world, (chunk->x * CHUNK_SIZE) + x, (cluster->y * CHUNK_SIZE) + y, (chunk->z * CHUNK_SIZE) + z)
+			   ? World_GetBlock((chunk->x * CHUNK_SIZE) + x, (cluster->y * CHUNK_SIZE) + y, (chunk->z * CHUNK_SIZE) + z)
 			   : cluster->blocks[x][y][z];
 }
-static inline uint8_t fastMetadataFetch(World* world, Chunk* chunk, Cluster* cluster, int x, int y, int z) {
+static inline uint8_t fastMetadataFetch(Chunk* chunk, Cluster* cluster, int x, int y, int z) {
 	return (x < 0 || y < 0 || z < 0 || x >= CHUNK_SIZE || y >= CHUNK_SIZE || z >= CHUNK_SIZE)
-			   ? World_GetMetadata(world, (chunk->x * CHUNK_SIZE) + x, (cluster->y * CHUNK_SIZE) + y, (chunk->z * CHUNK_SIZE) + z)
+			   ? World_GetMetadata((chunk->x * CHUNK_SIZE) + x, (cluster->y * CHUNK_SIZE) + y, (chunk->z * CHUNK_SIZE) + z)
 			   : (cluster->metadataLight[x][y][z] & 0xf);
 }
-
-static World* world;
-static Player* player;
 
 typedef struct {
 	int8_t x, y, z;
@@ -111,10 +108,7 @@ static vec_t(QueueElement) floodfill_queue;
 
 static LightLock updateLock;
 
-void PolyGen_Init(World* world_, Player* player_) {
-	world  = world_;
-	player = player_;
-
+void PolyGen_Init() {
 	VBOCache_Init();
 
 	vec_init(&floodfill_queue);
@@ -139,7 +133,7 @@ void PolyGen_Harvest() {
 				while (vboUpdates.length > 0) {
 					VBOUpdate update = vec_pop(&vboUpdates);
 
-					Chunk* chunk = World_GetChunk(world, update.x, update.z);
+					Chunk* chunk = World_GetChunk(update.x, update.z);
 					if (chunk) {
 						if (chunk->clusters[update.y].vertices > 0)
 							VBO_Free(chunk->clusters[update.y].vbo);
@@ -170,7 +164,7 @@ static inline void addFace(int x, int y, int z, Direction dir, Block block, uint
 	}
 }
 
-static uint16_t floodFill(World* world, Chunk* chunk, Cluster* cluster, int x, int y, int z, Direction entrySide0, Direction entrySide1,
+static uint16_t floodFill(Chunk* chunk, Cluster* cluster, int x, int y, int z, Direction entrySide0, Direction entrySide1,
 						  Direction entrySide2) {
 	if (floodfill_visited[x][y][z] & 1)
 		return 0;
@@ -245,9 +239,9 @@ void PolyGen_GeneratePolygons(WorkQueue* queue, WorkerItem item, void* this) {
 							yDir = Direction_Top;
 
 						if (!Block_Opaque(cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf))
-							visibility |= floodFill(world, item.chunk, cluster, x, y, z, xDir, yDir, zDir);
-						Block block	 = fastBlockFetch(world, item.chunk, cluster, x + (!x ? -1 : 1), y, z);
-						uint8_t meta = fastMetadataFetch(world, item.chunk, cluster, x + (!x ? -1 : 1), y, z);
+							visibility |= floodFill(item.chunk, cluster, x, y, z, xDir, yDir, zDir);
+						Block block	 = fastBlockFetch(item.chunk, cluster, x + (!x ? -1 : 1), y, z);
+						uint8_t meta = fastMetadataFetch(item.chunk, cluster, x + (!x ? -1 : 1), y, z);
 						if (!Block_Opaque(block, meta) && cluster->blocks[x][y][z] != Block_Air) {
 							addFace(x, y, z, xDir, cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf, 0,
 									!Block_Opaque(cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf));
@@ -270,9 +264,9 @@ void PolyGen_GeneratePolygons(WorkQueue* queue, WorkerItem item, void* this) {
 						else if (z == CHUNK_SIZE - 1)
 							zDir = Direction_North;
 						if (!Block_Opaque(cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf))
-							visibility |= floodFill(world, item.chunk, cluster, x, y, z, xDir, yDir, zDir);
-						Block block	 = fastBlockFetch(world, item.chunk, cluster, x, y + (!y ? -1 : 1), z);
-						uint8_t meta = fastMetadataFetch(world, item.chunk, cluster, x, y + (!y ? -1 : 1), z);
+							visibility |= floodFill(item.chunk, cluster, x, y, z, xDir, yDir, zDir);
+						Block block	 = fastBlockFetch(item.chunk, cluster, x, y + (!y ? -1 : 1), z);
+						uint8_t meta = fastMetadataFetch(item.chunk, cluster, x, y + (!y ? -1 : 1), z);
 						if (!Block_Opaque(block, meta) && cluster->blocks[x][y][z] != Block_Air) {
 							addFace(x, y, z, yDir, cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf, 0,
 									!Block_Opaque(cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf));
@@ -295,8 +289,8 @@ void PolyGen_GeneratePolygons(WorkQueue* queue, WorkerItem item, void* this) {
 						else if (y == CHUNK_SIZE - 1)
 							yDir = Direction_Top;
 						if (!Block_Opaque(cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf))
-							visibility |= floodFill(world, item.chunk, cluster, x, y, z, xDir, yDir, zDir);
-						Block block = fastBlockFetch(world, item.chunk, cluster, x, y, z + (!z ? -1 : 1));
+							visibility |= floodFill(item.chunk, cluster, x, y, z, xDir, yDir, zDir);
+						Block block = fastBlockFetch(item.chunk, cluster, x, y, z + (!z ? -1 : 1));
 						if (!Block_Opaque(block, cluster->metadataLight[x][y][z] & 0xf) && cluster->blocks[x][y][z] != Block_Air) {
 							addFace(x, y, z, zDir, cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf, 0,
 									!Block_Opaque(cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf));
@@ -304,11 +298,11 @@ void PolyGen_GeneratePolygons(WorkQueue* queue, WorkerItem item, void* this) {
 					}
 				}
 			}
-			int px = FastFloor(player->position.x);
-			int py = FastFloor(player->position.y);
-			int pz = FastFloor(player->position.z);
+			int px = FastFloor(gPlayer.position.x);
+			int py = FastFloor(gPlayer.position.y);
+			int pz = FastFloor(gPlayer.position.z);
 			if (WorldToChunkCoord(px) == item.chunk->x && WorldToChunkCoord(pz) == item.chunk->z && WorldToChunkCoord(py) == i) {
-				floodFill(world, item.chunk, cluster, WorldToLocalCoord(px), WorldToLocalCoord(py), WorldToLocalCoord(pz), Direction_None,
+				floodFill(item.chunk, cluster, WorldToLocalCoord(px), WorldToLocalCoord(py), WorldToLocalCoord(pz), Direction_None,
 						  Direction_None, Direction_None);
 			}
 

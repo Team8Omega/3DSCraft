@@ -22,7 +22,7 @@ typedef struct {
 	KeyCombo crouch;
 } PlayerControlScheme;
 typedef struct {
-	Player* player;
+	;
 	PlayerControlScheme controlScheme;
 
 	float breakPlaceTimeout;
@@ -31,5 +31,5 @@ typedef struct {
 	float flyTimer;
 } PlayerController;
 
-void PlayerController_Init(PlayerController* ctrl, Player* player);
+void PlayerController_Init(PlayerController* ctrl);
 void PlayerController_Update(PlayerController* ctrl, Sound* sound, float dt);

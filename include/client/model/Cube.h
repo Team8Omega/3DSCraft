@@ -30,6 +30,6 @@ void Cube_SetRotPoint(Cube* cube, float3 pos);
 
 void Cube_Reset(Cube* cube);
 
-void Cube_InitVBOs();
+void Cube_InitVBOs();  // needs to be called AFTER all cubes have been built.
 
 void Cube_DeinitVBOs();

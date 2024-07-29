@@ -8,4 +8,4 @@
 void Cursor_Init();
 void Cursor_Deinit();
 
-void Cursor_Draw(int projUniform, C3D_Mtx* projectionview, World* world, int x, int y, int z, Direction highlight);
+void Cursor_Draw(int projUniform, C3D_Mtx* projectionview, int x, int y, int z, Direction highlight);

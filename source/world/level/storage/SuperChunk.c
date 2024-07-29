@@ -1,4 +1,4 @@
-#include "world/savegame/SuperChunk.h"
+#include "world/level/storage/SuperChunk.h"
 
 #include <miniz/miniz.h>
 #include <mpack/mpack.h>
@@ -52,12 +52,13 @@ void SuperChunk_Init(SuperChunk* superchunk, int x, int z) {
 
 		mpack_node_t chunkIndices = mpack_node_map_cstr(root, "chunkIndices");
 		for (int i = 0; i < SUPERCHUNK_SIZE * SUPERCHUNK_SIZE; i++) {
-			mpack_node_t chunkInfo									   = mpack_node_array_at(chunkIndices, i);
-			superchunk->grid[i % SUPERCHUNK_SIZE][i / SUPERCHUNK_SIZE] = (ChunkInfo){
-				mpack_node_u32(mpack_node_map_cstr(chunkInfo, "position")),
-				mpack_node_u32(mpack_node_map_cstr(chunkInfo, "compressedSize")),
-				mpack_node_u32(mpack_node_map_cstr(chunkInfo, "actualSize")), mpack_node_u8(mpack_node_map_cstr(chunkInfo, "blockSize")),
-				mpack_node_u32(mpack_node_map_cstr(chunkInfo, "revision"))};
+			mpack_node_t chunkInfo = mpack_node_array_at(chunkIndices, i);
+			superchunk->grid[i % SUPERCHUNK_SIZE][i / SUPERCHUNK_SIZE] =
+				(ChunkInfo){ mpack_node_u32(mpack_node_map_cstr(chunkInfo, "position")),
+							 mpack_node_u32(mpack_node_map_cstr(chunkInfo, "compressedSize")),
+							 mpack_node_u32(mpack_node_map_cstr(chunkInfo, "actualSize")),
+							 mpack_node_u8(mpack_node_map_cstr(chunkInfo, "blockSize")),
+							 mpack_node_u32(mpack_node_map_cstr(chunkInfo, "revision")) };
 
 			{
 				ChunkInfo chunkInfo = superchunk->grid[i % SUPERCHUNK_SIZE][i / SUPERCHUNK_SIZE];
@@ -219,7 +220,7 @@ void SuperChunk_SaveChunk(SuperChunk* superchunk, Chunk* chunk) {
 			if (fwrite(fileBuffer, compressedSize, 1, superchunk->dataFile) != 1)
 				Crash("Couldn't write complete chunk data to file");
 
-			superchunk->grid[x][z] = (ChunkInfo){address, compressedSize, uncompressedSize, blockSize, chunk->revision};
+			superchunk->grid[x][z] = (ChunkInfo){ address, compressedSize, uncompressedSize, blockSize, chunk->revision };
 		}
 	}
 }
