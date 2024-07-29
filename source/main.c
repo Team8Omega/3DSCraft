@@ -109,6 +109,8 @@ int main() {
 	Player_Init();
 	PlayerController_Init(&playerCtrl);
 
+	World_Init(&chunkWorker.queue);
+
 	SuperFlatGen_Init(&flatGen);
 	SmeaGen_Init(&smeaGen);
 
@@ -117,8 +119,6 @@ int main() {
 	DebugUI_Init();
 
 	test();
-
-	World_Init(&chunkWorker.queue);
 
 	SaveManager_Init(&savemgr);
 	ChunkWorker_AddHandler(&chunkWorker, WorkerItemType_Load, (WorkerFuncObj){ &SaveManager_LoadChunk, &savemgr, true });
@@ -137,7 +137,8 @@ int main() {
 	while (aptMainLoop()) {
 		DebugUI_Text("%d FPS  CPU: %5.2f%% GPU: %5.2f%% Buf: %5.2f%% Lin: %d", fps, C3D_GetProcessingTime() * 6.f,
 					 C3D_GetDrawingTime() * 6.f, C3D_GetCmdBufUsage() * 100.f, linearSpaceFree());
-		if (gGamestate == GameState_Playing) {
+
+		if (!currentScreen) {
 			DebugUI_Text("X: %f, Y: %f, Z: %f", f3_unpack(gPlayer.position));
 			DebugUI_Text("HP: %i", gPlayer.hp);
 			// DebugUI_Text("velocity: %f rndy: %f",gPlayer.velocity.y,gPlayer.rndy);
@@ -191,6 +192,7 @@ int main() {
 			}
 		}*/
 
+		if (!currentScreen) {}
 		if (gGamestate == GameState_Playing) {
 			while (timeAccum >= 1.f / 20.f) {
 				World_Tick();

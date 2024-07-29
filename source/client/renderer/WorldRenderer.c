@@ -6,6 +6,7 @@
 #include "client/renderer/Cursor.h"
 #include "world/level/block/Block.h"
 
+#include "client/Crash.h"
 #include "client/gui/DebugUI.h"
 
 #include <citro3d.h>

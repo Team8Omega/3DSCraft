@@ -1,6 +1,7 @@
 #include "client/renderer/Renderer.h"
 
 #include <client/Camera.h>
+#include <client/Crash.h>
 #include <client/gui/DebugUI.h>
 #include <client/gui/Gui.h>
 #include <client/gui/Inventory.h>
