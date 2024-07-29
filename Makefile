@@ -36,9 +36,20 @@ VERSION_MAJOR	:= 0
 VERSION_MINOR	:= 5
 VERSION_MICRO	:= 4
 
-DEBUG			?=	1
+ifeq ($(DEBUG),)
+	DEBUG		:=	1
+endif
 
+ifeq ($(WORKFLOW),1)
+	ifeq ($(DEBUG), 0)
+		TARGET	:=	3DSCraft
+	else
+		TARGET	:=	3DSCraft-debug
+	endif
+else
 TARGET			:=	3DSCraft
+endif
+
 BUILD			:=	build
 DATA			:=	data
 META			:=	project
@@ -67,9 +78,9 @@ ARCH	:=	-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
 
 LDFLAGS	=	-specs=3dsx.specs -z noexecstack -g $(ARCH) -Wl,-Map,$(notdir $*.map) -include $(DEVKITPRO)/libctru/include/3ds/types.h
 
-CFLAGS	:=	-g -Wall -Wno-psabi -O2 -mword-relocations \
+CFLAGS	:=	-g -Wall -Wno-psabi -mword-relocations \
 			-DC_V=\"$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_MICRO)\" \
-			-fomit-frame-pointer -ffunction-sections \
+			-ffunction-sections \
 			$(ARCH) $(LDFLAGS)
 
 CFLAGS	+=	$(INCLUDE) -D__3DS__ -D_3DS=1 -D_VER_MAJ=$(VERSION_MAJOR) -D_VER_MIN=$(VERSION_MINOR) -D_VER_MIC=$(VERSION_MICRO) -D_AUTHOR=$(APP_AUTHOR) -D_GNU_SOURCE=1
@@ -185,6 +196,13 @@ endif
 .PHONY: $(BUILD) clean all
 
 #---------------------------------------------------------------------------------
+entry:
+	@echo "Compiling $(TARGET), v$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_MICRO)"
+ifneq ($(strip $(DEBUG)),0)
+	@echo "GLOBAL DEBUG FLAG ENABLED"
+endif
+	@$(MAKE) --no-print-directory -f $(CURDIR)/Makefile $(BUILD)
+
 all: $(BUILD) 
 
 $(BUILD):
@@ -196,7 +214,9 @@ clean: clean-exe
 	@rm -rf $(BUILD) 
 	
 clean-exe:
+ifneq ($(WORKFLOW),1)
 	@rm -f $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf $(TARGET).cia $(TARGET).cxi $(TARGET).cfa $(TARGET).lst
+endif
 #---------------------------------------------------------------------------------
 run:
 	@echo running...
@@ -206,6 +226,7 @@ rund: #run dima
 	@3dslink $(TARGET).3dsx -a 192.168.178.37
 
 cia: $(TARGET).cia
+	@echo Built $(TARGET).cia
 
 $(TARGET).cxi:
 	@$(MAKEROM) -o $(TARGET).cxi $(MAKEROM_ARGS)
@@ -248,6 +269,7 @@ endif
 # main targets
 #---------------------------------------------------------------------------------
 3dsx: $(OUTPUT).3dsx
+	@echo Built $(TARGET).3dsx
 
 ifeq ($(strip $(NO_SMDH)),)
 $(OUTPUT).3dsx	:	$(OUTPUT).elf $(OUTPUT).smdh banner.bnr

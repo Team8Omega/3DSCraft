@@ -10,7 +10,6 @@ typedef enum
 } GameState;
 
 #ifdef _DEBUG
-#pragma message "WARNING: Compiling with Debug-Flag"
 
 #define DEBUG_BLOCKPLACE 1
 #endif
