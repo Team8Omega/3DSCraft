@@ -45,8 +45,6 @@ static World* world;
 static Player* player;
 static WorkQueue* workqueue;
 
-static GameState* gamestate;
-
 static state_machine_t* machine;
 
 extern bool showDebugInfo;
@@ -56,14 +54,13 @@ extern Camera camera;
 void Renderer_RenderGameOverlay();
 void renderExpBar();
 
-void Renderer_Init(World* world_, Player* player_, WorkQueue* queue, GameState* gamestate_) {
+void Renderer_Init(World* world_, Player* player_, WorkQueue* queue) {
 	machine = state_machine_create();
 	state_machine_set_current_state(machine, TitleScreen);
 
 	world	  = world_;
 	player	  = player_;
 	workqueue = queue;
-	gamestate = gamestate_;
 
 	C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
 
@@ -148,13 +145,13 @@ void Renderer_Render() {
 
 	C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 
-	if (*gamestate == GameState_Playing || *gamestate == GameState_Paused)
+	if (gGamestate == GameState_Playing || gGamestate == GameState_Paused)
 		PolyGen_Harvest();
 	else
 		CubeMap_Update(&camera.projection, f3_new(0.f, 0.0013f, 0.f));
 
 	for (int i = 0; i < 2; i++) {
-		if (*gamestate == GameState_Playing || *gamestate == GameState_Paused) {
+		if (gGamestate == GameState_Playing || gGamestate == GameState_Paused) {
 			C3D_RenderTargetClear(renderTargets[i], C3D_CLEAR_ALL, CLEAR_COLOR_SKY, 0);
 		} else {
 			C3D_RenderTargetClear(renderTargets[i], C3D_CLEAR_ALL, 0x000000FF, 0);
@@ -172,14 +169,14 @@ void Renderer_Render() {
 		C3D_BindProgram(&world_shader);
 		C3D_SetAttrInfo(&world_vertexAttribs);
 
-		if (*gamestate == GameState_Playing) {
+		if (gGamestate == GameState_Playing) {
 			C3D_TexBind(0, Block_GetTextureMap());
 
 			WorldRenderer_Render(!i ? -iod : iod);
 
 			Renderer_RenderGameOverlay();
 
-		} else if (*gamestate == GameState_Paused) {
+		} else if (gGamestate == GameState_Paused) {
 			C3D_TexBind(0, Block_GetTextureMap());
 			WorldRenderer_Render(!i ? -iod : iod);
 
@@ -213,12 +210,12 @@ void Renderer_Render() {
 
 	SpriteBatch_StartFrame(320, 240);
 
-	if (*gamestate == GameState_Menu) {
+	if (gGamestate == GameState_Menu) {
 		state_machine_run(machine);
-	} else if (*gamestate == GameState_Paused) {
-		PauseScreen(gamestate);
+	} else if (gGamestate == GameState_Paused) {
+		PauseScreen(gGamestate);
 
-	} else if (*gamestate == GameState_Playing) {
+	} else if (gGamestate == GameState_Playing) {
 		SpriteBatch_SetScale(2);
 		player->quickSelectBarSlots = 9;
 		Inventory_DrawQuickSelect(160 / 2 - Inventory_QuickSelectCalcWidth(player->quickSelectBarSlots) / 2,

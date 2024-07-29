@@ -1,17 +1,17 @@
 //
 // Created by Elias on 27.07.2024.
 //
+#include "client/Crash.h"
+#include "client/gui/DebugUI.h"
 #include "client/language/LanguageManager.h"
 #include "util/StringUtils.h"
 #include <mpack/mpack.h>
-#include "client/gui/DebugUI.h"
-#include "client/Crash.h"
- 
-void test(){
+
+void test() {
 	// Load the file
-	FILE *file = fopen(String_ParsePackName("minecraft","language","en_us.mp"), "rb");
+	FILE *file = fopen(String_ParsePackName("minecraft", "language", "en_us.mp"), "rb");
 	if (!file) {
-		Crash("Failed to open file");
+		// Crash("Failed to open file for language, testing.");
 		return;
 	}
 
@@ -21,7 +21,7 @@ void test(){
 	fseek(file, 0, SEEK_SET);
 
 	// Allocate memory to read the file
-	char *data = (char*)malloc(size);
+	char *data = (char *)malloc(size);
 	if (!data) {
 		Crash("Failed to allocate memory");
 		fclose(file);
@@ -60,7 +60,6 @@ void test(){
 			Crash("isMale: %s", value ? "true" : "false");
 		} else {
 			mpack_discard(&reader);
-
 		}
 	}
 
@@ -73,5 +72,4 @@ void test(){
 
 	// Clean up
 	free(data);
-
 }

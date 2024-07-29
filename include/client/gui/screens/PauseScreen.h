@@ -2,4 +2,4 @@
 
 #include "Globals.h"
 
-void PauseScreen(GameState* gamestate);
+void PauseScreen();

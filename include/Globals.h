@@ -9,6 +9,8 @@ typedef enum
 	GameState_Paused,
 } GameState;
 
+extern GameState gGamestate;
+
 #ifdef _DEBUG
 
 #define DEBUG_BLOCKPLACE 1

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include <3ds.h>
+#include <citro3d.h>
 
 #include "client/Crash.h"
 #include "util/Paths.h"
@@ -21,16 +22,22 @@ void Crash(const char* reason, ...) {
 	va_end(vl);
 
 	printf("\n\nFatal error, press start to exit\n");
-	while (aptMainLoop()) {
+#ifdef _DEBUG
+	printf("Running with debug, may press select to continue");
+#endif
+	while (true) {
 		gspWaitForVBlank();
 
 		hidScanInput();
 
 		if (hidKeysDown() & KEY_START)
-			break;
-	}
+			exit(EXIT_FAILURE);
 
-	exit(EXIT_FAILURE);
+#ifdef _DEBUG
+		if (hidKeysDown() & KEY_SELECT)
+			break;
+#endif
+	}
 }
 
 void Log(const char* reason, ...) {

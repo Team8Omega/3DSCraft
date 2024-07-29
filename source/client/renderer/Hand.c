@@ -83,7 +83,7 @@ void Hand_Draw(int projUniform, C3D_Mtx* projection, ItemStack stack, Player* pl
 			}
 			for (int j = 0; j < 6; j++) {
 				int idx = i * 6 + j;
-#define toTexCoord(x, tw) (int16_t)(((float)(x) / (float)(tw)) * (float)(1 << 15))
+#define toTexCoord(x, tw) (int16_t)(((float)(x) / (float)(tw)) * (float)(1 << 15) - 1)
 				const int16_t uvLookUp[6][4] = {
 					{ toTexCoord(48, 64), toTexCoord(52, 64), toTexCoord(20, 64), toTexCoord(32, 64) },	 // west = inside
 					{ toTexCoord(40, 64), toTexCoord(44, 64), toTexCoord(20, 64), toTexCoord(32, 64) },	 // east = outside

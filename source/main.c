@@ -27,16 +27,17 @@
 
 #include <Globals.h>
 
+#include "client/language/LanguageManager.h"
 #include <citro3d.h>
 #include <sino/sino.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "client/language/LanguageManager.h"
 
 #undef MAIN_C
 
 bool showDebugInfo = true;
 InputData gInput, gInputOld;
+GameState gGamestate;
 
 void releaseWorld(ChunkWorker* chunkWorker, SaveManager* savemgr, World* world) {
 	for (int i = 0; i < CHUNKCACHE_SIZE; i++) {
@@ -68,10 +69,7 @@ void initCheck() {
 }
 
 int main() {
-
-
-
-	GameState gamestate = GameState_Menu;
+	gGamestate = GameState_Menu;
 	// printf("gfxinit\n");
 	gfxInitDefault();
 
@@ -112,7 +110,7 @@ int main() {
 	SuperFlatGen_Init(&flatGen, world);
 	SmeaGen_Init(&smeaGen, world);
 
-	Renderer_Init(world, &player, &chunkWorker.queue, &gamestate);
+	Renderer_Init(world, &player, &chunkWorker.queue);
 
 	DebugUI_Init();
 
@@ -140,7 +138,7 @@ int main() {
 	while (aptMainLoop()) {
 		DebugUI_Text("%d FPS  CPU: %5.2f%% GPU: %5.2f%% Buf: %5.2f%% Lin: %d", fps, C3D_GetProcessingTime() * 6.f,
 					 C3D_GetDrawingTime() * 6.f, C3D_GetCmdBufUsage() * 100.f, linearSpaceFree());
-		if (gamestate == GameState_Playing) {
+		if (gGamestate == GameState_Playing) {
 			DebugUI_Text("X: %f, Y: %f, Z: %f", f3_unpack(player.position));
 			DebugUI_Text("HP: %i", player.hp);
 			// DebugUI_Text("velocity: %f rndy: %f",player.velocity.y,player.rndy);
@@ -179,22 +177,22 @@ int main() {
 								 touchPos.px,	touchPos.py,   cstickPos.dx, cstickPos.dy };
 
 		if (gInput.keysdown & KEY_START) {
-			if (gamestate == GameState_Menu)
+			if (gGamestate == GameState_Menu)
 				break;
-			else if (gamestate == GameState_Paused) {
+			else if (gGamestate == GameState_Paused) {
 				releaseWorld(&chunkWorker, &savemgr, world);
 
-				gamestate = GameState_Menu;
+				gGamestate = GameState_Menu;
 
 				SelectWorldScreen_ScanWorlds();
 
 				lastTime = svcGetSystemTick();
-			}else if (gamestate == GameState_Playing) {
-				gamestate = GameState_Paused;
+			} else if (gGamestate == GameState_Playing) {
+				gGamestate = GameState_Paused;
 			}
 		}
 
-		if (gamestate == GameState_Playing) {
+		if (gGamestate == GameState_Playing) {
 			while (timeAccum >= 1.f / 20.f) {
 				World_Tick(world);
 
@@ -204,9 +202,9 @@ int main() {
 			PlayerController_Update(&playerCtrl, &PlayerSound, dt);
 
 			World_UpdateChunkCache(world, WorldToChunkCoord(FastFloor(player.position.x)), WorldToChunkCoord(FastFloor(player.position.z)));
-		}else if (gamestate == GameState_Paused) {
+		} else if (gGamestate == GameState_Paused) {
 			World_UpdateChunkCache(world, WorldToChunkCoord(FastFloor(player.position.x)), WorldToChunkCoord(FastFloor(player.position.z)));
-		} else if (gamestate == GameState_Menu) {
+		} else if (gGamestate == GameState_Menu) {
 			char path[256];
 			char name[WORLD_NAME_SIZE] = { '\0' };
 			WorldGenType worldType;
@@ -249,13 +247,13 @@ int main() {
 					player.hp		  = 20;
 					player.position.y = (float)highestblock + 0.2f;
 				}
-				gamestate = GameState_Playing;
-				lastTime  = svcGetSystemTick();	 // fix timing
+				gGamestate = GameState_Playing;
+				lastTime   = svcGetSystemTick();  // fix timing
 			}
 		}
 	}
 
-	if (gamestate == GameState_Playing) {
+	if (gGamestate == GameState_Playing) {
 		releaseWorld(&chunkWorker, &savemgr, world);
 	}
 

@@ -80,7 +80,7 @@ LDFLAGS	=	-specs=3dsx.specs -z noexecstack -g $(ARCH) -Wl,-Map,$(notdir $*.map) 
 
 CFLAGS	:=	-g -Wall -Wno-psabi -mword-relocations \
 			-DC_V=\"$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_MICRO)\" \
-			-ffunction-sections \
+			-ffunction-sections -ffast-math\
 			$(ARCH) $(LDFLAGS)
 
 CFLAGS	+=	$(INCLUDE) -D__3DS__ -D_3DS=1 -D_VER_MAJ=$(VERSION_MAJOR) -D_VER_MIN=$(VERSION_MINOR) -D_VER_MIC=$(VERSION_MICRO) -D_AUTHOR=$(APP_AUTHOR) -D_GNU_SOURCE=1
@@ -225,7 +225,10 @@ run:
 rund: #run dima
 	@3dslink $(TARGET).3dsx -a 192.168.178.37
 
-cia: $(TARGET).cia
+clean-cia:
+	@rm -f $(TARGET).cia $(TARGET).cxi $(TARGET).cfa
+
+cia: clean-cia $(TARGET).cxi $(TARGET).cfa $(TARGET).cia
 	@echo Built $(TARGET).cia
 
 $(TARGET).cxi:
@@ -235,7 +238,7 @@ $(TARGET).cfa:
 	@$(MAKEROM) -o $(TARGET).cfa -rsf $(RSF_PATH) -target t
 	@echo built ... $(TARGET).cfa
 
-$(TARGET).cia: $(TARGET).3dsx $(TARGET).cxi $(TARGET).cfa
+$(TARGET).cia:
 	@$(MAKEROM) -f cia -o $(TARGET).cia -target t -i $(TARGET).cxi:0:0 -i $(TARGET).cfa:1:1
 	@echo built ... $(TARGET).cia
 
