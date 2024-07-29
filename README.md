@@ -8,6 +8,8 @@ Yet another revival of craftus, updating to more recent behavior and rebrandings
 
 You'll need a hacked system that can load homebrew for this to run (citra is good for testing but i haven't been able to get most of the controls working there)
 
+We moved our old repo to this fork, to keep the long history of craftus intact, but noticed that the history wasnt kept on this fork...
+https://github.com/EinfachEli08/3DSCraft (old repo)
 
 This was forked from Onixiya/craftus: https://github.com/Onixiya/craftus
 
