@@ -47,8 +47,8 @@ void Hand_Draw(int projUniform, C3D_Mtx* projection, ItemStack stack) {
 	memcpy(handVBO, block_sides_lut, sizeof(block_sides_lut));
 	for (int i = 0; i < 6; i++) {
 		if (stack.amount > 0) {
-			int16_t iconUV[2];
-			uint8_t color[3];
+			s16 iconUV[2];
+			u8 color[3];
 			Block_GetTexture(stack.block, i, stack.meta, iconUV);
 			Block_GetColor(stack.block, stack.meta, i, color);
 
@@ -69,7 +69,7 @@ void Hand_Draw(int projUniform, C3D_Mtx* projection, ItemStack stack) {
 			C3D_TexBind(0, &SkinTexture);
 
 			if (i == Direction_East || i == Direction_West) {  // eines der dümmsten Dinge, die ich jemals in meinem Leben getan habe
-				const int16_t uvRotationTable[2][2][2][2] = {
+				const s16 uvRotationTable[2][2][2][2] = {
 					{ { { 0, 1 }, { 0, 0 } }, { { 1, 1 }, { 1, 0 } } },
 					{ { { 1, 0 }, { 1, 1 } }, { { 0, 0 }, { 0, 1 } } },
 				};
@@ -83,8 +83,8 @@ void Hand_Draw(int projUniform, C3D_Mtx* projection, ItemStack stack) {
 			}
 			for (int j = 0; j < 6; j++) {
 				int idx = i * 6 + j;
-#define toTexCoord(x, tw) (int16_t)(((float)(x) / (float)(tw)) * (float)(1 << 15) - 1)
-				const int16_t uvLookUp[6][4] = {
+#define toTexCoord(x, tw) (s16)(((float)(x) / (float)(tw)) * (float)(1 << 15) - 1)
+				const s16 uvLookUp[6][4] = {
 					{ toTexCoord(48, 64), toTexCoord(52, 64), toTexCoord(20, 64), toTexCoord(32, 64) },	 // west = inside
 					{ toTexCoord(40, 64), toTexCoord(44, 64), toTexCoord(20, 64), toTexCoord(32, 64) },	 // east = outside
 					{ toTexCoord(52, 64), toTexCoord(56, 64), toTexCoord(20, 64), toTexCoord(32, 64) },	 // bottom = back

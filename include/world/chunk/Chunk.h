@@ -14,59 +14,60 @@
 #define CLUSTER_PER_CHUNK (CHUNK_HEIGHT / CHUNK_SIZE)
 
 typedef struct {
-		int y;
-		Block blocks[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
-		uint8_t metadataLight[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];	// first half metadata, second half light
+	int y;
+	Block blocks[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
+	u8 metadataLight[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];  // first half metadata, second half light
 
-		uint32_t revision;
+	u32 revision;
 
-		uint16_t seeThrough;
+	u16 seeThrough;
 
-		bool empty;
-		uint32_t emptyRevision;
+	bool empty;
+	u32 emptyRevision;
 
-		VBO_Block vbo, transparentVBO;
-		size_t vertices, transparentVertices;
-		uint32_t vboRevision;
-		bool forceVBOUpdate;
+	VBO_Block vbo, transparentVBO;
+	size_t vertices, transparentVertices;
+	u32 vboRevision;
+	bool forceVBOUpdate;
 } Cluster;
 
-typedef enum {
+typedef enum
+{
 	ChunkGen_Empty,	 //
 	ChunkGen_Terrain,
 	ChunkGen_Finished  // Terrain | Decoration
 } ChunkGenProgress;
 
 typedef struct {
-		// Die Gesamtanzahl! >= graphicalTasksRunning
-		uint32_t tasksRunning;
-		uint32_t graphicalTasksRunning;
+	// Die Gesamtanzahl! >= graphicalTasksRunning
+	u32 tasksRunning;
+	u32 graphicalTasksRunning;
 
-		uint32_t uuid;
+	u32 uuid;
 
-		ChunkGenProgress genProgress;
+	ChunkGenProgress genProgress;
 
-		int x, z;
-		Cluster clusters[CLUSTER_PER_CHUNK];
+	int x, z;
+	Cluster clusters[CLUSTER_PER_CHUNK];
 
-		uint8_t heightmap[CHUNK_SIZE][CHUNK_SIZE];
-		uint32_t heightmapRevision;
+	u8 heightmap[CHUNK_SIZE][CHUNK_SIZE];
+	u32 heightmapRevision;
 
-		size_t revision;
+	size_t revision;
 
-		uint32_t displayRevision;
-		bool forceVBOUpdate;
+	u32 displayRevision;
+	bool forceVBOUpdate;
 
-		int references;
+	int references;
 } Chunk;
 
 extern Xorshift32 uuidGenerator;
-extern const uint8_t _seethroughTable[6][6];
-static inline uint16_t ChunkSeeThrough(Direction in, Direction out) {
-	return 1 << (uint16_t)(_seethroughTable[in][out]);
+extern const u8 _seethroughTable[6][6];
+static inline u16 ChunkSeeThrough(Direction in, Direction out) {
+	return 1 << (u16)(_seethroughTable[in][out]);
 }
-static inline bool ChunkCanBeSeenThrough(uint16_t visiblity, Direction in, Direction out) {
-	return visiblity & (1 << (uint16_t)(_seethroughTable[in][out]));
+static inline bool ChunkCanBeSeenThrough(u16 visiblity, Direction in, Direction out) {
+	return visiblity & (1 << (u16)(_seethroughTable[in][out]));
 }
 
 static inline void Chunk_Init(Chunk* chunk, int x, int z) {
@@ -88,18 +89,18 @@ static inline void Chunk_RequestGraphicsUpdate(Chunk* chunk, int cluster) {
 }
 
 void Chunk_GenerateHeightmap(Chunk* chunk);
-static inline uint8_t Chunk_GetHeightMap(Chunk* chunk, int x, int z) {
+static inline u8 Chunk_GetHeightMap(Chunk* chunk, int x, int z) {
 	Chunk_GenerateHeightmap(chunk);
 	return chunk->heightmap[x][z];
 }
 
-static inline uint8_t Chunk_GetMetadata(Chunk* chunk, int x, int y, int z) {
+static inline u8 Chunk_GetMetadata(Chunk* chunk, int x, int y, int z) {
 	return chunk->clusters[y / CHUNK_SIZE].metadataLight[x][y - (y / CHUNK_SIZE * CHUNK_SIZE)][z] & 0xf;
 }
-static inline void Chunk_SetMetadata(Chunk* chunk, int x, int y, int z, uint8_t metadata) {
+static inline void Chunk_SetMetadata(Chunk* chunk, int x, int y, int z, u8 metadata) {
 	metadata &= 0xf;
 	Cluster* cluster = &chunk->clusters[y / CHUNK_SIZE];
-	uint8_t* addr	 = &cluster->metadataLight[x][y - (y / CHUNK_SIZE * CHUNK_SIZE)][z];
+	u8* addr		 = &cluster->metadataLight[x][y - (y / CHUNK_SIZE * CHUNK_SIZE)][z];
 	*addr			 = (*addr & 0xf0) | metadata;
 	++cluster->revision;
 	++chunk->revision;
@@ -116,12 +117,12 @@ static inline void Chunk_SetBlock(Chunk* chunk, int x, int y, int z, Block block
 	/*++cluster->revision;
 	++chunk->revision;*/  // durch das Setzen der Metadaten wird das sowieso erhöht
 }
-static inline void Chunk_SetBlockAndMeta(Chunk* chunk, int x, int y, int z, Block block, uint8_t metadata) {
+static inline void Chunk_SetBlockAndMeta(Chunk* chunk, int x, int y, int z, Block block, u8 metadata) {
 	Cluster* cluster										 = &chunk->clusters[y / CHUNK_SIZE];
 	cluster->blocks[x][y - (y / CHUNK_SIZE * CHUNK_SIZE)][z] = block;
 	metadata &= 0xf;
-	uint8_t* addr = &cluster->metadataLight[x][y - (y / CHUNK_SIZE * CHUNK_SIZE)][z];
-	*addr		  = (*addr & 0xf0) | metadata;
+	u8* addr = &cluster->metadataLight[x][y - (y / CHUNK_SIZE * CHUNK_SIZE)][z];
+	*addr	 = (*addr & 0xf0) | metadata;
 
 	++cluster->revision;
 	++chunk->revision;

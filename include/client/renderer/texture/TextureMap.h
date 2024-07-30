@@ -10,8 +10,8 @@ void Texture_Load(C3D_Tex* result, const char* filename);
 #define TEXTURE_MAPTILES (TEXTURE_MAPSIZE / TEXTURE_TILESIZE)
 
 typedef struct {
-	uint32_t textureHash;
-	int16_t u, v;
+	u32 textureHash;
+	s16 u, v;
 } Texture_MapIcon;
 
 typedef struct {
@@ -22,4 +22,4 @@ typedef struct {
 void Texture_MapInit(Texture_Map* map, const char** files, int num_files);
 Texture_MapIcon Texture_MapGetIcon(Texture_Map* map, char* filename);
 
-void Texture_TileImage8(uint8_t* src, uint8_t* dst, int size);
+void Texture_TileImage8(u8* src, u8* dst, int size);

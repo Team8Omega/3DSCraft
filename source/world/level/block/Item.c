@@ -30,7 +30,7 @@ void* Item_GetTextureMap() {
 	return &textureMap.texture;
 }
 
-void Item_GetTexture(Item item, Direction direction, uint8_t metadata, int16_t* out_uv) {
+void Item_GetTexture(Item item, Direction direction, u8 metadata, s16* out_uv) {
 	Texture_MapIcon i = { 0, 0, 0 };
 	switch (item) {
 		case Item_Totem:

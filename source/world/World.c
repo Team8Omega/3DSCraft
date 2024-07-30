@@ -126,7 +126,7 @@ void World_SetBlock(int x, int y, int z, Block block) {
 	}
 }
 
-void World_SetBlockAndMeta(int x, int y, int z, Block block, uint8_t metadata) {
+void World_SetBlockAndMeta(int x, int y, int z, Block block, u8 metadata) {
 	if (y < 0 || y >= CHUNK_HEIGHT)
 		return;
 	int cX		 = WorldToChunkCoord(x);
@@ -141,7 +141,7 @@ void World_SetBlockAndMeta(int x, int y, int z, Block block, uint8_t metadata) {
 	}
 }
 
-uint8_t World_GetMetadata(int x, int y, int z) {
+u8 World_GetMetadata(int x, int y, int z) {
 	if (y < 0 || y >= CHUNK_HEIGHT)
 		return 0;
 	Chunk* chunk = World_GetChunk(WorldToChunkCoord(x), WorldToChunkCoord(z));
@@ -150,7 +150,7 @@ uint8_t World_GetMetadata(int x, int y, int z) {
 	return 0;
 }
 
-void World_SetMetadata(int x, int y, int z, uint8_t metadata) {
+void World_SetMetadata(int x, int y, int z, u8 metadata) {
 	if (y < 0 || y >= CHUNK_HEIGHT)
 		return;
 	int cX		 = WorldToChunkCoord(x);

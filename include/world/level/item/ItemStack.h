@@ -8,8 +8,8 @@
 #include "util/math/NumberUtils.h"
 
 typedef struct {
-		Block block;
-		uint8_t meta, amount;
+	Block block;
+	u8 meta, amount;
 } ItemStack;
 
 #define ITEMSTACK_MAX (64)

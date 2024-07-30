@@ -22,7 +22,7 @@ static WorldVertex* cloudVBO;
 #define TEXTURE_SIZE 64
 
 void Clouds_Init() {
-	uint8_t* map = (uint8_t*)malloc(TEXTURE_SIZE * TEXTURE_SIZE);
+	u8* map = (u8*)malloc(TEXTURE_SIZE * TEXTURE_SIZE);
 	for (int i = 0; i < TEXTURE_SIZE; i++) {
 		for (int j = 0; j < TEXTURE_SIZE; j++) {
 			float noise = sino_2d(j * 0.2f, i * 0.3f);

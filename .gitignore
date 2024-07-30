@@ -9,8 +9,9 @@
 *.smdh
 lib/libgame.a
 
+private
+
 build
-backup_cpp/build
 resources/OUTPUT
 resources/TMP
 resources/assets

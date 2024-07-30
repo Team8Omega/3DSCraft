@@ -5,7 +5,7 @@
 
 #include "core/Direction.h"
 
-typedef uint8_t Block;
+typedef u8 Block;
 
 enum
 {
@@ -56,10 +56,10 @@ void Block_Deinit();
 
 void* Block_GetTextureMap();
 
-void Block_GetTexture(Block block, Direction direction, uint8_t metadata, int16_t* out_uv);
+void Block_GetTexture(Block block, Direction direction, u8 metadata, s16* out_uv);
 
-void Block_GetColor(Block block, uint8_t metadata, Direction direction, uint8_t out_rgb[]);
+void Block_GetColor(Block block, u8 metadata, Direction direction, u8 out_rgb[]);
 
-bool Block_Opaque(Block block, uint8_t metadata);
+bool Block_Opaque(Block block, u8 metadata);
 
 extern const char* BlockNames[Blocks_Count];

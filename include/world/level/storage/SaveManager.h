@@ -6,10 +6,10 @@
 
 #include "client/player/Player.h"
 
-#include "world/level/storage/SuperChunk.h"
+#include "world/level/storage/Region.h"
 
 typedef struct {
-	vec_t(SuperChunk*) superchunks;
+	vec_t(Region*) regions;
 } SaveManager;
 
 void SaveManager_InitFileSystem();

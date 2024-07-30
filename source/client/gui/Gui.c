@@ -13,7 +13,7 @@ void Gui_Init() {
 void Gui_Deinit() {
 }
 
-void Gui_Label(int x, int y, int z, float size, bool shadow, int16_t color, const char* text, ...) {
+void Gui_Label(int x, int y, int z, float size, bool shadow, s16 color, const char* text, ...) {
 	int wrap = size <= 0.f ? INFINITY : size;
 
 	va_list vl;
@@ -23,7 +23,7 @@ void Gui_Label(int x, int y, int z, float size, bool shadow, int16_t color, cons
 	va_end(vl);
 }
 
-void Gui_Label_Centered(int x, int y, int z, float size, bool shadow, int16_t color, const char* text, ...) {
+void Gui_Label_Centered(int x, int y, int z, float size, bool shadow, s16 color, const char* text, ...) {
 	int wrap = size <= 0.f ? INFINITY : size;
 
 	va_list vl;
@@ -68,7 +68,7 @@ bool Gui_Button(bool enabled, int x, int y, int width, int z, const char* label)
 	return false;
 }
 
-bool Gui_IconButton(int x, int y, int width, int height, int z, bool centered, uint32_t tintColor, const char* label) {
+bool Gui_IconButton(int x, int y, int width, int height, int z, bool centered, u32 tintColor, const char* label) {
 	// TODO: Redesign
 
 	bool pressed = Gui_IsCursorInside(x, y, width, height);
@@ -121,11 +121,11 @@ void Gui_GetCursorMovement(int* x, int* y) {
 	*y = gInput.touchY / SpriteBatch_GetScale() - gInputOld.touchY / SpriteBatch_GetScale();
 }
 
-void Gui_DrawLine(int x, int y, int width, int thickness, int z, uint32_t color) {
+void Gui_DrawLine(int x, int y, int width, int thickness, int z, u32 color) {
 	SpriteBatch_PushSingleColorQuad(x, y, z, width, thickness, color);
 }
 
-void Gui_DrawOutline(int x, int y, int width, int height, int thickness, int z, uint32_t color) {
+void Gui_DrawOutline(int x, int y, int width, int height, int thickness, int z, u32 color) {
 	// Top border
 	SpriteBatch_PushSingleColorQuad(x, y, z, width, thickness, color);
 	// Bottom border
@@ -136,7 +136,7 @@ void Gui_DrawOutline(int x, int y, int width, int height, int thickness, int z, 
 	SpriteBatch_PushSingleColorQuad(x + width, y, z, thickness, height, color);
 }
 
-void Gui_DrawTint(int x, int y, int width, int height, int z, uint32_t color) {
+void Gui_DrawTint(int x, int y, int width, int height, int z, u32 color) {
 	SpriteBatch_PushSingleColorQuad(x, y, z, width, height, color);
 }
 

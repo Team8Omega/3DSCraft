@@ -18,10 +18,10 @@ void SaveManager_InitFileSystem() {
 }
 
 void SaveManager_Init(SaveManager* mgr) {
-	vec_init(&mgr->superchunks);
+	vec_init(&mgr->regions);
 }
 void SaveManager_Deinit(SaveManager* mgr) {
-	vec_deinit(&mgr->superchunks);
+	vec_deinit(&mgr->regions);
 }
 
 #define mpack_elvis(node, key, typ, default_)                                                                                              \
@@ -36,7 +36,7 @@ void SaveManager_Load(SaveManager* mgr, const char* path) {
 	mkdir(path, mkdirFlags);
 	chdir(path);
 
-	mkdir("superchunks", mkdirFlags);
+	mkdir("regions", mkdirFlags);
 
 	if (access("level.mp", F_OK) != -1) {
 		mpack_tree_t levelTree;
@@ -144,40 +144,40 @@ void SaveManager_Unload(SaveManager* mgr) {
 		Crash("Mpack error %d while saving world manifest", err);
 	}
 
-	for (int i = 0; i < mgr->superchunks.length; i++) {
-		SuperChunk_Deinit(mgr->superchunks.data[i]);
-		free(mgr->superchunks.data[i]);
+	for (int i = 0; i < mgr->regions.length; i++) {
+		Region_Deinit(mgr->regions.data[i]);
+		free(mgr->regions.data[i]);
 	}
-	vec_clear(&mgr->superchunks);
+	vec_clear(&mgr->regions);
 }
 
-static SuperChunk* fetchSuperChunk(SaveManager* mgr, int x, int z) {
-	for (int i = 0; i < mgr->superchunks.length; i++) {
-		if (mgr->superchunks.data[i]->x == x && mgr->superchunks.data[i]->z == z) {
-			return mgr->superchunks.data[i];
+static Region* fetchRegion(SaveManager* mgr, int x, int z) {
+	for (int i = 0; i < mgr->regions.length; i++) {
+		if (mgr->regions.data[i]->x == x && mgr->regions.data[i]->z == z) {
+			return mgr->regions.data[i];
 		}
 	}
-	SuperChunk* superchunk = (SuperChunk*)malloc(sizeof(SuperChunk));
-	SuperChunk_Init(superchunk, x, z);
-	vec_push(&mgr->superchunks, superchunk);
+	Region* region = (Region*)malloc(sizeof(Region));
+	Region_Init(region, x, z);
+	vec_push(&mgr->regions, region);
 	svcSleepThread(50000);
-	return superchunk;
+	return region;
 }
 
 void SaveManager_LoadChunk(WorkQueue* queue, WorkerItem item, void* this) {
-	SaveManager* mgr	   = (SaveManager*)this;
-	int x				   = ChunkToSuperChunkCoord(item.chunk->x);
-	int z				   = ChunkToSuperChunkCoord(item.chunk->z);
-	SuperChunk* superchunk = fetchSuperChunk(mgr, x, z);
+	SaveManager* mgr = (SaveManager*)this;
+	int x			 = ChunkToRegionCoord(item.chunk->x);
+	int z			 = ChunkToRegionCoord(item.chunk->z);
+	Region* region	 = fetchRegion(mgr, x, z);
 
-	SuperChunk_LoadChunk(superchunk, item.chunk);
+	Region_LoadChunk(region, item.chunk);
 }
 void SaveManager_SaveChunk(WorkQueue* queue, WorkerItem item, void* this) {
 	SaveManager* mgr = (SaveManager*)this;
-	int x			 = ChunkToSuperChunkCoord(item.chunk->x);
-	int z			 = ChunkToSuperChunkCoord(item.chunk->z);
+	int x			 = ChunkToRegionCoord(item.chunk->x);
+	int z			 = ChunkToRegionCoord(item.chunk->z);
 
-	SuperChunk* superchunk = fetchSuperChunk(mgr, x, z);
+	Region* region = fetchRegion(mgr, x, z);
 
-	SuperChunk_SaveChunk(superchunk, item.chunk);
+	Region_SaveChunk(region, item.chunk);
 }

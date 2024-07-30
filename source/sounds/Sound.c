@@ -17,11 +17,11 @@ static const int SAMPLES_PER_BUF	 = SAMPLE_RATE * 120 / 1000;
 static const int CHANNELS_PER_SAMPLE = 2;
 static const int THREAD_AFFINITY	 = -1;
 static const int THREAD_STACK_SZ	 = 32 * 1024;
-static const size_t WAVEBUF_SIZE	 = SAMPLES_PER_BUF * CHANNELS_PER_SAMPLE * sizeof(int16_t);
+static const size_t WAVEBUF_SIZE	 = SAMPLES_PER_BUF * CHANNELS_PER_SAMPLE * sizeof(s16);
 ndspWaveBuf s_waveBufs0[3];
 ndspWaveBuf s_waveBufs1[3];
-int16_t* s_audioBuffer0 = NULL;
-int16_t* s_audioBuffer1 = NULL;
+s16* s_audioBuffer0 = NULL;
+s16* s_audioBuffer1 = NULL;
 LightEvent s_event, s_event1;
 volatile bool s_quit0 = false, s_quit1 = false;
 
@@ -89,14 +89,14 @@ bool Sound_Init(int _channel) {
 	ndspChnSetFormat(_channel, NDSP_FORMAT_STEREO_PCM16);
 	const size_t bufferSize = WAVEBUF_SIZE * ARRAY_SIZE(s_waveBufs0);
 	if (_channel == 0) {
-		s_audioBuffer0 = (int16_t*)linearAlloc(bufferSize);
+		s_audioBuffer0 = (s16*)linearAlloc(bufferSize);
 		if (!s_audioBuffer0) {
 			printf("Failed to allocate audio buffer\n");
 			return false;
 		}
 	}
 	if (_channel == 1) {
-		s_audioBuffer1 = (int16_t*)linearAlloc(bufferSize);
+		s_audioBuffer1 = (s16*)linearAlloc(bufferSize);
 		if (!s_audioBuffer1) {
 			printf("Failed to allocate audio buffer\n");
 			return false;
@@ -104,7 +104,7 @@ bool Sound_Init(int _channel) {
 	}
 	if (_channel == 0) {
 		memset(&s_waveBufs0, 0, sizeof(s_waveBufs0));
-		int16_t* buffer = _channel == 0 ? s_audioBuffer0 : s_audioBuffer1;
+		s16* buffer = _channel == 0 ? s_audioBuffer0 : s_audioBuffer1;
 		for (size_t i = 0; i < ARRAY_SIZE(s_waveBufs0); ++i) {
 			s_waveBufs0[i].data_vaddr = buffer;
 			s_waveBufs0[i].status	  = NDSP_WBUF_DONE;
@@ -113,7 +113,7 @@ bool Sound_Init(int _channel) {
 	}
 	if (_channel == 1) {
 		memset(&s_waveBufs1, 0, sizeof(s_waveBufs1));
-		int16_t* buffer = _channel == 0 ? s_audioBuffer0 : s_audioBuffer1;
+		s16* buffer = _channel == 0 ? s_audioBuffer0 : s_audioBuffer1;
 		for (size_t i = 0; i < ARRAY_SIZE(s_waveBufs1); ++i) {
 			s_waveBufs1[i].data_vaddr = buffer;
 			s_waveBufs1[i].status	  = NDSP_WBUF_DONE;
@@ -134,7 +134,7 @@ void Sound_Deinit(int _channel) {
 bool Sound_FillBuffer(int _channel, OggOpusFile* opusFile_, ndspWaveBuf* waveBuf_) {
 	int totalSamples = 0;
 	while (totalSamples < SAMPLES_PER_BUF) {
-		int16_t* buffer			= waveBuf_->data_pcm16 + (totalSamples * CHANNELS_PER_SAMPLE);
+		s16* buffer				= waveBuf_->data_pcm16 + (totalSamples * CHANNELS_PER_SAMPLE);
 		const size_t bufferSize = (SAMPLES_PER_BUF - totalSamples) * CHANNELS_PER_SAMPLE;
 		const int samples		= op_read_stereo(opusFile_, buffer, bufferSize);
 		if (samples <= 0) {
@@ -152,7 +152,7 @@ bool Sound_FillBuffer(int _channel, OggOpusFile* opusFile_, ndspWaveBuf* waveBuf
 	}
 	waveBuf_->nsamples = totalSamples;
 	ndspChnWaveBufAdd(_channel, waveBuf_);
-	DSP_FlushDataCache(waveBuf_->data_pcm16, totalSamples * CHANNELS_PER_SAMPLE * sizeof(int16_t));
+	DSP_FlushDataCache(waveBuf_->data_pcm16, totalSamples * CHANNELS_PER_SAMPLE * sizeof(s16));
 	return true;
 }
 void Sound_AudioCallback(void* const nul_) {

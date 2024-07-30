@@ -91,7 +91,7 @@ void* Block_GetTextureMap() {
 	return &textureMap.texture;
 }
 
-void Block_GetTexture(Block block, Direction direction, uint8_t metadata, int16_t* out_uv) {
+void Block_GetTexture(Block block, Direction direction, u8 metadata, s16* out_uv) {
 	Texture_MapIcon i = { 0, 0, 0 };
 	switch (block) {
 		case Block_Air:
@@ -290,7 +290,7 @@ void Block_GetTexture(Block block, Direction direction, uint8_t metadata, int16_
 #define extractB(c) ((c)&0xff)
 /*#define toRGB16(c) \
 	{ extractR(c), extractG(c), extractB(c) }*/
-void Block_GetColor(Block block, uint8_t metadata, Direction direction, uint8_t out_rgb[]) {
+void Block_GetColor(Block block, u8 metadata, Direction direction, u8 out_rgb[]) {
 	if ((block == Block_Grass && direction == Direction_Top) || block == Block_Leaves) {
 		out_rgb[0] = 130;
 		out_rgb[1] = 255;
@@ -298,8 +298,8 @@ void Block_GetColor(Block block, uint8_t metadata, Direction direction, uint8_t 
 		return;
 	}
 	// white, orange, magenta, light blue, yellow, lime, pink, gray, silver, cyan, purple, blue, green, red, black
-	const uint32_t dies[] = { (16777215), (14188339), (11685080), (6724056), (15066419), (8375321), (15892389), (5000268),
-							  (10066329), (5013401),  (8339378),  (3361970), (6704179),	 (6717235), (10040115), (1644825) };
+	const u32 dies[] = { (16777215), (14188339), (11685080), (6724056), (15066419), (8375321), (15892389), (5000268),
+						 (10066329), (5013401),	 (8339378),	 (3361970), (6704179),	(6717235), (10040115), (1644825) };
 	if (block == Block_Wool) {
 		out_rgb[0] = extractR(dies[metadata]);
 		out_rgb[1] = extractG(dies[metadata]);
@@ -311,7 +311,7 @@ void Block_GetColor(Block block, uint8_t metadata, Direction direction, uint8_t 
 	}
 }
 
-bool Block_Opaque(Block block, uint8_t metadata) {
+bool Block_Opaque(Block block, u8 metadata) {
 	return block != Block_Air && block != Block_Glass && block != Block_Door_Top && block != Block_Door_Bottom && block != Block_Leaves;
 }
 

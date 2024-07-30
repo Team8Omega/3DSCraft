@@ -2,14 +2,14 @@
 
 Xorshift32 uuidGenerator = (Xorshift32)314159265;
 
-const uint8_t _seethroughTable[6][6] = {
+const u8 _seethroughTable[6][6] = {
 	// W E B T N S
-	{255, 0, 1, 3, 6, 10},	   // West
-	{0, 255, 2, 4, 7, 11},	   // East
-	{1, 2, 255, 5, 8, 12},	   // Bottom
-	{3, 4, 5, 255, 9, 13},	   // Top
-	{6, 7, 8, 9, 255, 14},	   // North
-	{10, 11, 12, 13, 14, 255}  // South
+	{ 255, 0, 1, 3, 6, 10 },	 // West
+	{ 0, 255, 2, 4, 7, 11 },	 // East
+	{ 1, 2, 255, 5, 8, 12 },	 // Bottom
+	{ 3, 4, 5, 255, 9, 13 },	 // Top
+	{ 6, 7, 8, 9, 255, 14 },	 // North
+	{ 10, 11, 12, 13, 14, 255 }	 // South
 };
 
 void Chunk_GenerateHeightmap(Chunk* chunk) {
@@ -35,8 +35,8 @@ bool Cluster_IsEmpty(Cluster* cluster) {
 		return cluster->empty;
 	cluster->empty		   = false;
 	cluster->emptyRevision = cluster->revision;
-	for (int i = 0; i < sizeof(cluster->blocks) / sizeof(uint32_t); i++) {
-		if (((uint32_t*)cluster->blocks)[i] != 0)
+	for (int i = 0; i < sizeof(cluster->blocks) / sizeof(u32); i++) {
+		if (((u32*)cluster->blocks)[i] != 0)
 			return false;
 	}
 	cluster->empty = true;

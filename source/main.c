@@ -28,7 +28,7 @@
 #include "util/StringUtils.h"
 #include "world/level/levelgen/SmeaGen.h"
 #include "world/level/levelgen/SuperFlatGen.h"
-#include "world/level/storage/SuperChunk.h"
+#include "world/level/storage/Region.h"
 
 #include "client/language/LanguageManager.h"
 
@@ -74,7 +74,7 @@ int main() {
 	osSetSpeedupEnable(true);  // Enable N3DS 804MHz operation, where available
 	gfxSet3D(true);
 
-	SuperChunk_InitPools();
+	Region_InitPools();
 
 	SaveManager_InitFileSystem();
 
@@ -178,7 +178,7 @@ int main() {
 
 	SaveManager_Deinit(&savemgr);
 
-	SuperChunk_DeinitPools();
+	Region_DeinitPools();
 
 	Sound_Quit(0);
 	threadJoin(BackgroundSound.threaid, 50000);

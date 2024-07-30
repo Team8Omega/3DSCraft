@@ -5,9 +5,10 @@
 
 #include "core/Direction.h"
 
-typedef uint8_t Item;
+typedef u8 Item;
 
-enum {
+enum
+{
 	Item_Totem,
 	Items_Count
 };
@@ -17,6 +18,6 @@ void Item_Deinit();
 
 void* Item_GetTextureMap();
 
-void Item_GetTexture(Item items, Direction direction, uint8_t metadata, int16_t* out_uv);
+void Item_GetTexture(Item items, Direction direction, u8 metadata, s16* out_uv);
 
 extern const char* ItemNames[Items_Count];

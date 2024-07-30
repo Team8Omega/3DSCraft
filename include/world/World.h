@@ -37,7 +37,7 @@ typedef enum
 	Difficulty_Count
 } Difficulty;
 typedef struct {
-	uint64_t seed;
+	u64 seed;
 	WorldGenType type;
 	// gamemode type;
 	union {
@@ -92,10 +92,10 @@ Chunk* World_GetChunk(int x, int z);
 
 Block World_GetBlock(int x, int y, int z);
 void World_SetBlock(int x, int y, int z, Block block);
-uint8_t World_GetMetadata(int x, int y, int z);
-void World_SetMetadata(int x, int y, int z, uint8_t metadata);
+u8 World_GetMetadata(int x, int y, int z);
+void World_SetMetadata(int x, int y, int z, u8 metadata);
 
-void World_SetBlockAndMeta(int x, int y, int z, Block block, uint8_t metadata);
+void World_SetBlockAndMeta(int x, int y, int z, Block block, u8 metadata);
 
 void World_UpdateChunkCache(int orginX, int orginZ);
 

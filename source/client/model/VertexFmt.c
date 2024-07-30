@@ -2,8 +2,8 @@
 
 #define HUE_DEGREE 512
 
-int16_t RGB16_ToHSV(uint16_t rgb) {
-	int16_t out_h, out_s, out_v;
+s16 RGB16_ToHSV(u16 rgb) {
+	s16 out_h, out_s, out_v;
 
 	int r	  = SHADER_R(rgb);
 	int g	  = SHADER_G(rgb);
@@ -42,7 +42,7 @@ int16_t RGB16_ToHSV(uint16_t rgb) {
 	return SHADER_RGB(out_h, out_s, out_v);
 }
 
-int16_t HSV16_ToRGB(int16_t hsv) {
+s16 HSV16_ToRGB(s16 hsv) {
 	s16 r = 0, g = 0, b = 0;
 	s16 in_h = SHADER_R(hsv), in_s = SHADER_G(hsv), in_v = SHADER_B(hsv);
 

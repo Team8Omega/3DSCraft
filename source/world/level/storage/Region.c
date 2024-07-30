@@ -1,4 +1,4 @@
-#include "world/level/storage/SuperChunk.h"
+#include "world/level/storage/Region.h"
 
 #include <miniz/miniz.h>
 #include <mpack/mpack.h>
@@ -15,25 +15,25 @@ static char* decompressBuffer;
 static const int fileBufferSize = sizeof(Chunk) * 2;
 static char* fileBuffer;
 
-void SuperChunk_InitPools() {
+void Region_InitPools() {
 	nodeDataPool	 = (mpack_node_data_t*)malloc(sizeof(mpack_node_data_t) * nodeDataPoolSize);
 	fileBuffer		 = malloc(fileBufferSize);	// 4kb
 	decompressBuffer = malloc(decompressBufferSize);
 }
-void SuperChunk_DeinitPools() {
+void Region_DeinitPools() {
 	free(nodeDataPool);
 	free(decompressBuffer);
 	free(fileBuffer);
 }
 
-void SuperChunk_Init(SuperChunk* superchunk, int x, int z) {
-	superchunk->x = x;
-	superchunk->z = z;
+void Region_Init(Region* region, int x, int z) {
+	region->x = x;
+	region->z = z;
 
-	vec_init(&superchunk->sectors);
+	vec_init(&region->sectors);
 
 	char buffer[256];
-	sprintf(buffer, "superchunks/s.%d.%d.mp", x, z);
+	sprintf(buffer, "regions/r.%d.%d.mp", x, z);
 
 	if (access(buffer, F_OK) != -1) {
 		int size = 0;
@@ -51,49 +51,48 @@ void SuperChunk_Init(SuperChunk* superchunk, int x, int z) {
 		mpack_node_t root = mpack_tree_root(&tree);
 
 		mpack_node_t chunkIndices = mpack_node_map_cstr(root, "chunkIndices");
-		for (int i = 0; i < SUPERCHUNK_SIZE * SUPERCHUNK_SIZE; i++) {
-			mpack_node_t chunkInfo = mpack_node_array_at(chunkIndices, i);
-			superchunk->grid[i % SUPERCHUNK_SIZE][i / SUPERCHUNK_SIZE] =
-				(ChunkInfo){ mpack_node_u32(mpack_node_map_cstr(chunkInfo, "position")),
-							 mpack_node_u32(mpack_node_map_cstr(chunkInfo, "compressedSize")),
-							 mpack_node_u32(mpack_node_map_cstr(chunkInfo, "actualSize")),
-							 mpack_node_u8(mpack_node_map_cstr(chunkInfo, "blockSize")),
-							 mpack_node_u32(mpack_node_map_cstr(chunkInfo, "revision")) };
+		for (int i = 0; i < REGION_SIZE * REGION_SIZE; i++) {
+			mpack_node_t chunkInfo						   = mpack_node_array_at(chunkIndices, i);
+			region->grid[i % REGION_SIZE][i / REGION_SIZE] = (ChunkInfo){ mpack_node_u32(mpack_node_map_cstr(chunkInfo, "position")),
+																		  mpack_node_u32(mpack_node_map_cstr(chunkInfo, "compressedSize")),
+																		  mpack_node_u32(mpack_node_map_cstr(chunkInfo, "actualSize")),
+																		  mpack_node_u8(mpack_node_map_cstr(chunkInfo, "blockSize")),
+																		  mpack_node_u32(mpack_node_map_cstr(chunkInfo, "revision")) };
 
 			{
-				ChunkInfo chunkInfo = superchunk->grid[i % SUPERCHUNK_SIZE][i / SUPERCHUNK_SIZE];
+				ChunkInfo chunkInfo = region->grid[i % REGION_SIZE][i / REGION_SIZE];
 				if (chunkInfo.actualSize > 0) {
-					while (chunkInfo.position + chunkInfo.blockSize > superchunk->sectors.length) {
-						vec_push(&superchunk->sectors, false);
+					while (chunkInfo.position + chunkInfo.blockSize > region->sectors.length) {
+						vec_push(&region->sectors, false);
 					}
 					for (int j = 0; j < chunkInfo.blockSize; j++)
-						superchunk->sectors.data[chunkInfo.position + j] = true;
+						region->sectors.data[chunkInfo.position + j] = true;
 				}
 			}
 		}
 
 		mpack_error_t err = mpack_tree_destroy(&tree);
 		if (err != mpack_ok) {
-			Crash("MPack error %d while loading superchunk manifest %d %d", err, x, z);
+			Crash("MPack error %d while loading region manifest %d %d", err, x, z);
 		}
 	} else {
-		memset(superchunk->grid, 0x0, sizeof(superchunk->grid));
+		memset(region->grid, 0x0, sizeof(region->grid));
 	}
 
-	sprintf(buffer, "superchunks/s.%d.%d.dat", x, z);
-	superchunk->dataFile = fopen(buffer, "r+b");
-	if (superchunk->dataFile == NULL)
-		superchunk->dataFile = fopen(buffer, "w+b");
+	sprintf(buffer, "regions/s.%d.%d.dat", x, z);
+	region->dataFile = fopen(buffer, "r+b");
+	if (region->dataFile == NULL)
+		region->dataFile = fopen(buffer, "w+b");
 }
-void SuperChunk_Deinit(SuperChunk* superchunk) {
-	SuperChunk_SaveIndex(superchunk);
-	vec_deinit(&superchunk->sectors);
-	fclose(superchunk->dataFile);
+void Region_Deinit(Region* region) {
+	Region_SaveIndex(region);
+	vec_deinit(&region->sectors);
+	fclose(region->dataFile);
 }
 
-void SuperChunk_SaveIndex(SuperChunk* superchunk) {
+void Region_SaveIndex(Region* region) {
 	char buffer[256];
-	sprintf(buffer, "superchunks/s.%d.%d.mp", superchunk->x, superchunk->z);
+	sprintf(buffer, "regions/s.%d.%d.mp", region->x, region->z);
 
 	mpack_writer_t writer;
 	mpack_writer_init_file(&writer, buffer);
@@ -102,10 +101,10 @@ void SuperChunk_SaveIndex(SuperChunk* superchunk) {
 
 	mpack_write_cstr(&writer, "chunkIndices");
 
-	mpack_start_array(&writer, SUPERCHUNK_SIZE * SUPERCHUNK_SIZE);
-	for (int j = 0; j < SUPERCHUNK_SIZE; j++) {
-		for (int i = 0; i < SUPERCHUNK_SIZE; i++) {
-			ChunkInfo chunkInfo = superchunk->grid[i][j];
+	mpack_start_array(&writer, REGION_SIZE * REGION_SIZE);
+	for (int j = 0; j < REGION_SIZE; j++) {
+		for (int i = 0; i < REGION_SIZE; i++) {
+			ChunkInfo chunkInfo = region->grid[i][j];
 			mpack_start_map(&writer, 5);
 
 			mpack_write_cstr(&writer, "position");
@@ -128,15 +127,15 @@ void SuperChunk_SaveIndex(SuperChunk* superchunk) {
 
 	mpack_error_t err = mpack_writer_destroy(&writer);
 	if (err != mpack_ok) {
-		Crash("Mpack error %d while saving superchunk index %d %d", err, superchunk->x, superchunk->z);
+		Crash("Mpack error %d while saving region index %d %d", err, region->x, region->z);
 	}
 }
 
-static uint32_t reserveSectors(SuperChunk* superchunk, int amount) {
+static u32 reserveSectors(Region* region, int amount) {
 	int amountFulfilled = 0;
 	int startValue		= -1;
-	for (int i = 0; i < superchunk->sectors.length; i++) {
-		if (!superchunk->sectors.data[i]) {
+	for (int i = 0; i < region->sectors.length; i++) {
+		if (!region->sectors.data[i]) {
 			if (startValue == -1)
 				startValue = i;
 			amountFulfilled++;
@@ -146,25 +145,25 @@ static uint32_t reserveSectors(SuperChunk* superchunk, int amount) {
 		}
 		if (amountFulfilled == amount) {
 			for (int i = 0; i < amount; i++)
-				superchunk->sectors.data[startValue + i] = true;
+				region->sectors.data[startValue + i] = true;
 			return startValue;
 		}
 	}
 	for (int i = 0; i < amount; i++)
-		vec_push(&superchunk->sectors, true);
-	return superchunk->sectors.length - amount;
+		vec_push(&region->sectors, true);
+	return region->sectors.length - amount;
 }
-static void freeSectors(SuperChunk* superchunk, uint32_t address, uint8_t size) {
+static void freeSectors(Region* region, u32 address, u8 size) {
 	for (size_t i = 0; i < size; i++) {
-		superchunk->sectors.data[address + i] = false;
+		region->sectors.data[address + i] = false;
 	}
 }
 
-void SuperChunk_SaveChunk(SuperChunk* superchunk, Chunk* chunk) {
-	int x = ChunkToLocalSuperChunkCoord(chunk->x);
-	int z = ChunkToLocalSuperChunkCoord(chunk->z);
+void Region_SaveChunk(Region* region, Chunk* chunk) {
+	int x = ChunkToLocalRegionCoord(chunk->x);
+	int z = ChunkToLocalRegionCoord(chunk->z);
 
-	if (superchunk->grid[x][z].revision != chunk->revision) {
+	if (region->grid[x][z].revision != chunk->revision) {
 		mpack_writer_t writer;
 		mpack_writer_init(&writer, decompressBuffer, decompressBufferSize);
 
@@ -203,39 +202,39 @@ void SuperChunk_SaveChunk(SuperChunk* superchunk, Chunk* chunk) {
 		mpack_finish_map(&writer);
 		mpack_error_t err = mpack_writer_destroy(&writer);
 		if (err != mpack_ok) {
-			Crash("MPack error %d while saving chunk(%d, %d) to superchunk", err, chunk->x, chunk->z);
+			Crash("MPack error %d while saving chunk(%d, %d) to region", err, chunk->x, chunk->z);
 		}
 
 		size_t uncompressedSize = mpack_writer_buffer_used(&writer);
 		mz_ulong compressedSize = fileBufferSize;
-		if (compress((uint8_t*)fileBuffer, &compressedSize, (uint8_t*)decompressBuffer, uncompressedSize) == Z_OK) {
+		if (compress((u8*)fileBuffer, &compressedSize, (u8*)decompressBuffer, uncompressedSize) == Z_OK) {
 			size_t blockSize = compressedSize / SectorSize + 1;
 
-			if (superchunk->grid[x][z].actualSize > 0)
-				freeSectors(superchunk, superchunk->grid[x][z].position, superchunk->grid[x][z].blockSize);
+			if (region->grid[x][z].actualSize > 0)
+				freeSectors(region, region->grid[x][z].position, region->grid[x][z].blockSize);
 
-			size_t address = reserveSectors(superchunk, blockSize);
+			size_t address = reserveSectors(region, blockSize);
 
-			fseek(superchunk->dataFile, address * SectorSize, SEEK_SET);
-			if (fwrite(fileBuffer, compressedSize, 1, superchunk->dataFile) != 1)
+			fseek(region->dataFile, address * SectorSize, SEEK_SET);
+			if (fwrite(fileBuffer, compressedSize, 1, region->dataFile) != 1)
 				Crash("Couldn't write complete chunk data to file");
 
-			superchunk->grid[x][z] = (ChunkInfo){ address, compressedSize, uncompressedSize, blockSize, chunk->revision };
+			region->grid[x][z] = (ChunkInfo){ address, compressedSize, uncompressedSize, blockSize, chunk->revision };
 		}
 	}
 }
 
-void SuperChunk_LoadChunk(SuperChunk* superchunk, Chunk* chunk) {
-	int x				= ChunkToLocalSuperChunkCoord(chunk->x);
-	int z				= ChunkToLocalSuperChunkCoord(chunk->z);
-	ChunkInfo chunkInfo = superchunk->grid[x][z];
+void Region_LoadChunk(Region* region, Chunk* chunk) {
+	int x				= ChunkToLocalRegionCoord(chunk->x);
+	int z				= ChunkToLocalRegionCoord(chunk->z);
+	ChunkInfo chunkInfo = region->grid[x][z];
 	if (chunkInfo.actualSize > 0) {
-		fseek(superchunk->dataFile, chunkInfo.position * SectorSize, SEEK_SET);
-		if (fread(fileBuffer, chunkInfo.compressedSize, 1, superchunk->dataFile) != 1)
+		fseek(region->dataFile, chunkInfo.position * SectorSize, SEEK_SET);
+		if (fread(fileBuffer, chunkInfo.compressedSize, 1, region->dataFile) != 1)
 			Crash("Read chunk data size isn't equal to the expected size");
 		mz_ulong uncompressedSize = decompressBufferSize;
 
-		if (uncompress((uint8_t*)decompressBuffer, &uncompressedSize, (uint8_t*)fileBuffer, chunkInfo.compressedSize) == Z_OK) {
+		if (uncompress((u8*)decompressBuffer, &uncompressedSize, (u8*)fileBuffer, chunkInfo.compressedSize) == Z_OK) {
 			mpack_tree_t tree;
 			mpack_tree_init_pool(&tree, decompressBuffer, uncompressedSize, nodeDataPool, nodeDataPoolSize);
 			mpack_node_t root = mpack_tree_root(&tree);
@@ -274,7 +273,7 @@ void SuperChunk_LoadChunk(SuperChunk* superchunk, Chunk* chunk) {
 
 			mpack_error_t err = mpack_tree_destroy(&tree);
 			if (err != mpack_ok) {
-				Crash("MPack error %d while loading chunk(%d %d) from superchunk", err, chunk->x, chunk->z);
+				Crash("MPack error %d while loading chunk(%d %d) from region", err, chunk->x, chunk->z);
 			}
 
 			chunk->revision = chunkInfo.revision;
