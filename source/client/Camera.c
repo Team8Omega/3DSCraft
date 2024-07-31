@@ -3,6 +3,7 @@
 #include "world/chunk/Chunk.h"
 
 #include "client/gui/DebugUI.h"
+#include "client/player/InputData.h"
 
 Camera gCamera;
 
@@ -12,38 +13,57 @@ void Camera_Init() {
 	gCamera.fov	 = C3D_AngleFromDegrees(60.f);
 	gCamera.near = 0.2f, gCamera.far = 8.f * CHUNK_SIZE;
 
-	gCamera.mode = CameraMode_First;
+	gCamera.mode = CameraMode_Third;
 
 	Mtx_PerspTilt(&gCamera.projection, gCamera.fov, ((400.f) / (240.f)), gCamera.near, gCamera.far, false);
 }
 
 void Camera_Update(float iod) {
 	float fov = gCamera.fov + C3D_AngleFromDegrees(12.f) * gPlayer.fovAdd;
-	Mtx_PerspStereoTilt(&gCamera.projection, fov, ((400.f) / (240.f)), gCamera.near, gCamera.far, iod, 1.f, false);
 
 	float3 playerHead = f3_new(gPlayer.position.x, gPlayer.position.y + PLAYER_EYEHEIGHT + sinf(gPlayer.bobbing) * 0.1f + gPlayer.crouchAdd,
 							   gPlayer.position.z);
 
 	Mtx_Identity(&gCamera.view);
 
+	float3 forward = gPlayer.view;
+	float3 right   = f3_crs(f3_new(0, 1, 0), forward);
+	float3 up	   = f3_crs(forward, right);
+
+	Mtx_RotateX(&gCamera.view, -gPlayer.pitch, true);
+	Mtx_RotateY(&gCamera.view, -gPlayer.yaw, true);
+
 	switch (gCamera.mode) {
 		case CameraMode_First:
-			Mtx_RotateX(&gCamera.view, -gPlayer.pitch, true);
-			Mtx_RotateY(&gCamera.view, -gPlayer.yaw, true);
 			Mtx_Translate(&gCamera.view, -playerHead.x, -playerHead.y, -playerHead.z, true);
 			break;
 
 		case CameraMode_Second:
+			float3 cameraPosition = f3_sub(playerHead, f3_scl(forward, -3.0f));
+			cameraPosition.y -= 1.0f;
+
+			Mtx_Translate(&gCamera.view, -cameraPosition.x, -cameraPosition.y, -cameraPosition.z, true);
 			break;
 
-		case CameraMode_Third:
-			break;
+		case CameraMode_Third: {
+			float3 cameraPosition = f3_sub(playerHead, f3_scl(forward, 3.0f));
+			cameraPosition.y -= 1.0f;
+
+			Mtx_Translate(&gCamera.view, -cameraPosition.x, -cameraPosition.y, -cameraPosition.z, true);
+		} break;
 	}
+
+	if (gInput.keysdown & KEY_R) {
+		gCamera.mode = ++gCamera.mode % 3;
+	}
+
+	Mtx_PerspStereoTilt(&gCamera.projection, fov, ((400.f) / (240.f)), gCamera.near, gCamera.far, iod, 1.f, false);
 
 	C3D_Mtx vp;
 	Mtx_Multiply(&vp, &gCamera.projection, &gCamera.view);
 	Mtx_Copy(&gCamera.vp, &vp);
 
+	// Frustum plane calculations remain the same
 	C3D_FVec rowX = vp.r[0];
 	C3D_FVec rowY = vp.r[1];
 	C3D_FVec rowZ = vp.r[2];
@@ -56,12 +76,7 @@ void Camera_Update(float iod) {
 	gCamera.frustumPlanes[Frustum_Bottom] = FVec4_Normalize(FVec4_Subtract(rowW, rowY));
 	gCamera.frustumPlanes[Frustum_Far]	  = FVec4_Normalize(FVec4_Add(rowW, rowZ));
 
-	float3 forward = gPlayer.view;
-	float3 right   = f3_crs(f3_new(0, 1, 0), f3_new(sinf(gPlayer.yaw), 0.f, cosf(gPlayer.yaw)));
-	float3 up	   = f3_crs(forward, right);
-
-	float ar = 400.f / 240.f;
-
+	float ar		  = 400.f / 240.f;
 	float tan2halffov = 2.f * tanf(gCamera.fov / 2.f);
 
 	float hNear = tan2halffov * gCamera.near;

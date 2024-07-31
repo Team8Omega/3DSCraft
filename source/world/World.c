@@ -37,8 +37,6 @@ void World_Reset() {
 
 	gWorld.randomTickGen = Xorshift32_New();
 
-	strcpy(gWorld.name, "");
-
 	gWorld.active = false;
 }
 

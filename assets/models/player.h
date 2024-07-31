@@ -17,38 +17,40 @@ typedef enum
 	MODELPART_PLAYER_COUNT
 } MODELPART_PLAYER;
 
+#define rotator M_PI
+
 static CubeModelDef modeldef_player = { { 64, 64 },
 										{
 											{ // head
 											  { -4, -12, -4 },
 											  { 8, 8, 8 },
 											  { 0, 0 },
-											  { 0, 0, 0 } },
+											  { 0, rotator, 0 } },
 											{ // body
 											  { -4, -4, -2 },
 											  { 8, 12, 4 },
 											  { 16, 16 },
-											  { 0, 0, 0 } },
+											  { 0, rotator, 0 } },
 											{ // arm r
 											  { -4, -4, -2 },
 											  { -4, 12, 4 },
 											  { 40, 16 },
-											  { 0, 0, 0 } },
+											  { 0, rotator, 0 } },
 											{ // arm l
 											  { 4, -4, -2 },
 											  { 4, 12, 4 },
 											  { 32, 48 },
-											  { 0, 0, 0 } },
+											  { 0, rotator, 0 } },
 											{ // leg r
 											  { 0, 8, -2 },
 											  { 4, 12, 4 },
 											  { 0, 16 },
-											  { 0, 0, 0 } },
+											  { 0, rotator, 0 } },
 											{ // leg l
 											  { -4, 8, -2 },
 											  { 4, 12, 4 },
 											  { 16, 48 },
-											  { 0, 0, 0 } },
+											  { 0, rotator, 0 } },
 										}
 
 };

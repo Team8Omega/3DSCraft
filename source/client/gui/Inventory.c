@@ -27,7 +27,7 @@ void Inventory_DrawQuickSelect(int x, int y, ItemStack* stacks, int count, int* 
 		int rx = (i * 20 + x + 3) * 2;
 		int ry = (y + 3) * 2;
 		if (stacks[i].amount > 0) {
-			SpriteBatch_PushIcon(stacks[i].block, stacks[i].meta, rx, ry, 11);
+			SpriteBatch_PushIcon(stacks[i].block, stacks[i].meta, rx, ry, -9);
 		}
 		if (Gui_EnteredCursorInside(rx - 4, ry - 4, 18 * 2, 18 * 2)) {
 			*selected = i;
@@ -35,19 +35,19 @@ void Inventory_DrawQuickSelect(int x, int y, ItemStack* stacks, int count, int* 
 		}
 		SpriteBatch_SetScale(2);
 		if (sourceStack == &stacks[i]) {
-			SpriteBatch_PushSingleColorQuad(rx / 2 - 2, ry / 2 - 2, 9, 18, 18, SHADER_RGB(20, 5, 2));
+			SpriteBatch_PushSingleColorQuad(rx / 2 - 2, ry / 2 - 2, -11, 18, 18, SHADER_RGB(20, 5, 2));
 			SpriteBatch_BindGuiTexture(GuiTexture_Widgets);
 		}
 		if (i < count - 2) {
-			SpriteBatch_PushQuad(i * 20 + 21 + x, y, 10, 20, 22, 21, 0, 20, 22);
+			SpriteBatch_PushQuad(i * 20 + 21 + x, y, -10, 20, 22, 21, 0, 20, 22);
 		}
 	}
 	SpriteBatch_SetScale(2);
 
-	SpriteBatch_PushQuad(x, y, 10, 21, 22, 0, 0, 21, 22);
-	SpriteBatch_PushQuad(21 + 20 * (count - 2) + x, y, 10, 21, 22, 161, 0, 21, 22);
+	SpriteBatch_PushQuad(x, y, -10, 21, 22, 0, 0, 21, 22);
+	SpriteBatch_PushQuad(21 + 20 * (count - 2) + x, y, -10, 21, 22, 161, 0, 21, 22);
 
-	SpriteBatch_PushQuad(x + *selected * 20 - 1, y - 1, 11, 24, 24, 0, 22, 24, 24);
+	SpriteBatch_PushQuad(x + *selected * 20 - 1, y - 1, -9, 24, 24, 0, 22, 24, 24);
 }
 
 int Inventory_Draw(int x, int y, int w, ItemStack* stacks, int count, int _site) {
@@ -80,17 +80,17 @@ int Inventory_Draw(int x, int y, int w, ItemStack* stacks, int count, int _site)
 				newLine = true;
 			}
 			if (stacks[i].amount > 0)
-				SpriteBatch_PushIcon(stacks[i].block, stacks[i].meta, headX * 2, headY * 2, 10);
+				SpriteBatch_PushIcon(stacks[i].block, stacks[i].meta, headX * 2, headY * 2, -10);
 			if (Gui_EnteredCursorInside(headX * 2, headY * 2, 16 * 2, 16 * 2))
 				clickAtStack(&stacks[i]);
-			SpriteBatch_PushSingleColorQuad(headX * 2, headY * 2, 9, 16 * 2, 16 * 2,
+			SpriteBatch_PushSingleColorQuad(headX * 2, headY * 2, -11, 16 * 2, 16 * 2,
 											sourceStack == &stacks[i] ? SHADER_RGB(20, 5, 2) : colors[even]);
 			even ^= true;
 			headX += 16;
 			if (newLine) {
 				even = false;
 				// draw separator between "inventory lines"
-				SpriteBatch_PushSingleColorQuad(x * 2, (headY - 1) * 2, 10, (w - 32) * 2, 2, SHADER_RGB(7, 7, 7));
+				SpriteBatch_PushSingleColorQuad(x * 2, (headY - 1) * 2, -10, (w - 32) * 2, 2, SHADER_RGB(7, 7, 7));
 			}
 		}
 	}

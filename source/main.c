@@ -174,7 +174,7 @@ int main() {
 	}
 
 	if (gWorld.active)
-		Game_ReleaseWorld(&chunkWorker, &savemgr);
+		Game_ReleaseWorld();
 
 	SaveManager_Deinit(&savemgr);
 

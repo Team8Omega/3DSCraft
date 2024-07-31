@@ -23,8 +23,11 @@ void Player_InitModel() {
 }
 
 void Player_Draw(int projectionUniform, C3D_Mtx* matrix) {
+	if (gCamera.mode == CameraMode_First)
+		return;
+
 	CubeModel_Reset(gPlayer.model);
-	CubeModel_SetPos(gPlayer.model, f3_new(gPlayer.position.x, gPlayer.position.y + 6, gPlayer.position.z));
+	CubeModel_SetPos(gPlayer.model, f3_new(gPlayer.position.x, gPlayer.position.y + 1.f, gPlayer.position.z));
 	CubeModel_SetRotY(gPlayer.model, gPlayer.yaw);
 	CubeModel_Draw(gPlayer.model, projectionUniform, matrix);
 }
