@@ -11,24 +11,15 @@
 
 typedef struct {
 	u16 vboIdx;
-	C3D_Mtx localMatrix;
 	float3 rotationPoint;
 	WorldVertex* vertices;
 } Cube;
 
 Cube* Cube_Init(const CubeRaw* in, s16 texwidth, s16 texheight);
 
-void Cube_Draw(Cube* cube, int shaderUniform, C3D_Mtx* matrix);
+void Cube_Draw(Cube* cube, C3D_Mtx* matrix);
 
 void Cube_Deinit(Cube* cube);
-
-void Cube_SetPos(Cube* cube, float3 pos);
-
-void Cube_SetRot(Cube* cube, float3 rot);
-
-void Cube_SetRotPoint(Cube* cube, float3 pos);
-
-void Cube_Reset(Cube* cube);
 
 void Cube_InitVBOs();  // needs to be called AFTER all cubes have been built.
 

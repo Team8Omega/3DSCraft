@@ -1,5 +1,6 @@
 #include "world/chunk/ChunkWorker.h"
 
+#include "Globals.h"
 #include "client/Crash.h"
 
 #include <stdio.h>
@@ -15,11 +16,9 @@ void ChunkWorker_Init(ChunkWorker* chunkworker) {
 		vec_init(&chunkworker->handler[i]);
 
 	s32 prio;
-	bool isNew3ds = false;
-	APT_CheckNew3DS(&isNew3ds);
 	svcGetThreadPriority(&prio, CUR_THREAD_HANDLE);
 	chunkworker->thread =
-		threadCreate(&ChunkWorker_Mainloop, (void*)chunkworker, CHUNKWORKER_THREAD_STACKSIZE, prio - 1, isNew3ds ? 2 : 1, false);
+		threadCreate(&ChunkWorker_Mainloop, (void*)chunkworker, CHUNKWORKER_THREAD_STACKSIZE, prio - 1, gIsNew3ds ? 2 : 1, false);
 	if (!chunkworker->thread) {
 		Crash("Couldn't create worker thread");
 	}

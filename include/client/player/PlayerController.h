@@ -20,6 +20,8 @@ typedef struct {
 	KeyCombo openCmd;
 
 	KeyCombo crouch;
+
+	KeyCombo camMode;
 } PlayerControlScheme;
 typedef struct {
 	;

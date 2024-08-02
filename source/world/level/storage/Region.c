@@ -79,7 +79,7 @@ void Region_Init(Region* region, int x, int z) {
 		memset(region->grid, 0x0, sizeof(region->grid));
 	}
 
-	sprintf(buffer, "regions/s.%d.%d.dat", x, z);
+	sprintf(buffer, "regions/r.%d.%d.dat", x, z);
 	region->dataFile = fopen(buffer, "r+b");
 	if (region->dataFile == NULL)
 		region->dataFile = fopen(buffer, "w+b");
@@ -92,7 +92,7 @@ void Region_Deinit(Region* region) {
 
 void Region_SaveIndex(Region* region) {
 	char buffer[256];
-	sprintf(buffer, "regions/s.%d.%d.mp", region->x, region->z);
+	sprintf(buffer, "regions/r.%d.%d.mp", region->x, region->z);
 
 	mpack_writer_t writer;
 	mpack_writer_init_file(&writer, buffer);

@@ -11,29 +11,33 @@
 #include "world/phys/Collision.h"
 
 #include "assets/models.h"
+#include "entity/Entity.h"
 
 Player gPlayer;
 
 static C3D_Tex textureSkin;
+static CubeModel* cubeTMP;
+static Entity playerEntity;	 // TODO: rework entity
 
 void Player_InitModel() {
 	Texture_Load(&textureSkin, "entity/player/wide/steve.png");
 
-	gPlayer.model = createModel(&modeldef_player, &textureSkin);
+	cubeTMP		 = createModel(&modeldef_player);
+	playerEntity = (Entity){ .modelType = cubeTMP, .texture = &textureSkin };
 }
 
-void Player_Draw(int projectionUniform, C3D_Mtx* matrix) {
+void Player_Draw() {
 	if (gCamera.mode == CameraMode_First)
 		return;
 
-	CubeModel_Reset(gPlayer.model);
-	CubeModel_SetPos(gPlayer.model, f3_new(gPlayer.position.x, gPlayer.position.y + 1.f, gPlayer.position.z));
-	CubeModel_SetRotY(gPlayer.model, gPlayer.yaw);
-	CubeModel_Draw(gPlayer.model, projectionUniform, matrix);
+	playerEntity.position = gPlayer.position;
+	++playerEntity.position.y;
+	playerEntity.yaw = gPlayer.yaw - DEG_TO_RAD * 180;
+	Entity_Draw(&playerEntity);
 }
 
 void Player_Deinit() {
-	CubeModel_Deinit(gPlayer.model);
+	CubeModel_Deinit(cubeTMP);
 	C3D_TexDelete(&textureSkin);
 }
 

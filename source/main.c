@@ -35,6 +35,7 @@
 #include "Globals.h"
 
 InputData gInput, gInputOld;
+bool gIsNew3ds;
 
 static ChunkWorker chunkWorker;
 static SuperFlatGen flatGen;
@@ -63,6 +64,8 @@ void initCheck() {
 			"This build is shipped without license information for third parties, and is therefore not legit.\nPlease build with "
 			"\'licenses.txt\' in "
 			"romfs, and retry.");
+
+	APT_CheckNew3DS(&gIsNew3ds);
 }
 
 int main() {

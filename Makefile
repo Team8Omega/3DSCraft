@@ -203,7 +203,7 @@ ifneq ($(strip $(DEBUG)),0)
 endif
 	@$(MAKE) --no-print-directory -f $(CURDIR)/Makefile $(BUILD)
 
-all: $(BUILD) 
+all: entry cia 
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
@@ -229,7 +229,6 @@ clean-cia:
 	@rm -f $(TARGET).cia $(TARGET).cxi $(TARGET).cfa
 
 cia: clean-cia $(TARGET).cxi $(TARGET).cfa $(TARGET).cia
-	@echo Built $(TARGET).cia
 
 $(TARGET).cxi:
 	@$(MAKEROM) -o $(TARGET).cxi $(MAKEROM_ARGS)
@@ -272,7 +271,6 @@ endif
 # main targets
 #---------------------------------------------------------------------------------
 3dsx: $(OUTPUT).3dsx
-	@echo Built $(TARGET).3dsx
 
 ifeq ($(strip $(NO_SMDH)),)
 $(OUTPUT).3dsx	:	$(OUTPUT).elf $(OUTPUT).smdh banner.bnr

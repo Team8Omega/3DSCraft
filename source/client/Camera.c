@@ -7,6 +7,10 @@
 
 Camera gCamera;
 
+#define CAM_Z_OFFSET 3.6f
+
+#define CAM_Y_OFFSET 0.3f
+
 void Camera_Init() {
 	Mtx_Identity(&gCamera.view);
 
@@ -38,23 +42,22 @@ void Camera_Update(float iod) {
 			Mtx_Translate(&gCamera.view, -playerHead.x, -playerHead.y, -playerHead.z, true);
 			break;
 
-		case CameraMode_Second:
-			float3 cameraPosition = f3_sub(playerHead, f3_scl(forward, -3.0f));
-			cameraPosition.y -= 1.0f;
+		case CameraMode_Second: {
+			float3 cameraPosition = f3_sub(playerHead, f3_scl(forward, -CAM_Z_OFFSET));
+			cameraPosition.y -= CAM_Y_OFFSET;
 
 			Mtx_Translate(&gCamera.view, -cameraPosition.x, -cameraPosition.y, -cameraPosition.z, true);
-			break;
+			Mtx_RotateY(&gCamera.view, M_PI, true);
+		} break;
 
 		case CameraMode_Third: {
-			float3 cameraPosition = f3_sub(playerHead, f3_scl(forward, 3.0f));
-			cameraPosition.y -= 1.0f;
+			float3 cameraPosition = f3_sub(playerHead, f3_scl(forward, CAM_Z_OFFSET));
+			cameraPosition.y -= CAM_Y_OFFSET;
 
 			Mtx_Translate(&gCamera.view, -cameraPosition.x, -cameraPosition.y, -cameraPosition.z, true);
 		} break;
-	}
-
-	if (gInput.keysdown & KEY_R) {
-		gCamera.mode = ++gCamera.mode % 3;
+		default:
+			break;
 	}
 
 	Mtx_PerspStereoTilt(&gCamera.projection, fov, ((400.f) / (240.f)), gCamera.near, gCamera.far, iod, 1.f, false);

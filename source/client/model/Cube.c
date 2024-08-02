@@ -2,7 +2,9 @@
 
 #include "vec/vec.h"
 
+#include "client/Camera.h"
 #include "client/Crash.h"
+#include "client/renderer/Shader.h"
 #include "core/Direction.h"
 #include "util/math/NumberUtils.h"
 
@@ -99,15 +101,15 @@ Cube* Cube_Init(const CubeRaw* in, s16 texwidth, s16 texheight) {
 
 #define VERTEX_SCALE 0.941f
 
-	float from[3], to[3];
+	float pos[3], size[3];
 	for (u8 i = 0; i < 3; ++i) {
-		from[i] = in->from[i] * VERTEX_SCALE;
-		to[i]	= in->to[i] * VERTEX_SCALE;
+		pos[i]	= in->pos[i] * VERTEX_SCALE;
+		size[i] = in->size[i] * VERTEX_SCALE;
 	}
 
-	const s16 length = to[0] / VERTEX_SCALE;
-	const s16 width	 = to[2] / VERTEX_SCALE;
-	const s16 height = to[1] / VERTEX_SCALE;
+	const s16 length = size[0] / VERTEX_SCALE;
+	const s16 width	 = size[2] / VERTEX_SCALE;
+	const s16 height = size[1] / VERTEX_SCALE;
 
 	s16 faceUV[4];
 	for (u8 face = 0; face < 6; ++face) {
@@ -158,27 +160,16 @@ Cube* Cube_Init(const CubeRaw* in, s16 texwidth, s16 texheight) {
 			u8 idx				= lutStartIndex + i;
 			WorldVertex* vertex = &cube->vertices[idx];
 
-			vertex->pos[0] = -(in->mirrored ? -from[0] : from[0] + (cube_sides_lut[idx].pos[0] ? in->mirrored ? -to[0] : to[0] : 0));
-			vertex->pos[1] = -(from[1] + (cube_sides_lut[idx].pos[1] ? to[1] : 0));
-			vertex->pos[2] = -(from[2] + (cube_sides_lut[idx].pos[2] ? to[2] : 0));
+			vertex->pos[0] = -(pos[0] + (cube_sides_lut[idx].pos[0] ? size[0] : 0));
+			vertex->pos[1] = -(pos[1] + (cube_sides_lut[idx].pos[1] ? size[1] : 0));
+			vertex->pos[2] = -(pos[2] + (cube_sides_lut[idx].pos[2] ? size[2] : 0));
 
-#define toTexCrd(x, tw) (s16)(((float)(x) / (float)(tw)) * (float)((1 << 15) - 1))
+#define sizeTexCrd(x, tw) (s16)(((float)(x) / (float)(tw)) * (float)((1 << 15) - 1))
 
-			s16 u = faceUV[cube_sides_lut[idx].uv[0] * 2], v = faceUV[cube_sides_lut[idx].uv[1] * 2 + 1];
-			u = v;
-			v = u;
-
-			vertex->uv[0] = toTexCrd(faceUV[cube_sides_lut[idx].uv[0] * 2], texwidth);
-			vertex->uv[1] = toTexCrd(faceUV[cube_sides_lut[idx].uv[1] * 2 + 1], texheight);
+			vertex->uv[0] = sizeTexCrd(faceUV[cube_sides_lut[idx].uv[0] * 2], texwidth);
+			vertex->uv[1] = sizeTexCrd(faceUV[cube_sides_lut[idx].uv[1] * 2 + 1], texheight);
 		}
 	}
-	C3D_Mtx matrix;
-	Mtx_Identity(&matrix);
-	Mtx_RotateX(&matrix, in->rotation[0], true);
-	Mtx_RotateY(&matrix, in->rotation[1], true);
-	Mtx_RotateZ(&matrix, in->rotation[2], true);
-
-	Mtx_Copy(&cube->localMatrix, &matrix);
 
 	cubeRef[cubeNum] = cube;
 	cubeNum++;
@@ -193,12 +184,17 @@ void Cube_Deinit(Cube* cube) {
 	linearFree(cube);
 }
 
-void Cube_Draw(Cube* cube, int shaderUniform, C3D_Mtx* matrix) {
+extern Shader shaderWorld;
+
+void Cube_Draw(Cube* cube, C3D_Mtx* matrix) {
+	if (!cube)
+		Crash("CUBE==NULL");
+
 	C3D_Mtx outMatrix;
 	Mtx_Identity(&outMatrix);
-	Mtx_Multiply(&outMatrix, matrix, &cube->localMatrix);
+	Mtx_Multiply(&outMatrix, &gCamera.vp, matrix);
 
-	C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, shaderUniform, &outMatrix);
+	C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, shaderWorld.uLocProjection, &outMatrix);
 
 	WorldVertex* vbo = cubeModelVBOs[cube->vboIdx];
 
@@ -212,16 +208,4 @@ void Cube_Draw(Cube* cube, int shaderUniform, C3D_Mtx* matrix) {
 	BufInfo_Add(bufInfo, vbo, sizeof(WorldVertex), 4, 0x3210);
 
 	C3D_DrawArrays(GPU_TRIANGLES, 0, CUBE_VERTICE_NUM);
-}
-
-void Cube_Reset(Cube* c) {
-	Mtx_Identity(&c->localMatrix);
-}
-void Cube_SetPos(Cube* cube, float3 pos) {
-	Mtx_Translate(&cube->localMatrix, pos.x, pos.y, pos.z, true);
-}
-void Cube_SetRot(Cube* c, float3 rot) {
-	Mtx_RotateX(&c->localMatrix, rot.x, true);
-	Mtx_RotateY(&c->localMatrix, rot.y, true);
-	Mtx_RotateZ(&c->localMatrix, rot.z, true);
 }

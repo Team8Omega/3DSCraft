@@ -1,12 +1,15 @@
 #include "client/player/PlayerController.h"
 
+#include "client/Camera.h"
 #include "commands/CommandLine.h"
 #include "util/math/NumberUtils.h"
 
 #include "client/gui/DebugUI.h"
 #include "util/Paths.h"
 
+#include "Globals.h"
 #include "sounds/Sound.h"
+
 #include <ini/ini.h>
 #include <unistd.h>
 
@@ -19,7 +22,7 @@ const char* platform_key_names[PLATFORM_BUTTONS] = { "Not Set",	   "A",			 "B",	
 													 "CStickDown", "CStickLeft", "CStickRight", "ZL",		"ZR" };
 enum
 {
-	K3DS_Undefined = 0,
+	K3DS_NONE = 0,
 	K3DS_A,
 	K3DS_B,
 	K3DS_X,
@@ -43,6 +46,7 @@ enum
 	K3DS_ZL,
 	K3DS_ZR
 };
+
 const PlayerControlScheme platform_default_scheme = { .forward			= K3DS_CPAD_UP,
 													  .backward			= K3DS_CPAD_DOWN,
 													  .strafeLeft		= K3DS_CPAD_LEFT,
@@ -54,11 +58,13 @@ const PlayerControlScheme platform_default_scheme = { .forward			= K3DS_CPAD_UP,
 													  .placeBlock		= K3DS_L,
 													  .breakBlock		= K3DS_R,
 													  .jump				= K3DS_DUP,
-													  .switchBlockLeft	= K3DS_DLEFT,
-													  .switchBlockRight = K3DS_DRIGHT,
+													  .switchBlockLeft	= K3DS_NONE,
+													  .switchBlockRight = K3DS_NONE,
 													  .openCmd			= K3DS_SELECT,
-													  .crouch			= K3DS_DDOWN };
-const PlayerControlScheme n3ds_default_scheme	  = { .forward			= K3DS_CPAD_UP,
+													  .crouch			= K3DS_DLEFT,
+													  .camMode			= K3DS_DDOWN };
+
+const PlayerControlScheme n3ds_default_scheme = { .forward			= K3DS_CPAD_UP,
 												  .backward			= K3DS_CPAD_DOWN,
 												  .strafeLeft		= K3DS_CPAD_LEFT,
 												  .strafeRight		= K3DS_CPAD_RIGHT,
@@ -66,13 +72,15 @@ const PlayerControlScheme n3ds_default_scheme	  = { .forward			= K3DS_CPAD_UP,
 												  .lookRight		= K3DS_CSTICK_RIGHT,
 												  .lookUp			= K3DS_CSTICK_UP,
 												  .lookDown			= K3DS_CSTICK_DOWN,
-												  .placeBlock		= K3DS_ZL,
-												  .breakBlock		= K3DS_ZR,
-												  .jump				= K3DS_A && K3DS_B && K3DS_DUP,
-												  .switchBlockLeft	= K3DS_L && K3DS_DLEFT,
-												  .switchBlockRight = K3DS_R && K3DS_DRIGHT,
+												  .placeBlock		= K3DS_L,
+												  .breakBlock		= K3DS_R,
+												  .jump				= K3DS_A,
+												  .switchBlockLeft	= K3DS_ZL,
+												  .switchBlockRight = K3DS_ZR,
 												  .openCmd			= K3DS_SELECT,
-												  .crouch			= K3DS_Y && K3DS_X && K3DS_DDOWN };
+												  .crouch			= K3DS_B,
+												  .camMode			= K3DS_DDOWN };
+
 static void convertPlatformInput(InputData* input, float ctrls[], bool keysdown[], bool keysup[]) {
 #define reg_bin_key(i, k)                                                                                                                  \
 	ctrls[(i)]	  = (float)((input->keysdown & (k)) || (input->keysheld & (k)));                                                           \
@@ -148,9 +156,7 @@ static inline bool WasKeyPressed(KeyCombo combo, PlatformAgnosticInput* input) {
 void PlayerController_Init(PlayerController* ctrl) {
 	ctrl->breakPlaceTimeout = 0.f;
 
-	bool isNew3ds = false;
-	APT_CheckNew3DS(&isNew3ds);
-	if (isNew3ds) {
+	if (gIsNew3ds) {
 		ctrl->controlScheme		= n3ds_default_scheme;
 		gPlayer.autoJumpEnabled = false;
 	} else {
@@ -194,6 +200,7 @@ void PlayerController_Init(PlayerController* ctrl) {
 		loadKey(switchBlockRight);
 		loadKey(openCmd);
 		loadKey(crouch);
+		loadKey(camMode);
 #undef loadKey
 
 		if (!ini_sget(cfg, "controls", "auto_jumping", "%d", &gPlayer.autoJumpEnabled))
@@ -236,6 +243,7 @@ void PlayerController_Init(PlayerController* ctrl) {
 		writeKey(switchBlockRight);
 		writeKey(openCmd);
 		writeKey(crouch);
+		writeKey(camMode);
 
 #undef writeKey
 
@@ -326,6 +334,11 @@ void PlayerController_Update(PlayerController* ctrl, Sound* sound, float dt) {
 	if (cmdLine) {
 		CommandLine_Activate();
 		ctrl->openedCmd = true;
+	}
+
+	bool camMode = WasKeyPressed(ctrl->controlScheme.camMode, &agnosticInput);
+	if (camMode) {
+		gCamera.mode = (gCamera.mode + 1) % CameraMode_Count;
 	}
 
 	Player_Move(dt, movement);

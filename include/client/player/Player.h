@@ -61,8 +61,6 @@ typedef struct {
 	bool blockInSight, blockInActionRange;
 	ItemStack inventory[64];
 
-	CubeModel* model;
-
 	Damage dmg;
 } Player;
 
@@ -72,7 +70,7 @@ void Player_Init();
 
 void Player_InitModel();
 
-void Player_Draw(int projectionUniform, C3D_Mtx* matrix);
+void Player_Draw();
 
 void Player_Update(Sound* sound);
 

@@ -214,7 +214,7 @@ void WorldRenderer_Render(float iod) {
 
 	renderWorld();
 
-	Player_Draw(projectionUniform, &gCamera.vp);
+	Player_Draw();
 
 	Clouds_Render(projectionUniform, &gCamera.vp, gPlayer.position.x, gPlayer.position.z);
 

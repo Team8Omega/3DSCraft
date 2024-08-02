@@ -36,7 +36,8 @@ typedef enum
 {
 	CameraMode_First,
 	CameraMode_Third,
-	CameraMode_Second
+	CameraMode_Second,
+	CameraMode_Count
 } CameraMode;
 
 typedef struct {
