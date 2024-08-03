@@ -118,13 +118,11 @@ void SelectWorldScreen_DrawDown() {
 
 	WorldInfo info;
 
-	SpriteBatch_PushSingleColorQuad(0, 0, 0, 320, 14, SHADER_RGB(25, 25, 25));
-
-	// ToDo: Add fancy shmancy top texture
-
 	clicked_back = Gui_IconButton(0, 0, 15, 15, 0, true, SHADER_RGB(20, 20, 20), "<");
 
-	Gui_Label_Centered(SpriteBatch_GetWidth(), 4, 0, 0, false, SHADER_RGB(4, 4, 4), "Singleplayer");
+	Gui_Label_Centered(SpriteBatch_GetWidth(), 3, 0, 0, false, SHADER_RGB(4, 4, 4), "Singleplayer");
+
+	SpriteBatch_PushSingleColorQuad(0, 0, -1, 320, 14, SHADER_RGB(25, 25, 25));
 
 	vec_foreach (&worlds.list, info, worldNum) {
 		int x;
