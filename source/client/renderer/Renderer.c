@@ -157,18 +157,19 @@ void Renderer_Render() {
 
 	SpriteBatch_StartFrame(320, 240);
 
-	if (gWorld.active) {
-		SpriteBatch_SetScale(2);
-		gPlayer.quickSelectBarSlots = 9;
-		Inventory_DrawQuickSelect(160 / 2 - Inventory_QuickSelectCalcWidth(gPlayer.quickSelectBarSlots) / 2,
-								  120 - INVENTORY_QUICKSELECT_HEIGHT, gPlayer.quickSelectBar, gPlayer.quickSelectBarSlots,
-								  &gPlayer.quickSelectBarSlot);
-		gPlayer.inventorySite =
-			Inventory_Draw(16, 0, 160, gPlayer.inventory, sizeof(gPlayer.inventory) / sizeof(ItemStack), gPlayer.inventorySite);
-	}
-
 	if (currentScreen)
 		ScreenManager_DrawDown();
+	else{
+		if (gWorld.active) {
+			SpriteBatch_SetScale(2);
+			gPlayer.quickSelectBarSlots = 9;
+			Inventory_DrawQuickSelect(160 / 2 - Inventory_QuickSelectCalcWidth(gPlayer.quickSelectBarSlots) / 2,
+									  120 - INVENTORY_QUICKSELECT_HEIGHT, gPlayer.quickSelectBar, gPlayer.quickSelectBarSlots,
+									  &gPlayer.quickSelectBarSlot);
+			gPlayer.inventorySite =
+				Inventory_Draw(16, 0, 160, gPlayer.inventory, sizeof(gPlayer.inventory) / sizeof(ItemStack), gPlayer.inventorySite);
+		}
+	}
 
 	DebugUI_Draw();
 
