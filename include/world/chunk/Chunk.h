@@ -2,6 +2,9 @@
 
 #include "world/level/block/Block.h"
 
+
+#include "world/level/block/Blocks.h"
+
 #include "client/renderer/VBOCache.h"
 #include "util/math/Xorshift.h"
 
@@ -15,7 +18,7 @@
 
 typedef struct {
 	int y;
-	Block blocks[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
+	BlockId blocks[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
 	u8 metadataLight[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];  // first half metadata, second half light
 
 	u32 revision;
@@ -106,18 +109,18 @@ static inline void Chunk_SetMetadata(Chunk* chunk, int x, int y, int z, u8 metad
 	++chunk->revision;
 }
 
-static inline Block Chunk_GetBlock(Chunk* chunk, int x, int y, int z) {
+static inline BlockId Chunk_GetBlock(Chunk* chunk, int x, int y, int z) {
 	return chunk->clusters[y / CHUNK_SIZE].blocks[x][y - (y / CHUNK_SIZE * CHUNK_SIZE)][z];
 }
 // resets the meta data
-static inline void Chunk_SetBlock(Chunk* chunk, int x, int y, int z, Block block) {
+static inline void Chunk_SetBlock(Chunk* chunk, int x, int y, int z, BlockId block) {
 	Cluster* cluster										 = &chunk->clusters[y / CHUNK_SIZE];
 	cluster->blocks[x][y - (y / CHUNK_SIZE * CHUNK_SIZE)][z] = block;
 	Chunk_SetMetadata(chunk, x, y, z, 0);
 	/*++cluster->revision;
 	++chunk->revision;*/  // durch das Setzen der Metadaten wird das sowieso erhöht
 }
-static inline void Chunk_SetBlockAndMeta(Chunk* chunk, int x, int y, int z, Block block, u8 metadata) {
+static inline void Chunk_SetBlockAndMeta(Chunk* chunk, int x, int y, int z, BlockId block, u8 metadata) {
 	Cluster* cluster										 = &chunk->clusters[y / CHUNK_SIZE];
 	cluster->blocks[x][y - (y / CHUNK_SIZE * CHUNK_SIZE)][z] = block;
 	metadata &= 0xf;

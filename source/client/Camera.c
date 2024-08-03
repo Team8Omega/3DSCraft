@@ -17,7 +17,7 @@ void Camera_Init() {
 	gCamera.fov	 = C3D_AngleFromDegrees(60.f);
 	gCamera.near = 0.2f, gCamera.far = 8.f * CHUNK_SIZE;
 
-	gCamera.mode = CameraMode_Third;
+	gCamera.mode = CameraMode_First;
 
 	Mtx_PerspTilt(&gCamera.projection, gCamera.fov, ((400.f) / (240.f)), gCamera.near, gCamera.far, false);
 }

@@ -78,7 +78,7 @@ void Renderer_Init(WorkQueue* queue) {
 
 	C3D_CullFace(GPU_CULL_BACK_CCW);
 
-	Block_Init();
+	Blocks_Init();
 
 	Item_Init();
 
@@ -88,7 +88,7 @@ void Renderer_Init(WorkQueue* queue) {
 void Renderer_Deinit() {
 	Item_Deinit();
 
-	Block_Deinit();
+	Texture_MapDeinit(&gTexMapBlock);
 
 	PolyGen_Deinit();
 
@@ -132,7 +132,7 @@ void Renderer_Render() {
 		Shader_Bind(&shaderWorld);
 
 		if (gWorld.active) {
-			C3D_TexBind(0, Block_GetTextureMap());
+			C3D_TexBind(0, &gTexMapBlock.texture);
 			WorldRenderer_Render(!i ? -iod : iod);
 
 			if (!currentScreen)

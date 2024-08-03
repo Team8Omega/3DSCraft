@@ -1,325 +1,104 @@
 #include "world/level/block/Block.h"
 
-#include "client/model/VertexFmt.h"
-#include "client/renderer/texture/TextureMap.h"
+#include "client/Crash.h"
+#include "core/Direction.h"
+#include "util/StringUtils.h"
+#include "world/World.h"
 
-static Texture_Map textureMap;
+#include "stdio.h"
 
-// PATH PREFIX
-#define PPRX "block/"
-
-#define TEXTURE_FILES                                                                                                                      \
-	A(stone, "stone.png"), A(dirt, "dirt.png"), A(cobblestone, "cobblestone.png"), A(grass_side, "grass_block_side.png"),                  \
-		A(grass_top, "grass_block_top.png"), A(stonebrick, "stone_bricks.png"), A(sand, "sand.png"), A(oaklog_side, "oak_log.png"),        \
-		A(oaklog_top, "oak_log_top.png"), A(leaves_oak, "oak_leaves.png"), A(glass, "glass.png"), A(brick, "bricks.png"),                  \
-		A(oakplanks, "oak_planks.png"), A(wool, "white_wool.png"), A(bedrock, "bedrock.png"), A(gravel, "gravel.png"),                     \
-		A(coarse, "coarse_dirt.png"), A(door_top, "oak_door_top.png"), A(door_bottom, "oak_door_bottom.png"),                              \
-		A(snow_grass_side, "grass_block_snow.png"), A(snow, "snow.png"), A(obsidian, "obsidian.png"), A(sandstone_side, "sandstone.png"),  \
-		A(sandstone_top, "sandstone_top.png"), A(sandstone_bottom, "sandstone_bottom.png"), A(netherrack, "netherrack.png"),               \
-		A(smooth_stone, "smooth_stone.png"), A(lava, "lava.png"), A(water, "water.png"), A(grass_path_side, "dirt_path_side.png"),         \
-		A(grass_path_top, "dirt_path_top.png"), A(crafting_table_side, "crafting_table_side.png"),                                         \
-		A(crafting_table_top, "crafting_table_top.png"), A(iron_ore, "iron_ore.png"), A(iron_block, "iron_block.png"),                     \
-		A(diamond_ore, "diamond_ore.png"), A(diamond_block, "diamond_block.png"), A(gold_ore, "gold_ore.png"),                             \
-		A(gold_block, "gold_block.png"), A(coal_ore, "coal_ore.png"), A(coal_block, "coal_block.png"), A(emerald_ore, "emerald_ore.png"),  \
-		A(emerald_block, "emerald_block.png"), A(furnace_side, "furnace_side.png"), A(furnace_front, "furnace_front.png"),                 \
-		A(furnace_top, "furnace_top.png")
-
-#define A(i, n) PPRX n
-const char* block_texture_files[] = { TEXTURE_FILES };
-#undef A
-
-static struct {
-	Texture_MapIcon stone;
-	Texture_MapIcon dirt;
-	Texture_MapIcon cobblestone;
-	Texture_MapIcon grass_side;
-	Texture_MapIcon grass_top;
-	Texture_MapIcon stonebrick;
-	Texture_MapIcon sand;
-	Texture_MapIcon oaklog_side;
-	Texture_MapIcon oaklog_top;
-	Texture_MapIcon leaves_oak;
-	Texture_MapIcon glass;
-	Texture_MapIcon brick;
-	Texture_MapIcon oakplanks;
-	Texture_MapIcon wool;
-	Texture_MapIcon bedrock;
-	Texture_MapIcon gravel;
-	Texture_MapIcon coarse;
-	Texture_MapIcon door_top;
-	Texture_MapIcon door_bottom;
-	Texture_MapIcon snow_grass_side;
-	Texture_MapIcon snow;
-	Texture_MapIcon obsidian;
-	Texture_MapIcon netherrack;
-	Texture_MapIcon sandstone_side;
-	Texture_MapIcon sandstone_top;
-	Texture_MapIcon sandstone_bottom;
-	Texture_MapIcon smooth_stone;
-	Texture_MapIcon grass_path_side;
-	Texture_MapIcon grass_path_top;
-	Texture_MapIcon crafting_table_side;
-	Texture_MapIcon crafting_table_top;
-	Texture_MapIcon lava;
-	Texture_MapIcon water;
-	Texture_MapIcon iron_ore;
-	Texture_MapIcon iron_block;
-	Texture_MapIcon gold_block;
-	Texture_MapIcon gold_ore;
-	Texture_MapIcon diamond_ore;
-	Texture_MapIcon diamond_block;
-	Texture_MapIcon emerald_block;
-	Texture_MapIcon emerald_ore;
-	Texture_MapIcon coal_block;
-	Texture_MapIcon coal_ore;
-	Texture_MapIcon furnace_front;
-	Texture_MapIcon furnace_side;
-	Texture_MapIcon furnace_top;
-} icon;
-
-void Block_Init() {
-	Texture_MapInit(&textureMap, block_texture_files, sizeof(block_texture_files) / sizeof(block_texture_files[0]));
-#define A(i, n) icon.i = Texture_MapGetIcon(&textureMap, PPRX n)
-	TEXTURE_FILES;
-#undef A
+static bool renderAsNormalBlock() {
+	return true;
 }
-void Block_Deinit() {
-	C3D_TexDelete(&textureMap.texture);
+static u8 getRenderType() {
+	return 0;
+}
+static bool isOpaqueCube() {
+	return true;
+}
+static void textureLoad(Block* block) {
+	const char* path = String_ParseTexturePath("block", block->textureName);
+	block->icon		 = Texture_MapAdd(path);
+}
+static int getBlockColor(Direction dir, u8 meta) {
+	return 0xFFFFFFFF;
+}
+static Texture_MapIcon getBlockTexture(Block* block, Direction dir, u8 metadata) {
+	return gTexMapBlock.icons[block->icon];
 }
 
-void* Block_GetTextureMap() {
-	return &textureMap.texture;
-}
+static BlockVtable vtable_default = {
+	.renderAsNormalBlock = renderAsNormalBlock,
+	.getRenderType		 = getRenderType,
+	.isOpaqueCube		 = isOpaqueCube,
+	.textureLoad		 = textureLoad,
+	.getBlockColor		 = getBlockColor,
+	.getBlockTexture	 = getBlockTexture,
+};
 
-void Block_GetTexture(Block block, Direction direction, u8 metadata, s16* out_uv) {
-	Texture_MapIcon i = { 0, 0, 0 };
-	switch (block) {
-		case Block_Air:
-			return;
-		case Block_Dirt:
-			i = icon.dirt;
-			break;
-		case Block_Stone:
-			i = icon.stone;
-			break;
-		case Block_Grass:
-			switch (direction) {
-				case Direction_Top:
-					i = icon.grass_top;
-					break;
-				case Direction_Bottom:
-					i = icon.dirt;
-					break;
-				default:
-					i = icon.grass_side;
-					break;
-			}
-			break;
-		case Block_Cobblestone:
-			i = icon.cobblestone;
-			break;
-		case Block_Log:
-			switch (direction) {
-				case Direction_Bottom:
-				case Direction_Top:
-					i = icon.oaklog_top;
-					break;
-				default:
-					i = icon.oaklog_side;
-					break;
-			}
-			break;
-		case Block_Gravel:
-			i = icon.gravel;
-			break;
-		case Block_Sand:
-			i = icon.sand;
-			break;
-		case Block_Leaves:
-			i = icon.leaves_oak;
-			break;
-		case Block_Glass:
-			i = icon.glass;
-			break;
-		case Block_Stonebrick:
-			i = icon.stonebrick;
-			break;
-		case Block_Brick:
-			i = icon.brick;
-			break;
-		case Block_Planks:
-			i = icon.oakplanks;
-			break;
-		case Block_Wool:
-			i = icon.wool;
-			break;
-		case Block_Bedrock:
-			i = icon.bedrock;
-			break;
-		case Block_Coarse:
-			i = icon.coarse;
-			break;
-		case Block_Door_Top:
-			i = icon.door_top;
-			break;
-		case Block_Door_Bottom:
-			i = icon.door_bottom;
-			break;
-		case Block_Snow_Grass:
-			switch (direction) {
-				case Direction_Top:
-					i = icon.snow;
-					break;
-				case Direction_Bottom:
-					i = icon.dirt;
-					break;
-				default:
-					i = icon.snow_grass_side;
-					break;
-			}
-			break;
-		case Block_Snow:
-			i = icon.snow;
-			break;
-		case Block_Obsidian:
-			i = icon.obsidian;
-			break;
-		case Block_Netherrack:
-			i = icon.netherrack;
-			break;
-		case Block_Sandstone:
-			switch (direction) {
-				case Direction_Bottom:
-					i = icon.sandstone_bottom;
-					break;
-				case Direction_Top:
-					i = icon.sandstone_top;
-					break;
-				default:
-					i = icon.sandstone_side;
-					break;
-			}
-			break;
-		case Block_Smooth_Stone:
-			i = icon.smooth_stone;
-			break;
-		case Block_Crafting_Table:
-			switch (direction) {
-				case Direction_Bottom:
-					i = icon.oakplanks;
-					break;
-				case Direction_Top:
-					i = icon.crafting_table_top;
-					break;
-				default:
-					i = icon.crafting_table_side;
-					break;
-			}
-			break;
-		case Block_Lava:
-			i = icon.lava;
-			break;
-		case Block_Water:
-			i = icon.water;
-			break;
-		case Block_Grass_Path:
-			switch (direction) {
-				case Direction_Bottom:
-					i = icon.dirt;
-					break;
-				case Direction_Top:
-					i = icon.grass_path_top;
-					break;
-				default:
-					i = icon.grass_path_side;
-					break;
-			}
-			break;
-		case Block_Gold_Block:
-			i = icon.gold_block;
-			break;
-		case Block_Gold_Ore:
-			i = icon.gold_ore;
-			break;
-		case Block_Coal_Block:
-			i = icon.coal_block;
-			break;
-		case Block_Coal_Ore:
-			i = icon.coal_ore;
-			break;
-		case Block_Iron_Block:
-			i = icon.iron_block;
-			break;
-		case Block_Iron_Ore:
-			i = icon.iron_ore;
-			break;
-		case Block_Diamond_Block:
-			i = icon.diamond_block;
-			break;
-		case Block_Diamond_Ore:
-			i = icon.diamond_ore;
-			break;
-		case Block_Emerald_Block:
-			i = icon.emerald_block;
-			break;
-		case Block_Emerald_Ore:
-			i = icon.emerald_ore;
-			break;
-		case Block_Furnace:
-			switch (direction) {
-				case Direction_South:
-					i = icon.furnace_front;
-					break;
-				case Direction_Top:
-					i = icon.furnace_top;
-					break;
-				default:
-					i = icon.furnace_side;
-					break;
-			}
-			break;
-		default:
-			break;
+Block* Block_Init(const char* unlocalizedName, const char* textureName, u16 id, float resistance, float hardness, MaterialType material,
+				  Box bounds) {
+	Block* b = (Block*)malloc(sizeof(Block));
+
+	b->vptr = (BlockVtable*)malloc(sizeof(BlockVtable));
+	if (b->vptr)
+		memcpy(b->vptr, &vtable_default, sizeof(BlockVtable));
+
+	Block_SetResistance(b, resistance);
+	Block_SetHardness(b, hardness);
+	b->id		= id;
+	b->material = material;
+	b->bounds	= bounds;
+	strcpy(b->unlocalizedName, unlocalizedName);
+
+	if (!textureName) {
+		b->icon = 1;
+		return b;
 	}
-	out_uv[0] = i.u;
-	out_uv[1] = i.v;
+
+	strcpy(b->textureName, textureName);
+	b->vptr->textureLoad(b);
+
+	return b;
 }
 
-#define extractR(c) ((c >> 16) & 0xff)
-#define extractG(c) (((c) >> 8) & 0xff)
-#define extractB(c) ((c)&0xff)
-/*#define toRGB16(c) \
-	{ extractR(c), extractG(c), extractB(c) }*/
-void Block_GetColor(Block block, u8 metadata, Direction direction, u8 out_rgb[]) {
-	if ((block == Block_Grass && direction == Direction_Top) || block == Block_Leaves) {
-		out_rgb[0] = 130;
-		out_rgb[1] = 255;
-		out_rgb[2] = 130;
-		return;
-	}
-	// white, orange, magenta, light blue, yellow, lime, pink, gray, silver, cyan, purple, blue, green, red, black
-	const u32 dies[] = { (16777215), (14188339), (11685080), (6724056), (15066419), (8375321), (15892389), (5000268),
-						 (10066329), (5013401),	 (8339378),	 (3361970), (6704179),	(6717235), (10040115), (1644825) };
-	if (block == Block_Wool) {
-		out_rgb[0] = extractR(dies[metadata]);
-		out_rgb[1] = extractG(dies[metadata]);
-		out_rgb[2] = extractB(dies[metadata]);
+void Block_SetResistance(Block* b, float v) {
+	b->resistance = v * 3.f;
+}
+void Block_SetHardness(Block* b, float v) {
+	b->hardness = v;
+
+	if (b->resistance < v * 5.f)
+		b->resistance = v * 5.f;
+}
+void Block_SetBlockUnbreakable(Block* b) {
+	Block_SetHardness(b, -1.f);
+}
+void Block_SetBounds(Block* b, float3 from, float3 to) {
+	b->bounds.min = from;
+	b->bounds.max = to;
+}
+
+// if is smaller than block or sight hidden by other block
+bool Block_ShouldSideBeRendered(Block* b, int x, int y, int z, Direction dir) {
+	if (b->vptr->isOpaqueCube) {
+		return !World_IsBlockOpaqueCube(x, y, z);
 	} else {
-		out_rgb[0] = 255;
-		out_rgb[1] = 255;
-		out_rgb[2] = 255;
+		return dir == Direction_Bottom && b->bounds.min.y > 0.f
+				   ? true
+				   : (dir == Direction_Top && b->bounds.max.y < 1.f
+						  ? true
+						  : (dir == Direction_North && b->bounds.min.z > 0.f
+								 ? true
+								 : (dir == Direction_South && b->bounds.max.z < 1.f
+										? true
+										: (dir == Direction_West && b->bounds.min.x > 0.f
+											   ? true
+											   : (dir == Direction_East && b->bounds.max.x < 1.f ? true
+																								 : !World_IsBlockOpaqueCube(x, y, z))))));
 	}
 }
 
-bool Block_Opaque(Block block, u8 metadata) {
-	return block != Block_Air && block != Block_Glass && block != Block_Door_Top && block != Block_Door_Bottom && block != Block_Leaves;
+const Material* Block_GetMaterial(Block* block) {
+	return &MATERIALS[block->material];
 }
-
-const char* BlockNames[Blocks_Count] = { "Air",			 "Stone",	   "Dirt",			"Grass",		"Cobblestone",
-										 "Sand",		 "Log",		   "Gravel",		"Leaves",		"Glass",
-										 "Stone Bricks", "Bricks",	   "Planks",		"Wool",			"Bedrock",
-										 "Coarse",		 "Door_Top",   "Door_Bottom",	"Snow_Grass",	"Snow",
-										 "Obsidian",	 "Netherrack", "Sandstone",		"Smooth_Stone", "Crafting_Table",
-										 "Grass_Path",	 "Water",	   "Lava",			"Iron_Ore",		"Coal_Ore",
-										 "Diamond_Ore",	 "Gold_Ore",   "Emerald_Ore",	"Gold_Block",	"Diamond_Block",
-										 "Coal_Block",	 "Iron_Block", "Emerald_Block", "Furnace" };

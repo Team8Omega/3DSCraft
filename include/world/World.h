@@ -13,6 +13,8 @@
 
 #define CHUNKPOOL_SIZE (CHUNKCACHE_SIZE * CHUNKCACHE_SIZE + UNDEADCHUNKS_COUNT)
 
+typedef struct Block Block;
+
 typedef enum
 {
 	WorldGen_Default,
@@ -90,13 +92,15 @@ void World_UnloadChunk(Chunk* chunk);
 
 Chunk* World_GetChunk(int x, int z);
 
-Block World_GetBlock(int x, int y, int z);
-void World_SetBlock(int x, int y, int z, Block block);
+BlockId World_GetBlock(int x, int y, int z);
+void World_SetBlock(int x, int y, int z, BlockId block);
 u8 World_GetMetadata(int x, int y, int z);
 void World_SetMetadata(int x, int y, int z, u8 metadata);
 
-void World_SetBlockAndMeta(int x, int y, int z, Block block, u8 metadata);
+void World_SetBlockAndMeta(int x, int y, int z, BlockId block, u8 metadata);
 
 void World_UpdateChunkCache(int orginX, int orginZ);
 
 int World_GetHeight(int x, int z);
+
+bool World_IsBlockOpaqueCube(int x, int y, int z);

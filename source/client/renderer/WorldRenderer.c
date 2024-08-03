@@ -6,6 +6,7 @@
 #include "client/renderer/Cursor.h"
 #include "world/level/block/Block.h"
 
+
 #include "client/Crash.h"
 #include "client/gui/DebugUI.h"
 
@@ -208,7 +209,7 @@ static void renderWorld() {
 void WorldRenderer_Render(float iod) {
 	Camera_Update(iod);
 
-	C3D_TexBind(0, Block_GetTextureMap());
+	C3D_TexBind(0, &gTexMapBlock.texture);
 
 	C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, projectionUniform, &gCamera.vp);
 
@@ -218,7 +219,8 @@ void WorldRenderer_Render(float iod) {
 
 	Clouds_Render(projectionUniform, &gCamera.vp, gPlayer.position.x, gPlayer.position.z);
 
-	Hand_Draw(projectionUniform, &gCamera.projection, gPlayer.quickSelectBar[gPlayer.quickSelectBarSlot]);
+	if (gCamera.mode == CameraMode_First)
+		Hand_Draw(projectionUniform, &gCamera.projection, gPlayer.quickSelectBar[gPlayer.quickSelectBarSlot]);
 
 	if (gPlayer.blockInActionRange)
 		Cursor_Draw(projectionUniform, &gCamera.vp, gPlayer.viewRayCast.x, gPlayer.viewRayCast.y, gPlayer.viewRayCast.z,

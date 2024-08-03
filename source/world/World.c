@@ -4,6 +4,8 @@
 #include "client/gui/DebugUI.h"
 #include "world/level/block/BlockEvents.h"
 
+#include "world/level/block/Block.h"
+
 #include <string.h>
 
 #include <assert.h>
@@ -83,13 +85,13 @@ Chunk* World_GetChunk(int x, int z) {
 	return NULL;
 }
 
-Block World_GetBlock(int x, int y, int z) {
+BlockId World_GetBlock(int x, int y, int z) {
 	if (y < 0 || y >= CHUNK_HEIGHT)
-		return Block_Air;
+		return BLOCK_AIR;
 	Chunk* chunk = World_GetChunk(WorldToChunkCoord(x), WorldToChunkCoord(z));
 	if (chunk)
 		return Chunk_GetBlock(chunk, WorldToLocalCoord(x), y, WorldToLocalCoord(z));
-	return Block_Air;
+	return BLOCK_AIR;
 }
 
 #define NOTIFY_NEIGHTBOR(axis, comp, xDiff, zDiff)                                                                                         \
@@ -109,7 +111,7 @@ Block World_GetBlock(int x, int y, int z) {
 	if (WorldToLocalCoord(y) == 15 && y / CHUNK_SIZE + 1 < CLUSTER_PER_CHUNK)                                                              \
 		Chunk_RequestGraphicsUpdate(chunk, y / CHUNK_SIZE + 1);
 
-void World_SetBlock(int x, int y, int z, Block block) {
+void World_SetBlock(int x, int y, int z, BlockId block) {
 	if (y < 0 || y >= CHUNK_HEIGHT)
 		return;
 	int cX		 = WorldToChunkCoord(x);
@@ -124,7 +126,7 @@ void World_SetBlock(int x, int y, int z, Block block) {
 	}
 }
 
-void World_SetBlockAndMeta(int x, int y, int z, Block block, u8 metadata) {
+void World_SetBlockAndMeta(int x, int y, int z, BlockId block, u8 metadata) {
 	if (y < 0 || y >= CHUNK_HEIGHT)
 		return;
 	int cX		 = WorldToChunkCoord(x);
@@ -244,4 +246,9 @@ void World_Tick() {
 				}*/
 			}
 		}
+}
+
+bool World_IsBlockOpaqueCube(int x, int y, int z) {
+	Block* b = BLOCKS[World_GetBlock(x, y, z)];
+	return b == NULL ? false : Block_IsOpaqueCube(b);
 }

@@ -59,14 +59,15 @@ SOURCES 		:= $(shell find $(realpath lib) $(realpath source) $(realpath assets) 
 SOURCES 		:= $(foreach dir, $(SOURCES), $(patsubst $(CURDIR)/%, %, $(dir)))
 
 # 3dsx
-APP_DESCRIPTION :=  3DSCraft
-APP_AUTHOR		:=  Team-Omega
+APP_DESCRIPTION :=  "3DSCraft - Craftus Gen. 4"
+APP_AUTHOR		:=  "Team-Omega"
 ICON			:=	$(META)/icon.png
 
 # CIA
 BANNER_AUDIO	:=	$(META)/banner.wav
 BANNER_IMAGE	:=	$(META)/banner.cgfx
 RSF_PATH		:=	$(META)/app.rsf
+RSF_MANUAL_PATH	:=	$(META)/app_manual.rsf
 LOGO			:=	$(META)/logo.bcma.lz
 ICON_FLAGS		:=	nosavebackups,visible
 
@@ -104,7 +105,7 @@ LIBS		+= -lm `$(PREFIX)pkg-config opusfile --libs`
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(CURDIR) $(PORTLIBS) $(CTRULIB)
+LIBDIRS	:= $(PORTLIBS) $(CTRULIB) $(CURDIR)
 
 
 
@@ -228,18 +229,18 @@ rund: #run dima
 clean-cia:
 	@rm -f $(TARGET).cia $(TARGET).cxi $(TARGET).cfa
 
-cia: clean-cia $(TARGET).cxi $(TARGET).cfa $(TARGET).cia
+cia: clean-cia $(TARGET).cfa $(TARGET).cxi $(TARGET).cia
 
 $(TARGET).cxi:
 	@$(MAKEROM) -o $(TARGET).cxi $(MAKEROM_ARGS)
-	@echo built ... $(TARGET).cxi
+	@echo "built ... $(TARGET).cxi (Code)"
 $(TARGET).cfa:
-	@$(MAKEROM) -o $(TARGET).cfa -rsf $(RSF_PATH) -target t
-	@echo built ... $(TARGET).cfa
+	@$(MAKEROM) -o $(TARGET).cfa -rsf $(RSF_MANUAL_PATH) -target t
+	@echo "built ... $(TARGET).cfa (Manual)"
 
 $(TARGET).cia:
 	@$(MAKEROM) -f cia -o $(TARGET).cia -target t -i $(TARGET).cxi:0:0 -i $(TARGET).cfa:1:1
-	@echo built ... $(TARGET).cia
+	@echo "built ... $(TARGET).cia (Exe)"
 
 #---------------------------------------------------------------------------------
 else

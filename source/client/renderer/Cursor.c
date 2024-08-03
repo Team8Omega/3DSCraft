@@ -35,7 +35,7 @@ void Cursor_Draw(int projUniform, C3D_Mtx* projectionview, int x, int y, int z, 
 	WorldVertex* vtx = cursorVBO;
 	for (int i = 0; i < 6; i++) {
 		const int* offset = DirectionToOffset[i];
-		if (World_GetBlock(x + offset[0], y + offset[1], z + offset[2]) == Block_Air) {
+		if (World_GetBlock(x + offset[0], y + offset[1], z + offset[2]) == BLOCK_AIR) {
 			memcpy(vtx, &block_sides_lut[i * 6], sizeof(WorldVertex) * 6);
 			u8 color = i == highlight ? 65 : 32;
 			for (int j = 0; j < 6; j++) {

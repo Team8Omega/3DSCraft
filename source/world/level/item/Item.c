@@ -14,13 +14,13 @@ static Texture_Map textureMap;
 const char* item_texture_files[] = { ITEM_TEXTURE_FILES };
 #undef A
 
-static struct { Texture_MapIcon totem; } icon;
+// static struct { Texture_MapIcon totem; } icon;
+Texture_MapIcon totem;
 
 void Item_Init() {
-	Texture_MapInit(&textureMap, item_texture_files, sizeof(item_texture_files) / sizeof(item_texture_files[0]));
-#define A(i, n) icon.i = Texture_MapGetIcon(&textureMap, PPRX n)
-	ITEM_TEXTURE_FILES;
-#undef A
+	u16 icon = Texture_MapAdd("block/dirt.png");
+	Texture_MapInit(&textureMap);
+	totem = gTexMapBlock.icons[icon];
 }
 void Item_Deinit() {
 	C3D_TexDelete(&textureMap.texture);
@@ -31,10 +31,10 @@ void* Item_GetTextureMap() {
 }
 
 void Item_GetTexture(Item item, Direction direction, u8 metadata, s16* out_uv) {
-	Texture_MapIcon i = { 0, 0, 0 };
+	Texture_MapIcon i = { 0, 0 };
 	switch (item) {
 		case Item_Totem:
-			i = icon.totem;
+			i = totem;
 			break;
 		default:
 			break;

@@ -1,5 +1,7 @@
 #include "client/renderer/VBOCache.h"
 
+#include "client/Crash.h"
+
 #include <vec/vec.h>
 
 #include <3ds.h>
@@ -15,9 +17,7 @@ void VBOCache_Init() {
 void VBOCache_Deinit() {
 	VBO_Block block;
 	int i;
-	vec_foreach (&freedBlocks, block, i) {
-		linearFree(block.memory);
-	}
+	vec_foreach (&freedBlocks, block, i) { linearFree(block.memory); }
 	vec_deinit(&freedBlocks);
 }
 

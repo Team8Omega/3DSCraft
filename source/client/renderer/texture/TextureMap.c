@@ -4,6 +4,7 @@
 
 #include <3ds.h>
 #include <citro3d.h>
+
 #include <dirent.h>
 #include <malloc.h>
 #include <stdio.h>
@@ -135,11 +136,20 @@ void downscaleImage(u8* data, int size) {
 	}
 }
 
-void Texture_MapInit(Texture_Map* map, const char** files, int num_files) {
+char pathCollect[TEXTURE_MAPTILES * TEXTURE_MAPTILES][512];
+u16 pathNum = 0;
+
+u16 Texture_MapAdd(const char* path) {
+	if (pathNum >= (TEXTURE_MAPTILES * TEXTURE_MAPTILES))
+		Crash("Too many entries for TextureMap\n - you know what this means.");
+
+	strcpy(pathCollect[pathNum], path);
+	return pathNum++;
+}
+
+void Texture_MapInit(Texture_Map* map) {
 	int locX = 0;
 	int locY = 0;
-
-	// printf("TextureMapInit %s\n", files);
 
 	const int mipmapLevels = 2;
 	const int maxSize	   = 4 * TEXTURE_MAPSIZE * TEXTURE_MAPSIZE;
@@ -149,10 +159,11 @@ void Texture_MapInit(Texture_Map* map, const char** files, int num_files) {
 		buffer[i] = 0x000000FF;
 
 	int filei			 = 0;
-	const char* filename = files[filei];
+	const char* filename = pathCollect[0];
 	int c				 = 0;
-	while (filename != NULL && c < (TEXTURE_MAPTILES * TEXTURE_MAPTILES) && filei < num_files) {
-		filename = String_ParsePackName(PACK_VANILLA, PATH_PACK_TEXTURES, filename);
+	while (filename != NULL && c < (TEXTURE_MAPTILES * TEXTURE_MAPTILES) && filei < pathNum) {
+		if (access(filename, F_OK))
+			filename = String_ParsePackName(PACK_VANILLA, PATH_PACK_TEXTURES, filename);
 
 		u32* image;
 		unsigned int w, h;
@@ -166,11 +177,8 @@ void Texture_MapInit(Texture_Map* map, const char** files, int num_files) {
 			}
 
 			Texture_MapIcon* icon = &map->icons[c];
-			icon->textureHash	  = hash(files[filei]);
 			icon->u				  = 256 * locX;
 			icon->v				  = 256 * locY;
-
-			// printf("Stiched texture %s(hash: %u) at %d, %d\n", filename, icon->textureHash, locX, locY);
 
 			locX += TEXTURE_TILESIZE;
 			if (locX == TEXTURE_MAPSIZE) {
@@ -183,7 +191,7 @@ void Texture_MapInit(Texture_Map* map, const char** files, int num_files) {
 			printf("Image size(%d, %d) doesn't match or ptr null(internal error)\n'", w, h);
 		}
 		free(image);
-		filename = files[++filei];
+		filename = pathCollect[++filei];
 		c++;
 	}
 
@@ -217,10 +225,16 @@ void Texture_MapInit(Texture_Map* map, const char** files, int num_files) {
 		size /= 2;
 	}
 
+	pathNum = 0;
+
 	linearFree(tiledImage);
 	linearFree(buffer);
 }
+void Texture_MapDeinit(Texture_Map* map) {
+	C3D_TexDelete(&map->texture);
+}
 
+/*
 Texture_MapIcon Texture_MapGetIcon(Texture_Map* map, char* filename) {
 	u32 h = hash(filename);
 	for (size_t i = 0; i < TEXTURE_MAPTILES * TEXTURE_MAPTILES; i++) {
@@ -230,3 +244,4 @@ Texture_MapIcon Texture_MapGetIcon(Texture_Map* map, char* filename) {
 	}
 	return (Texture_MapIcon){ 0 };
 }
+*/

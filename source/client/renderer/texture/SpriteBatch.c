@@ -111,20 +111,20 @@ void SpriteBatch_PushQuadColor(int x, int y, int z, int w, int h, int rx, int ry
 static float rot = 0.f;
 extern const WorldVertex block_sides_lut[6 * 6];
 // TODO: Größe konfigurierbar machen
-void SpriteBatch_PushIcon(Block block, u8 metadata, int x, int y, int z) {
+void SpriteBatch_PushIcon(BlockId block, u8 metadata, int x, int y, int z) {
 	WorldVertex vertices[6 * 6];
 	memcpy(vertices, block_sides_lut, sizeof(block_sides_lut));
 	for (int i = 0; i < 6; i++) {
 		if (i != Direction_Top && i != Direction_South && i != Direction_West)
 			continue;
 		s16 iconUV[2];
-		Block_GetTexture(block, i, metadata, iconUV);
+		Block_GetBlockTexture(BLOCKS[block], i, metadata, iconUV);
 
 #define oneDivIconsPerRow (32768 / 8)
 #define halfTexel (6)
 
 		u8 color[3];
-		Block_GetColor(block, metadata, i, color);
+		Block_GetBlockColor(BLOCKS[block], metadata, i, color);
 
 		for (int j = 0; j < 5; j++) {
 			int k	   = i * 6 + j;
@@ -139,7 +139,7 @@ void SpriteBatch_PushIcon(Block block, u8 metadata, int x, int y, int z) {
 		WorldVertex topRight	= vertices[i * 6 + 2];
 		WorldVertex topLeft		= vertices[i * 6 + 4];
 
-		C3D_Tex* texture = Block_GetTextureMap();
+		C3D_Tex* texture = &gTexMapBlock.texture;
 
 		s16 color16 = SHADER_RGB(color[0] >> 3, color[1] >> 3, color[2] >> 3);
 		if (i == Direction_South)

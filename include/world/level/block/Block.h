@@ -1,65 +1,74 @@
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
-
+#include "client/renderer/texture/TextureMap.h"
 #include "core/Direction.h"
+#include "util/math/VecMath.h"
+#include "world/level/block/material/Material.h"
+#include "world/phys/Collision.h"
 
-typedef u8 Block;
+typedef struct Block Block;
 
-enum
-{
-	Block_Air,
-	Block_Stone,
-	Block_Dirt,
-	Block_Grass,
-	Block_Cobblestone,
-	Block_Sand,
-	Block_Log,
-	Block_Gravel,
-	Block_Leaves,
-	Block_Glass,
-	Block_Stonebrick,
-	Block_Brick,
-	Block_Planks,
-	Block_Wool,
-	Block_Bedrock,
-	Block_Coarse,
-	Block_Door_Top,
-	Block_Door_Bottom,
-	Block_Snow_Grass,
-	Block_Snow,
-	Block_Obsidian,
-	Block_Netherrack,
-	Block_Sandstone,
-	Block_Smooth_Stone,
-	Block_Crafting_Table,
-	Block_Grass_Path,
-	Block_Water,
-	Block_Lava,
-	Block_Iron_Ore,
-	Block_Coal_Ore,
-	Block_Diamond_Ore,
-	Block_Gold_Ore,
-	Block_Emerald_Ore,
-	Block_Gold_Block,
-	Block_Diamond_Block,
-	Block_Coal_Block,
-	Block_Iron_Block,
-	Block_Emerald_Block,
-	Block_Furnace,
-	Blocks_Count
+typedef struct {
+	bool (*renderAsNormalBlock)();
+	bool (*isOpaqueCube)();
+	u8 (*getRenderType)();
+	void (*textureLoad)(Block *b);
+	int (*getBlockColor)(Direction dir, u8 meta);
+	Texture_MapIcon (*getBlockTexture)(Block *b, Direction dir, u8 meta);
+} BlockVtable;
+
+struct Block {
+	BlockVtable *vptr;		   // virtual table for inheriting block classes.
+	char textureName[64];	   // for texture path
+	char unlocalizedName[64];  // for localized string
+	u16 id;					   // block id, matches enum index.
+	float hardness;			   // how many hits to break block
+	float resistance;		   // explosion resistance
+	Box bounds;				   // bounds
+	MaterialType material;	   // Material Enum
+	u16 icon;				   // index of texture icon
 };
 
-void Block_Init();
-void Block_Deinit();
+extern Texture_Map gTexMapBlock;
 
-void* Block_GetTextureMap();
+Block *Block_Init(const char *unlocalizedName, const char *textureName, u16 id, float resistance, float hardness, MaterialType material,
+				  Box bounds);
 
-void Block_GetTexture(Block block, Direction direction, u8 metadata, s16* out_uv);
+void Block_SetResistance(Block *block, float v);
+void Block_SetHardness(Block *block, float v);
+void Block_SetBounds(Block *block, float3 from, float3 to);
 
-void Block_GetColor(Block block, u8 metadata, Direction direction, u8 out_rgb[]);
+bool Block_ShouldSideBeRendered(Block *block, int x, int y, int z, Direction dir);
+const Material *Block_GetMaterial(Block *block);
 
-bool Block_Opaque(Block block, u8 metadata);
+static inline bool Block_RenderAsNormalBlock(Block *block) {
+	return block->vptr->renderAsNormalBlock();
+}
+static inline bool Block_IsOpaqueCube(Block *block) {
+	return block->vptr->isOpaqueCube();
+}
+static inline u8 Block_GetRenderType(Block *block) {
+	return block->vptr->getRenderType();
+}
+#define colR(c) ((c >> 16) & 0xff)
+#define colG(c) (((c) >> 8) & 0xff)
+#define colB(c) ((c)&0xff)
+static inline void Block_GetBlockColor(Block *b, Direction dir, u8 meta, u8 out_rgb[]) {
+	const int color = b->vptr->getBlockColor(dir, meta);
 
-extern const char* BlockNames[Blocks_Count];
+	out_rgb[0] = colR(color);
+	out_rgb[1] = colG(color);
+	out_rgb[2] = colB(color);
+}
+static inline void Block_GetBlockTexture(Block *b, Direction dir, u8 meta, s16 out_uv[]) {
+	const Texture_MapIcon icon = b->vptr->getBlockTexture(b, dir, meta);
+
+	out_uv[0] = icon.u;
+	out_uv[1] = icon.v;
+}
+static inline float Block_GetHardness(Block *block) {
+	return block->hardness;
+}
+static inline float Block_GetResistance(Block *block) {
+	return block->resistance;
+}

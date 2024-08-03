@@ -21,8 +21,8 @@ You can also change the settings in `sd:/3dscraft/options.ini`.
 
 | Category | Action | OLD 3DS | NEW 3DS |
 | ------------- | ------------- | ------------- | ------------- |
-| Blocks | Place Block | L | ZL |
-| Blocks | Break Block | R | ZR |
+| Blocks | Place BlockId | L | ZL |
+| Blocks | Break BlockId | R | ZR |
 |  |  |  |  |
 | Move | Forward | Circle Pad (Up) | Circle Pad (Up) |
 | Move | Backward | Circle Pad (Down) | Circle Pad (Down) |
@@ -36,8 +36,8 @@ You can also change the settings in `sd:/3dscraft/options.ini`.
 | Camera | Left | Y | C-Stick (Left) |
 | Camera | Right | A | C-Stick (Right) |
 |  |  |  |  |
-| Inventory | Switch Block | DPad (Left) | L/DPad (Left) |
-| Inventory | Switch Block | DPad (Right) | R/DPad (Right) |
+| Inventory | Switch BlockId | DPad (Left) | L/DPad (Left) |
+| Inventory | Switch BlockId | DPad (Right) | R/DPad (Right) |
 |  |  |  |  |
 | Commands | Open Console | Select | Select |
 |  |  |  |  |

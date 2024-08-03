@@ -9,8 +9,14 @@
 #include "Globals.h"
 #include "util/math/NumberUtils.h"
 
+#include "client/Crash.h"
+#include "util/Paths.h"
+
+#include <dirent.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #ifdef DEBUG_UI
 #define STATUS_LINES (240 / 8 / 2)
@@ -40,7 +46,8 @@ typedef enum
 	MENUSTATE_NONE,
 	MENUSTATE_LOG,
 	MENUSTATE_MENUROOT,
-	MENUSTATE_MENUTEST,
+	MENUSTATE_MENUDBGCOMMON,
+	MENUSTATE_MENUDBGINGAME,
 	MENUSTATE_COUNT
 } DebugUI_State;
 
@@ -50,18 +57,20 @@ static DebugUI_State menuState	   = MENUSTATE_NONE;
 static DebugUI_State menuStateLast = MENUSTATE_NONE;
 static u8 debugMenuOptionNum	   = 0;
 
-static const DebugUI_Menu debugMenus[MENUSTATE_COUNT - 2] = { { // Root Menu
-																{
-																	{ 3, NULL, "sub" },	 // to sub menu
-																	{ 1, NULL, "log" }	 // to log
+static const DebugUI_Menu debugMenus[MENUSTATE_COUNT - 2] = { { {
+																	{ 3, NULL, "Debug Common" },  // to sub menu
+																	{ 4, NULL, "Debug Ingame" }	  // to log
 																},
 																"Root" },
-															  { // Sub Test Menu
-																{
+															  { {
+																	{ 0xFF, NULL, "(didnt work)" }	// delete sdmc
+																},
+																"Debug Common" },
+															  { {
 																	{ 2, NULL, "root" },  // back to root
 																	{ 0, NULL, "close" }  // close
 																},
-																"Sub Test Menu" } };
+																"Debug Ingame" } };
 #endif
 void DebugUI_Init() {
 #ifdef DEBUG_LOG
@@ -186,7 +195,8 @@ void DebugUI_MenuCall(const DebugUI_MenuOption* option) {
 	if (option->onPressFunc)
 		option->onPressFunc();
 
-	DebugUI_MenuSet(option->onPressMenuID);
+	if (option->onPressMenuID != 0xFF)
+		DebugUI_MenuSet(option->onPressMenuID);
 }
 void DebugUI_DrawMenu() {
 	SpriteBatch_PushSingleColorQuad(0, 0, 99, 320, 240, SHADER_RGB(2, 2, 2));

@@ -75,8 +75,8 @@ void Player_Init() {
 	gPlayer.inventorySite		= 1;
 	{
 		int l				   = 0;
-		gPlayer.inventory[l++] = (ItemStack){ Block_Stone, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Dirt, 0, 1 };
+		gPlayer.inventory[l++] = (ItemStack){ BLOCK_STONE, 0, 1 };
+		/*gPlayer.inventory[l++] = (ItemStack){ Block_Dirt, 0, 1 };
 		gPlayer.inventory[l++] = (ItemStack){ Block_Grass, 0, 1 };
 		gPlayer.inventory[l++] = (ItemStack){ Block_Cobblestone, 0, 1 };
 		gPlayer.inventory[l++] = (ItemStack){ Block_Sand, 0, 1 };
@@ -114,10 +114,10 @@ void Player_Init() {
 		gPlayer.inventory[l++] = (ItemStack){ Block_Emerald_Block, 0, 1 };
 		gPlayer.inventory[l++] = (ItemStack){ Block_Emerald_Ore, 0, 1 };
 		gPlayer.inventory[l++] = (ItemStack){ Block_Furnace, 0, 1 };
-		// gPlayer.inventory[l++] = (ItemStack){Item_Totem, 0, 1};
+		// gPlayer.inventory[l++] = (ItemStack){Item_Totem, 0, 1};*/
 
 		for (int i = 0; i < INVENTORY_QUICKSELECT_MAXSLOTS; i++)
-			gPlayer.quickSelectBar[i] = (ItemStack){ Block_Air, 0, 0 };
+			gPlayer.quickSelectBar[i] = (ItemStack){ BLOCK_AIR, 0, 0 };
 	}
 
 	gPlayer.autoJumpEnabled = false;
@@ -138,18 +138,18 @@ void Player_Update(Sound* sound) {
 	if (gPlayer.velocity.y <= -12) {
 		// gPlayer.rndy;
 		gPlayer.rndy = round(gPlayer.velocity.y);
-		if (World_GetBlock(gPlayer.position.x, gPlayer.position.y - 1, gPlayer.position.z) != Block_Air) {
+		if (World_GetBlock(gPlayer.position.x, gPlayer.position.y - 1, gPlayer.position.z) != BLOCK_AIR) {
 			gPlayer.hp	 = gPlayer.hp + gPlayer.rndy;
 			gPlayer.rndy = 0;
 		}
 	}
 	// Fire damage
-	if (World_GetBlock(f3_unpack(gPlayer.position)) ==
-		Block_Lava /*||World_GetBlock(gPlayer.world,f3_unpack(gPlayer.position)) == Block_Fire*/) {
-		DebugUI_Log("ur burning lol");
-		gPlayer.dmg = (Damage){ .cause = DAMAGECAUSE_FIRE, .time = 10 };
-		OvertimeDamage();
-	}
+	// if (World_GetBlock(f3_unpack(gPlayer.position)) ==
+	//	Block_Lava /*||World_GetBlock(gPlayer.world,f3_unpack(gPlayer.position)) == Block_Fire*/) {
+	//	DebugUI_Log("ur burning lol");
+	//	gPlayer.dmg = (Damage){ .cause = DAMAGECAUSE_FIRE, .time = 10 };
+	//	OvertimeDamage();
+	//}
 	// Hunger
 	// if (gPlayer.difficulty!=0){
 	//  1000000000 having this here as reference on how long 1 second is
@@ -179,7 +179,7 @@ void Player_Update(Sound* sound) {
 				DebugUI_Log("No spawn was set");
 				gPlayer.position.x = 0.0;
 				int spawnY		   = 1;
-				while (World_GetBlock(gPlayer.spawnx, spawnY, gPlayer.spawnz) != Block_Air)
+				while (World_GetBlock(gPlayer.spawnx, spawnY, gPlayer.spawnz) != BLOCK_AIR)
 					spawnY++;
 
 				bool shouldOffset  = gWorld.genSettings.type != WorldGen_SuperFlat;
@@ -194,7 +194,7 @@ void Player_Update(Sound* sound) {
 				}
 				gPlayer.position.x = gPlayer.spawnx;
 				int spawnY		   = 1;
-				while (World_GetBlock(gPlayer.spawnx, spawnY, gPlayer.spawnz) != Block_Air)
+				while (World_GetBlock(gPlayer.spawnx, spawnY, gPlayer.spawnz) != BLOCK_AIR)
 					spawnY++;
 
 				bool shouldOffset  = gWorld.genSettings.type != WorldGen_SuperFlat;
@@ -221,8 +221,8 @@ bool Player_CanMove(float3 new) {
 				int pX = FastFloor(new.x) + x;
 				int pY = FastFloor(new.y) + y;
 				int pZ = FastFloor(new.z) + z;
-				if (World_GetBlock(pX, pY, pZ) != Block_Air && World_GetBlock(pX, pY, pZ) != Block_Lava &&
-					World_GetBlock(pX, pY, pZ) != Block_Water) {
+				if (World_GetBlock(pX, pY, pZ) != BLOCK_AIR /* && World_GetBlock(pX, pY, pZ) != Block_Lava &&
+					World_GetBlock(pX, pY, pZ) != Block_Water */) {
 					if (AABB_Overlap(new.x - PLAYER_COLLISIONBOX_SIZE / 2.f, new.y, new.z - PLAYER_COLLISIONBOX_SIZE / 2.f,
 									 PLAYER_COLLISIONBOX_SIZE, PLAYER_HEIGHT, PLAYER_COLLISIONBOX_SIZE, pX, pY, pZ, 1.f, 1.f, 1.f)) {
 						return false;
@@ -291,7 +291,7 @@ void Player_Move(float dt, float3 accl) {
 						int pX = FastFloor(axisStep.x) + x;
 						int pY = FastFloor(axisStep.y) + y;
 						int pZ = FastFloor(axisStep.z) + z;
-						if (World_GetBlock(pX, pY, pZ) != Block_Air) {
+						if (World_GetBlock(pX, pY, pZ) != BLOCK_AIR) {
 							Box blockBox = Box_Create(pX, pY, pZ, 1, 1, 1);
 
 							float3 normal = f3_new(0.f, 0.f, 0.f);
@@ -329,11 +329,11 @@ void Player_Move(float dt, float3 accl) {
 
 		if (wallCollision && gPlayer.autoJumpEnabled) {
 			float3 nrmDiff = f3_nrm(f3_sub(newPos, gPlayer.position));
-			Block block =
+			BlockId block =
 				World_GetBlock(FastFloor(finalPos.x + nrmDiff.x), FastFloor(finalPos.y + nrmDiff.y) + 2, FastFloor(finalPos.z + nrmDiff.z));
-			Block landingBlock =
+			BlockId landingBlock =
 				World_GetBlock(FastFloor(finalPos.x + nrmDiff.x), FastFloor(finalPos.y + nrmDiff.y) + 1, FastFloor(finalPos.z + nrmDiff.z));
-			if (block == Block_Air && landingBlock != Block_Air)
+			if (block == BLOCK_AIR && landingBlock != BLOCK_AIR)
 				Player_Jump(accl);
 		}
 
@@ -382,7 +382,7 @@ void Player_PlaceBlock(Sound* sound) {
 
 void Player_BreakBlock() {
 	if (gPlayer.blockInActionRange && gPlayer.breakPlaceTimeout < 0.f) {
-		World_SetBlock(gPlayer.viewRayCast.x, gPlayer.viewRayCast.y, gPlayer.viewRayCast.z, Block_Air);
+		World_SetBlock(gPlayer.viewRayCast.x, gPlayer.viewRayCast.y, gPlayer.viewRayCast.z, BLOCK_AIR);
 	}
 	if (gPlayer.breakPlaceTimeout < 0.f)
 		gPlayer.breakPlaceTimeout = PLAYER_PLACE_REPLACE_TIMEOUT;

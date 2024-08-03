@@ -55,7 +55,8 @@ void initCheck() {
 									   "block/stone.png",
 			   F_OK))
 		Crash(
-			"Please provide assets, check\n \'github.com/Team8Omega/3DSCraft-ResourcePacker\'\nfor infos.\n\nFILENOTFOUND: "
+			"Please provide assets, check\n \'github.com/Team8Omega/3DSCraft-ResourcePacker\'\nfor infos.\nYou have to validly provide "
+			"your own assets of the game you purchased, as we do not support piracy.\n\nFILENOTFOUND: "
 			"block/stone.png");
 
 	// Check for valid license

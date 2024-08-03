@@ -20,7 +20,7 @@ void Chunk_GenerateHeightmap(Chunk* chunk) {
 					if (Cluster_IsEmpty(&chunk->clusters[i]))
 						continue;
 					for (int j = CHUNK_SIZE - 1; j >= 0; --j) {
-						if (chunk->clusters[i].blocks[x][j][z] != Block_Air) {
+						if (chunk->clusters[i].blocks[x][j][z] != BLOCK_AIR) {
 							chunk->heightmap[x][z] = i * CHUNK_SIZE + j + 1;
 							i					   = -1;
 							break;
