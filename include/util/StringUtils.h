@@ -25,3 +25,11 @@ static inline const char* String_ParseTexturePath(const char* folder, const char
 	snprintf(path, len, "%s/%s.png", folder, name);
 	return path;
 }
+static inline const char* String_ParseTexturePrefix(const char* folder, const char* name, const char* prefix) {
+	size_t len = strlen(name) + strlen(prefix) + 13;
+
+	char* path = (char*)malloc(len);
+
+	snprintf(path, len, "%s/%s%s.png", folder, name, prefix);
+	return path;
+}

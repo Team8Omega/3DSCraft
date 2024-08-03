@@ -104,3 +104,5 @@ void World_UpdateChunkCache(int orginX, int orginZ);
 int World_GetHeight(int x, int z);
 
 bool World_IsBlockOpaqueCube(int x, int y, int z);
+
+const Material* World_GetMaterial(int x, int y, int z);

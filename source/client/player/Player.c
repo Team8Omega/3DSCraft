@@ -27,9 +27,6 @@ void Player_InitModel() {
 }
 
 void Player_Draw() {
-	if (gCamera.mode == CameraMode_First)
-		return;
-
 	playerEntity.position = gPlayer.position;
 	++playerEntity.position.y;
 	playerEntity.yaw = gPlayer.yaw - DEG_TO_RAD * 180;
@@ -76,9 +73,9 @@ void Player_Init() {
 	{
 		int l				   = 0;
 		gPlayer.inventory[l++] = (ItemStack){ BLOCK_STONE, 0, 1 };
-		/*gPlayer.inventory[l++] = (ItemStack){ Block_Dirt, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Grass, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Cobblestone, 0, 1 };
+		// gPlayer.inventory[l++] = (ItemStack){ Block_Dirt, 0, 1 };
+		gPlayer.inventory[l++] = (ItemStack){ BLOCK_GRASS, 0, 1 };
+		/*gPlayer.inventory[l++] = (ItemStack){ Block_Cobblestone, 0, 1 };
 		gPlayer.inventory[l++] = (ItemStack){ Block_Sand, 0, 1 };
 		gPlayer.inventory[l++] = (ItemStack){ Block_Log, 0, 1 };
 		gPlayer.inventory[l++] = (ItemStack){ Block_Leaves, 0, 1 };

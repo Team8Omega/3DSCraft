@@ -1,7 +1,7 @@
 #include "world/level/block/material/MaterialColor.h"
 
 // clang-format off
-const u16 COLORS[COLOR_COUNT] = {
+const u32 COLORS[COLOR_COUNT] = {
 	[COLOR_AIR]		= 0,
 	[COLOR_GRASS]	= 8368696,
 	[COLOR_SAND]	= 16247203,

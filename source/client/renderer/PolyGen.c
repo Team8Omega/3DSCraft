@@ -347,7 +347,7 @@ void PolyGen_GeneratePolygons(WorkQueue* queue, WorkerItem item, void* this) {
 					int offsetY = face.y + i * CHUNK_SIZE;
 
 					s16 iconUV[2];
-					Block_GetBlockTexture(BLOCKS[face.block], face.direction, face.metadata, iconUV);
+					Block_GetBlockTexture(BLOCKS[face.block], face.direction, face.x, face.y, face.z, face.metadata, iconUV);
 
 					WorldVertex* data = face.transparent ? transparentData : opaqueData;
 					memcpy(data, &block_sides_lut[face.direction * 6], sizeof(WorldVertex) * 6);

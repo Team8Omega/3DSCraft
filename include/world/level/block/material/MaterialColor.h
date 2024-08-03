@@ -21,4 +21,4 @@ typedef enum
 	COLOR_COUNT
 } MaterialColor;
 
-extern const u16 COLORS[COLOR_COUNT];
+extern const u32 COLORS[COLOR_COUNT];

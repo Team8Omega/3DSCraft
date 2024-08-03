@@ -14,8 +14,8 @@ static Texture_Map textureMap;
 const char* item_texture_files[] = { ITEM_TEXTURE_FILES };
 #undef A
 
-// static struct { Texture_MapIcon totem; } icon;
-Texture_MapIcon totem;
+// static struct { Icon totem; } icon;
+Icon totem;
 
 void Item_Init() {
 	u16 icon = Texture_MapAdd("block/dirt.png");
@@ -31,7 +31,7 @@ void* Item_GetTextureMap() {
 }
 
 void Item_GetTexture(Item item, Direction direction, u8 metadata, s16* out_uv) {
-	Texture_MapIcon i = { 0, 0 };
+	Icon i = { 0, 0 };
 	switch (item) {
 		case Item_Totem:
 			i = totem;

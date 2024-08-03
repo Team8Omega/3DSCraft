@@ -3,8 +3,10 @@
 #include "client/renderer/texture/TextureMap.h"
 #include "core/Direction.h"
 #include "util/math/VecMath.h"
-#include "world/level/block/material/Material.h"
 #include "world/phys/Collision.h"
+
+#include "Blocks.h"
+#include "material/Material.h"
 
 typedef struct Block Block;
 
@@ -12,27 +14,26 @@ typedef struct {
 	bool (*renderAsNormalBlock)();
 	bool (*isOpaqueCube)();
 	u8 (*getRenderType)();
-	void (*textureLoad)(Block *b);
-	int (*getBlockColor)(Direction dir, u8 meta);
-	Texture_MapIcon (*getBlockTexture)(Block *b, Direction dir, u8 meta);
+	int (*getBlockColor)(Block *b, Direction dir, u8 meta);
+	u16 (*getBlockTexture)(Block *b, Direction dir, int x, int y, int z, u8 meta);
+	void (*registerIcons)(Block *b);
 } BlockVtable;
 
 struct Block {
-	BlockVtable *vptr;		   // virtual table for inheriting block classes.
-	char textureName[64];	   // for texture path
-	char unlocalizedName[64];  // for localized string
-	u16 id;					   // block id, matches enum index.
-	float hardness;			   // how many hits to break block
-	float resistance;		   // explosion resistance
-	Box bounds;				   // bounds
-	MaterialType material;	   // Material Enum
-	u16 icon;				   // index of texture icon
+	BlockVtable *vptr;		// virtual table for inheriting block classes.
+	char name[64];			// for texture path
+	BlockId id;				// block id, matches enum index.
+	float hardness;			// how many hits to break block
+	float resistance;		// explosion resistance
+	Box bounds;				// bounds
+	MaterialType material;	// Material Enum
+	u16 icon;				// index of texture icon
 };
 
 extern Texture_Map gTexMapBlock;
 
-Block *Block_Init(const char *unlocalizedName, const char *textureName, u16 id, float resistance, float hardness, MaterialType material,
-				  Box bounds);
+Block *Block_InitWithBounds(const char *name, BlockId id, float resistance, float hardness, MaterialType material, Box bounds);
+Block *Block_Init(const char *name, BlockId id, float resistance, float hardness, MaterialType material);
 
 void Block_SetResistance(Block *block, float v);
 void Block_SetHardness(Block *block, float v);
@@ -54,17 +55,20 @@ static inline u8 Block_GetRenderType(Block *block) {
 #define colG(c) (((c) >> 8) & 0xff)
 #define colB(c) ((c)&0xff)
 static inline void Block_GetBlockColor(Block *b, Direction dir, u8 meta, u8 out_rgb[]) {
-	const int color = b->vptr->getBlockColor(dir, meta);
+	const int color = b->vptr->getBlockColor(b, dir, meta);
 
 	out_rgb[0] = colR(color);
 	out_rgb[1] = colG(color);
 	out_rgb[2] = colB(color);
 }
-static inline void Block_GetBlockTexture(Block *b, Direction dir, u8 meta, s16 out_uv[]) {
-	const Texture_MapIcon icon = b->vptr->getBlockTexture(b, dir, meta);
+static inline void Block_GetBlockTexture(Block *b, Direction dir, int x, int y, int z, u8 meta, s16 out_uv[]) {
+	const Icon icon = gTexMapBlock.icons[b->vptr->getBlockTexture(b, dir, x, y, z, meta)];
 
 	out_uv[0] = icon.u;
 	out_uv[1] = icon.v;
+}
+static inline u16 Block_GetIcon(Block *b, Direction dir, u8 meta) {
+	return b->vptr->getBlockTexture(b, dir, 0, 0, 0, meta);
 }
 static inline float Block_GetHardness(Block *block) {
 	return block->hardness;

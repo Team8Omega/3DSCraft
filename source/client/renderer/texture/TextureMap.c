@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 #include "client/Crash.h"
+#include "client/gui/DebugUI.h"
 #include "util/Paths.h"
 #include "util/StringUtils.h"
 
@@ -27,7 +28,9 @@ u32 hash(const char* str) {
 void tileImage32(u32* src, u8* dst, int sizex, int sizez);
 
 void Texture_Load(C3D_Tex* result, const char* filename) {
-	const char* filepath = String_ParsePackName(PACK_VANILLA, PATH_PACK_TEXTURES, filename);
+	const char* filepath = filename;
+	if (access(filename, F_OK))
+		filepath = String_ParsePackName(PACK_VANILLA, PATH_PACK_TEXTURES, filename);
 
 	u32* image		   = NULL;
 	unsigned int width = 255, height = 255;
@@ -53,9 +56,6 @@ void Texture_Load(C3D_Tex* result, const char* filename) {
 
 		C3D_TexInitVRAM(result, width, height, GPU_RGBA8);
 
-		if (result == NULL)
-			Crash("Failed to allocate texture in VRAM:\n %s\n Dimensions: %dx%d", filepath, width, height);
-
 		if (width < 64 || height < 64)
 			tileImage32(image, (u8*)imgInLinRam, width, height);
 
@@ -73,7 +73,8 @@ void Texture_Load(C3D_Tex* result, const char* filename) {
 
 		linearFree(imgInLinRam);
 	} else {
-		Crash("Failed to load texture %s\nCode %d", filepath, error);
+		DebugUI_Log("Failed to load texture %s: Code %d", filepath, error);
+		Texture_Load(result, "romfs:/error.png");
 	}
 }
 
@@ -176,9 +177,9 @@ void Texture_MapInit(Texture_Map* map) {
 				}
 			}
 
-			Texture_MapIcon* icon = &map->icons[c];
-			icon->u				  = 256 * locX;
-			icon->v				  = 256 * locY;
+			Icon* icon = &map->icons[c];
+			icon->u	   = 256 * locX;
+			icon->v	   = 256 * locY;
 
 			locX += TEXTURE_TILESIZE;
 			if (locX == TEXTURE_MAPSIZE) {
@@ -186,9 +187,15 @@ void Texture_MapInit(Texture_Map* map) {
 				locX = 0;
 			}
 		} else {
-			if (error != 0)
-				Crash("Failed to load texture %s\nCode %d", filename, error);
-			printf("Image size(%d, %d) doesn't match or ptr null(internal error)\n'", w, h);
+#ifdef DEBUG_LOG
+			if (error != 0) {
+				char name[512];
+				strcpy(name, filename);
+				DebugUI_Log("Failed to load texture %s: Code %d", name, error);
+			}
+#endif
+			map->icons[c].u = 0;
+			map->icons[c].v = 0;
 		}
 		free(image);
 		filename = pathCollect[++filei];
@@ -235,13 +242,13 @@ void Texture_MapDeinit(Texture_Map* map) {
 }
 
 /*
-Texture_MapIcon Texture_MapGetIcon(Texture_Map* map, char* filename) {
+Icon Texture_MapGetIcon(Texture_Map* map, char* filename) {
 	u32 h = hash(filename);
 	for (size_t i = 0; i < TEXTURE_MAPTILES * TEXTURE_MAPTILES; i++) {
 		if (h == map->icons[i].textureHash) {
 			return map->icons[i];
 		}
 	}
-	return (Texture_MapIcon){ 0 };
+	return (Icon){ 0 };
 }
 */

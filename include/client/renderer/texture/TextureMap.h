@@ -11,16 +11,16 @@ void Texture_Load(C3D_Tex* result, const char* filename);
 
 typedef struct {
 	s16 u, v;
-} Texture_MapIcon;
+} Icon;
 
 typedef struct {
 	C3D_Tex texture;
-	Texture_MapIcon icons[TEXTURE_MAPTILES * TEXTURE_MAPTILES];
+	Icon icons[TEXTURE_MAPTILES * TEXTURE_MAPTILES];
 } Texture_Map;
 
 u16 Texture_MapAdd(const char* path);
 void Texture_MapInit(Texture_Map* map);
-// Texture_MapIcon Texture_MapGetIcon(Texture_Map* map, char* filename);
+// Icon Texture_MapGetIcon(Texture_Map* map, char* filename);
 void Texture_MapDeinit(Texture_Map* map);
 
 void Texture_TileImage8(u8* src, u8* dst, int size);

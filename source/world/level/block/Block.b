@@ -32,52 +32,52 @@ const char* block_texture_files[] = { TEXTURE_FILES };
 #undef A
 
 static struct {
-	Texture_MapIcon stone;
-	Texture_MapIcon dirt;
-	Texture_MapIcon cobblestone;
-	Texture_MapIcon grass_side;
-	Texture_MapIcon grass_top;
-	Texture_MapIcon stonebrick;
-	Texture_MapIcon sand;
-	Texture_MapIcon oaklog_side;
-	Texture_MapIcon oaklog_top;
-	Texture_MapIcon leaves_oak;
-	Texture_MapIcon glass;
-	Texture_MapIcon brick;
-	Texture_MapIcon oakplanks;
-	Texture_MapIcon wool;
-	Texture_MapIcon bedrock;
-	Texture_MapIcon gravel;
-	Texture_MapIcon coarse;
-	Texture_MapIcon door_top;
-	Texture_MapIcon door_bottom;
-	Texture_MapIcon snow_grass_side;
-	Texture_MapIcon snow;
-	Texture_MapIcon obsidian;
-	Texture_MapIcon netherrack;
-	Texture_MapIcon sandstone_side;
-	Texture_MapIcon sandstone_top;
-	Texture_MapIcon sandstone_bottom;
-	Texture_MapIcon smooth_stone;
-	Texture_MapIcon grass_path_side;
-	Texture_MapIcon grass_path_top;
-	Texture_MapIcon crafting_table_side;
-	Texture_MapIcon crafting_table_top;
-	Texture_MapIcon lava;
-	Texture_MapIcon water;
-	Texture_MapIcon iron_ore;
-	Texture_MapIcon iron_block;
-	Texture_MapIcon gold_block;
-	Texture_MapIcon gold_ore;
-	Texture_MapIcon diamond_ore;
-	Texture_MapIcon diamond_block;
-	Texture_MapIcon emerald_block;
-	Texture_MapIcon emerald_ore;
-	Texture_MapIcon coal_block;
-	Texture_MapIcon coal_ore;
-	Texture_MapIcon furnace_front;
-	Texture_MapIcon furnace_side;
-	Texture_MapIcon furnace_top;
+	Icon stone;
+	Icon dirt;
+	Icon cobblestone;
+	Icon grass_side;
+	Icon grass_top;
+	Icon stonebrick;
+	Icon sand;
+	Icon oaklog_side;
+	Icon oaklog_top;
+	Icon leaves_oak;
+	Icon glass;
+	Icon brick;
+	Icon oakplanks;
+	Icon wool;
+	Icon bedrock;
+	Icon gravel;
+	Icon coarse;
+	Icon door_top;
+	Icon door_bottom;
+	Icon snow_grass_side;
+	Icon snow;
+	Icon obsidian;
+	Icon netherrack;
+	Icon sandstone_side;
+	Icon sandstone_top;
+	Icon sandstone_bottom;
+	Icon smooth_stone;
+	Icon grass_path_side;
+	Icon grass_path_top;
+	Icon crafting_table_side;
+	Icon crafting_table_top;
+	Icon lava;
+	Icon water;
+	Icon iron_ore;
+	Icon iron_block;
+	Icon gold_block;
+	Icon gold_ore;
+	Icon diamond_ore;
+	Icon diamond_block;
+	Icon emerald_block;
+	Icon emerald_ore;
+	Icon coal_block;
+	Icon coal_ore;
+	Icon furnace_front;
+	Icon furnace_side;
+	Icon furnace_top;
 } icon;
 
 void Block_Init() {
@@ -95,7 +95,7 @@ void* Block_GetTextureMap() {
 }
 
 void Block_GetBlockTexture(Block block, Direction direction, u8 metadata, s16* out_uv) {
-	Texture_MapIcon i = { 0, 0, 0 };
+	Icon i = { 0, 0, 0 };
 	switch (block) {
 		case BLOCK_AIR:
 			return;

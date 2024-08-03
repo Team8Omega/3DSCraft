@@ -118,7 +118,7 @@ void SpriteBatch_PushIcon(BlockId block, u8 metadata, int x, int y, int z) {
 		if (i != Direction_Top && i != Direction_South && i != Direction_West)
 			continue;
 		s16 iconUV[2];
-		Block_GetBlockTexture(BLOCKS[block], i, metadata, iconUV);
+		Block_GetBlockTexture(BLOCKS[block], i, x, -1, z, metadata, iconUV);
 
 #define oneDivIconsPerRow (32768 / 8)
 #define halfTexel (6)

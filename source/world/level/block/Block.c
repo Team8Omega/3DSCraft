@@ -16,28 +16,33 @@ static u8 getRenderType() {
 static bool isOpaqueCube() {
 	return true;
 }
-static void textureLoad(Block* block) {
-	const char* path = String_ParseTexturePath("block", block->textureName);
+static void registerIcons(Block* block) {
+	const char* path = String_ParseTexturePath("block", block->name);
 	block->icon		 = Texture_MapAdd(path);
 }
-static int getBlockColor(Direction dir, u8 meta) {
+static int getBlockColor(Block* b, Direction dir, u8 meta) {
 	return 0xFFFFFFFF;
 }
-static Texture_MapIcon getBlockTexture(Block* block, Direction dir, u8 metadata) {
-	return gTexMapBlock.icons[block->icon];
+static u16 getBlockTexture(Block* block, Direction dir, int x, int y, int z, u8 metadata) {
+	return block->icon;
 }
 
 static BlockVtable vtable_default = {
 	.renderAsNormalBlock = renderAsNormalBlock,
 	.getRenderType		 = getRenderType,
 	.isOpaqueCube		 = isOpaqueCube,
-	.textureLoad		 = textureLoad,
+	.registerIcons		 = registerIcons,
 	.getBlockColor		 = getBlockColor,
 	.getBlockTexture	 = getBlockTexture,
 };
 
-Block* Block_Init(const char* unlocalizedName, const char* textureName, u16 id, float resistance, float hardness, MaterialType material,
-				  Box bounds) {
+static const Box boxDefault = { { { 0.0F, 0.0F, 0.0F } }, { { 1.0F, 1.0F, 1.0F } } };
+
+Block* Block_Init(const char* name, BlockId id, float resistance, float hardness, MaterialType material) {
+	return Block_InitWithBounds(name, id, resistance, hardness, material, boxDefault);
+}
+
+Block* Block_InitWithBounds(const char* name, BlockId id, float resistance, float hardness, MaterialType material, Box bounds) {
 	Block* b = (Block*)malloc(sizeof(Block));
 
 	b->vptr = (BlockVtable*)malloc(sizeof(BlockVtable));
@@ -48,16 +53,8 @@ Block* Block_Init(const char* unlocalizedName, const char* textureName, u16 id, 
 	Block_SetHardness(b, hardness);
 	b->id		= id;
 	b->material = material;
-	b->bounds	= bounds;
-	strcpy(b->unlocalizedName, unlocalizedName);
-
-	if (!textureName) {
-		b->icon = 1;
-		return b;
-	}
-
-	strcpy(b->textureName, textureName);
-	b->vptr->textureLoad(b);
+	memcpy(&b->bounds, &bounds, sizeof(Box));
+	strcpy(b->name, name);
 
 	return b;
 }
@@ -70,9 +67,6 @@ void Block_SetHardness(Block* b, float v) {
 
 	if (b->resistance < v * 5.f)
 		b->resistance = v * 5.f;
-}
-void Block_SetBlockUnbreakable(Block* b) {
-	Block_SetHardness(b, -1.f);
 }
 void Block_SetBounds(Block* b, float3 from, float3 to) {
 	b->bounds.min = from;

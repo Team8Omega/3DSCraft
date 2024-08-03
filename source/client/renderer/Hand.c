@@ -38,7 +38,7 @@ void Hand_Draw(int projUniform, C3D_Mtx* projection, ItemStack stack) {
 	}
 	if (stack.amount == 0)
 		Mtx_RotateZ(&model, DEG_TO_RAD * 40.f, true);
-	Mtx_Scale(&model, 0.28f, 0.28f, stack.amount == 0 ? 0.8f : 0.28f);
+	Mtx_Scale(&model, 0.28f, 0.28f, stack.amount == 0 ? 0.7f : 0.28f);
 
 	Mtx_Multiply(&pm, projection, &model);
 
@@ -47,9 +47,11 @@ void Hand_Draw(int projUniform, C3D_Mtx* projection, ItemStack stack) {
 	memcpy(handVBO, block_sides_lut, sizeof(block_sides_lut));
 	for (int i = 0; i < 6; i++) {
 		if (stack.amount > 0) {
+			C3D_TexBind(0, &gTexMapBlock.texture);
+
 			s16 iconUV[2];
 			u8 color[3];
-			Block_GetBlockTexture(BLOCKS[stack.block], i, stack.meta, iconUV);
+			Block_GetBlockTexture(BLOCKS[stack.block], i, 0, -1, 0, stack.meta, iconUV);
 			Block_GetBlockColor(BLOCKS[stack.block], stack.meta, i, color);
 
 #define oneDivIconsPerRow (32768 / 8)

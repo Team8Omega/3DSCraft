@@ -58,8 +58,8 @@ bool Raycast_Cast(float3 inpos, float3 raydir, Raycast_Result* out) {
 			mapZ += stepZ;
 			side = 2;
 		}
-		// if (World_GetBlock(mapX, mapY, mapZ) != BLOCK_AIR || World_GetBlock(mapX, mapY, mapZ) == Block_Lava)
-		//	hit = 1;
+		if (World_GetBlock(mapX, mapY, mapZ) != BLOCK_AIR /* || World_GetBlock(mapX, mapY, mapZ) == Block_Lava*/)
+			hit = 1;
 		// if (gWorld.errFlags & World_ErrUnloadedBlockRequested) break;
 
 		if (steps++ > INF)

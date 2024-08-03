@@ -6,7 +6,6 @@
 #include "client/renderer/Cursor.h"
 #include "world/level/block/Block.h"
 
-
 #include "client/Crash.h"
 #include "client/gui/DebugUI.h"
 
@@ -215,14 +214,16 @@ void WorldRenderer_Render(float iod) {
 
 	renderWorld();
 
-	Player_Draw();
-
-	Clouds_Render(projectionUniform, &gCamera.vp, gPlayer.position.x, gPlayer.position.z);
-
-	if (gCamera.mode == CameraMode_First)
+	if (gCamera.mode == CameraMode_First) {
 		Hand_Draw(projectionUniform, &gCamera.projection, gPlayer.quickSelectBar[gPlayer.quickSelectBarSlot]);
+	} else {
+		Player_Draw();
+	}
 
-	if (gPlayer.blockInActionRange)
+	if (gPlayer.blockInActionRange) {
 		Cursor_Draw(projectionUniform, &gCamera.vp, gPlayer.viewRayCast.x, gPlayer.viewRayCast.y, gPlayer.viewRayCast.z,
 					gPlayer.viewRayCast.direction);
+	}
+
+	Clouds_Render(projectionUniform, &gCamera.vp, gPlayer.position.x, gPlayer.position.z);
 }
