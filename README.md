@@ -1,47 +1,45 @@
 # 3DSCraft
-Yet another revival of craftus, updating to more recent behavior and rebrandings.
+Yet another revival of craftus, fourth generation, updating to more recent behavior and rebrandings.
 
 ## Building
 - Install Devkitpro
 - run make, read the errors properly.
 - Get 3DSCraft.cia/.3dsx :)
 
-You'll need a hacked system that can load homebrew for this to run (citra is good for testing but i haven't been able to get most of the controls working there)
+You'll need a hacked system that can load homebrew for this to run
 
-We moved our old repo to this fork, to keep the long history of craftus intact, but noticed that the history wasnt kept on this fork...
+We moved our old repo to this fork, here you can see the old commit history (very messy and bad):
 https://github.com/EinfachEli08/3DSCraft (old repo)
 
 This was forked from Onixiya/craftus: https://github.com/Onixiya/craftus
 
+You can change following controls in `sd:/3dscraft/options.ini`:
 
-After launching it for the first time, you can change the controls in `sd:/3dscraft/options.ini`.
-You can also change the settings in `sd:/3dscraft/options.ini`.
+## Default Controls
 
-## Controls
-
-| Category | Action | OLD 3DS | NEW 3DS |
-| ------------- | ------------- | ------------- | ------------- |
-| Blocks | Place BlockId | L | ZL |
-| Blocks | Break BlockId | R | ZR |
-|  |  |  |  |
-| Move | Forward | Circle Pad (Up) | Circle Pad (Up) |
-| Move | Backward | Circle Pad (Down) | Circle Pad (Down) |
-| Move | Left | Circle Pad (Left) | Circle Pad (Left) |
-| Move | Right | Circle Pad (Right) | Circle Pad (Right) |
-| Move | Jump | DPad (Up) | A/B/DPad (Up) |
-| Move | Shift | DPad (Down) | Y/X/DPad (Down) |
-|  |  |  |  |
-| Camera | Up | X | C-Stick (Up) |
-| Camera | Down | B | C-Stick (Down) |
-| Camera | Left | Y | C-Stick (Left) |
-| Camera | Right | A | C-Stick (Right) |
-|  |  |  |  |
-| Inventory | Switch BlockId | DPad (Left) | L/DPad (Left) |
-| Inventory | Switch BlockId | DPad (Right) | R/DPad (Right) |
-|  |  |  |  |
-| Commands | Open Console | Select | Select |
-|  |  |  |  |
-| Menu | Back | Start | Start |
+| Action | OLD 3DS | NEW 3DS |
+| ------------- | ------------- | ------------- |
+| Place Block | L | L |
+|  Break Block | R | R |
+|  |  |  |
+| Walk Forward | Circle Pad (Up) | Circle Pad (Up) |
+| Walk Backward | Circle Pad (Down) | Circle Pad (Down) |
+| Strave Left | Circle Pad (Left) | Circle Pad (Left) |
+| Strave Right | Circle Pad (Right) | Circle Pad (Right) |
+| Jump | DPad (Up) | A |
+| Sneak | DPad (Down) | B |
+|  |  |  |
+| Camera Up | X | C-Stick (Up) |
+| Camera Down | B | C-Stick (Down) |
+| Camera Left | Y | C-Stick (Left) |
+| Camera Right | A | C-Stick (Right) |
+|  |  |  |
+| Quickselect Left| None | LZ |
+| Quickselect Right | None | RZ |
+|  |  |  |
+| Open Console | Select | Select |
+|  |  |  |
+| Pause | Start | Start |
 
 
 # Credits
@@ -50,6 +48,7 @@ You can also change the settings in `sd:/3dscraft/options.ini`.
 * KosmicDev for better y spawning code
 * GamesSanti who made Craftus Redesigned
 * RSDuck who made Craftus and Craftus Reloaded
+* Contributors who Forked Craftus and contibuted their changes each time
 * People who made 3DS homebrew possible
     * Especially smea for 3dscraft which is good place for ~~stealing ideas~~ inspiration
     * Contributors of the 3dbrew.org wiki and ctrulib
