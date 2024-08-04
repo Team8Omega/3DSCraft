@@ -67,7 +67,7 @@ void TitleScreen_DrawUp() {
 
 	SpriteBatch_BindTexture(&texLogo);
 
-	SpriteBatch_PushQuad(30, 30, 0, 140, 35, 0, 0, 512, 256);
+	SpriteBatch_PushQuad(28, 20, 0, 144, 36, 0, 0, 512, 128);
 
 	SpriteBatch_PushText(0, 112, 0, INT16_MAX, false, INT_MAX, NULL, APP_VERSION);
 
