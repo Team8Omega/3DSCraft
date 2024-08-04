@@ -73,7 +73,13 @@ void Texture_Load(C3D_Tex* result, const char* filename) {
 
 		linearFree(imgInLinRam);
 	} else {
-		DebugUI_Log("Failed to load texture %s: Code %d", filepath, error);
+#ifdef DEBUG_LOG
+		if (error != 0) {
+			char name[512];
+			strcpy(name, filename);
+			DebugUI_Log("Failed to load texture %s: Code %d", name, error);
+		}
+#endif
 		Texture_Load(result, "romfs:/error.png");
 	}
 }

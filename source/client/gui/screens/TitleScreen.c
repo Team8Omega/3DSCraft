@@ -29,7 +29,7 @@ void TitleScreen_Init() {
 	if (texLogo.data != NULL)
 		return;
 
-	Texture_Load(&texLogo, "gui/title/minecraft.png");
+	Texture_Load(&texLogo, "gui/title/3dscraft.png");
 
 	CubeMap_Init(shaderWorld.uLocProjection);
 
@@ -67,7 +67,7 @@ void TitleScreen_DrawUp() {
 
 	SpriteBatch_BindTexture(&texLogo);
 
-	SpriteBatch_PushQuad(36, 35, 0, 128, 32, 0, 0, 1024, 256);
+	SpriteBatch_PushQuad(30, 30, 0, 140, 35, 0, 0, 512, 256);
 
 	SpriteBatch_PushText(0, 112, 0, INT16_MAX, false, INT_MAX, NULL, APP_VERSION);
 
