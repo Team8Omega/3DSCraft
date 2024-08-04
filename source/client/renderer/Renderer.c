@@ -5,6 +5,7 @@
 #include <client/gui/DebugUI.h>
 #include <client/gui/Gui.h>
 #include <client/gui/Inventory.h>
+#include <client/gui/screens/TitleScreen.h>
 #include <client/renderer/Clouds.h>
 #include <client/renderer/CubeMap.h>
 #include <client/renderer/Cursor.h>
@@ -68,8 +69,6 @@ void Renderer_Init(WorkQueue* queue) {
 
 	PolyGen_Init();
 
-	CubeMap_Init(shaderWorld.uLocProjection);
-
 	WorldRenderer_Init(gWorld.workqueue, shaderWorld.uLocProjection);
 
 	SpriteBatch_Init(shaderGui.uLocProjection);
@@ -82,7 +81,9 @@ void Renderer_Init(WorkQueue* queue) {
 
 	Item_Init();
 
-	CubeMap_Set("gui/title/background/panorama", f3_new(0.f, 0.f, 0.f));
+	ScreenManager_SetScreen(&sTitleScreen);
+
+	TitleScreen_Init();
 }
 
 void Renderer_Deinit() {
@@ -92,7 +93,7 @@ void Renderer_Deinit() {
 
 	PolyGen_Deinit();
 
-	CubeMap_Deinit();
+	TitleScreen_Deinit();
 
 	WorldRenderer_Deinit();
 
@@ -112,10 +113,9 @@ void Renderer_Render() {
 
 	C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 
-	if (gWorld.active)
+	if (gWorld.active) {
 		PolyGen_Harvest();
-	else
-		CubeMap_Update(&gCamera.projection, f3_new(0.f, 0.0013f, 0.f));
+	}
 
 	for (int i = 0; i < 2; i++) {
 		C3D_RenderTargetClear(renderTargets[i], C3D_CLEAR_ALL, gWorld.active ? CLEAR_COLOR_SKY : 0x000000FF, 0);
@@ -138,7 +138,7 @@ void Renderer_Render() {
 			if (!currentScreen)
 				Renderer_RenderGameOverlay();
 		} else {
-			CubeMap_Draw();
+			TitleScreen_DrawUp();
 		}
 
 		if (currentScreen)
@@ -159,7 +159,7 @@ void Renderer_Render() {
 
 	if (currentScreen)
 		ScreenManager_DrawDown();
-	else{
+	else {
 		if (gWorld.active) {
 			SpriteBatch_SetScale(2);
 			gPlayer.quickSelectBarSlots = 9;

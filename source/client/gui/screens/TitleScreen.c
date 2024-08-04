@@ -1,13 +1,16 @@
 #include "client/gui/screens/TitleScreen.h"
 
+#include "client/Camera.h"
+#include "client/Crash.h"
 #include "client/gui/Gui.h"
 #include "client/gui/screens/SelectWorldScreen.h"
+#include "client/model/VertexFmt.h"
 #include "client/renderer/CubeMap.h"
+#include "client/renderer/Shader.h"
 #include "client/renderer/texture/SpriteBatch.h"
 #include "client/renderer/texture/TextureMap.h"
 
 #include "Globals.h"
-#include "client/model/VertexFmt.h"
 
 static bool clicked_play = false;
 static bool clicked_quit = false;
@@ -18,15 +21,24 @@ void TitleScreen_Deinit();
 void TitleScreen_DrawDown();
 void TitleScreen_DrawUp();
 
-Screen sTitleScreen = {
-	.OnAwake = TitleScreen_Init, .OnDeinit = TitleScreen_Deinit, .OnDrawUp = TitleScreen_DrawUp, .OnDrawDown = TitleScreen_DrawDown
-};
+Screen sTitleScreen = { .OnDrawDown = TitleScreen_DrawDown };
+
+extern Shader shaderWorld;
 
 void TitleScreen_Init() {
+	if (texLogo.data != NULL)
+		return;
+
 	Texture_Load(&texLogo, "gui/title/minecraft.png");
+
+	CubeMap_Init(shaderWorld.uLocProjection);
+
+	CubeMap_Set("gui/title/background/panorama", f3_new(0.f, 0.f, 0.f));
 }
 void TitleScreen_Deinit() {
 	C3D_TexDelete(&texLogo);
+
+	CubeMap_Deinit();
 }
 void TitleScreen_DrawDown() {
 	for (int i = 0; i < 160 / 16 + 1; i++) {
@@ -46,7 +58,9 @@ void TitleScreen_DrawDown() {
 		exit(0);
 	}
 }
+
 void TitleScreen_DrawUp() {
+	CubeMap_Update(&gCamera.projection, f3_new(0.f, 0.0013f, 0.f));
 	CubeMap_Draw();
 
 	SpriteBatch_SetScale(2);

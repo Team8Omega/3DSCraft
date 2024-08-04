@@ -113,8 +113,6 @@ int main() {
 
 	Cube_InitVBOs();  // needs to be called AFTER all cubes have been built.
 
-	ScreenManager_SetScreen(&sTitleScreen);
-
 	lastTime = svcGetSystemTick();
 
 	while (aptMainLoop()) {
