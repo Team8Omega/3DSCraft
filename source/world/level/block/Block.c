@@ -1,8 +1,8 @@
 #include "world/level/block/Block.h"
 
-#include "client/Crash.h"
 #include "core/Direction.h"
 #include "util/StringUtils.h"
+#include "util/math/NumberUtils.h"
 #include "world/World.h"
 
 #include "stdio.h"
@@ -17,11 +17,11 @@ static bool isOpaqueCube() {
 	return true;
 }
 static void registerIcons(Block* block) {
-	const char* path = String_ParseTexturePath("block", block->name);
+	const char* path = String_ParseTextureName("block", block->name);
 	block->icon		 = Texture_MapAdd(path);
 }
-static int getBlockColor(Block* b, Direction dir, u8 meta) {
-	return 0xFFFFFFFF;
+static u8 getBlockColor(Block* b, Direction dir, int x, int y, int z, u8 meta) {
+	return COLOR_AIR;
 }
 static u16 getBlockTexture(Block* block, Direction dir, int x, int y, int z, u8 metadata) {
 	return block->icon;
@@ -51,8 +51,10 @@ Block* Block_InitWithBounds(const char* name, BlockId id, float resistance, floa
 
 	Block_SetResistance(b, resistance);
 	Block_SetHardness(b, hardness);
-	b->id		= id;
-	b->material = material;
+	Block_SetLightness(b, 0);
+	b->id		  = id;
+	b->material	  = material;
+	b->renderType = 0;
 	memcpy(&b->bounds, &bounds, sizeof(Box));
 	strcpy(b->name, name);
 
@@ -60,17 +62,17 @@ Block* Block_InitWithBounds(const char* name, BlockId id, float resistance, floa
 }
 
 void Block_SetResistance(Block* b, float v) {
-	b->resistance = v * 3.f;
+	b->resistance = MAX(0.f, v);
 }
 void Block_SetHardness(Block* b, float v) {
 	b->hardness = v;
-
-	if (b->resistance < v * 5.f)
-		b->resistance = v * 5.f;
 }
 void Block_SetBounds(Block* b, float3 from, float3 to) {
 	b->bounds.min = from;
 	b->bounds.max = to;
+}
+void Block_SetLightness(Block* b, u8 v) {
+	b->lightness = v;
 }
 
 // if is smaller than block or sight hidden by other block

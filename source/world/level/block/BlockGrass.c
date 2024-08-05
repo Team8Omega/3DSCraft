@@ -1,5 +1,6 @@
 #include "world/level/block/BlockGrass.h"
 
+#include "client/Crash.h"
 #include "util/StringUtils.h"
 #include "world/World.h"
 
@@ -8,17 +9,21 @@ u16 iconGrassTop, iconSnowSide, iconGrassOverlay;
 static void registerIcons(Block* block) {
 	const char* path;
 
-	path			 = String_ParseTexturePrefix("block", block->name, "_side");
+	path			 = String_ParseTextureNamePrefix("block", block->name, "_side");
 	block->icon		 = Texture_MapAdd(path);
-	path			 = String_ParseTexturePrefix("block", block->name, "_top");
+	path			 = String_ParseTextureNamePrefix("block", block->name, "_top");
 	iconGrassTop	 = Texture_MapAdd(path);
-	path			 = String_ParseTexturePrefix("block", block->name, "_side_snow");
+	path			 = String_ParseTextureNamePrefix("block", block->name, "_side_snow");
 	iconSnowSide	 = Texture_MapAdd(path);
-	path			 = String_ParseTexturePrefix("block", block->name, "_side_overlay");
+	path			 = String_ParseTextureNamePrefix("block", block->name, "_side_overlay");
 	iconGrassOverlay = Texture_MapAdd(path);
 }
-static int getBlockColor(Block* b, Direction dir, u8 meta) {
-	return dir == Direction_Top ? MATERIALS[b->material].color : 0xFFFFFFFF;
+static u8 getBlockColor(Block* b, Direction dir, int x, int y, int z, u8 meta) {
+	if (dir == Direction_Top) {
+		BiomeGen* b = World_GetBiomeGenAt(x, y, z);
+		return BiomeGen_GetGrassColor(b);
+	} else
+		return 0;
 }
 static u16 getBlockTexture(Block* block, Direction dir, int x, int y, int z, u8 metadata) {
 	switch (dir) {
@@ -27,7 +32,7 @@ static u16 getBlockTexture(Block* block, Direction dir, int x, int y, int z, u8 
 			break;
 
 		case Direction_Bottom:
-			return Block_GetIcon(BLOCKS[BLOCK_STONE], Direction_North, 0);
+			return Block_GetIcon(BLOCKS[BLOCK_DIRT], Direction_North, 0);
 
 		default:
 			const Material* mat = World_GetMaterial(x, y + 1, z);
@@ -36,7 +41,7 @@ static u16 getBlockTexture(Block* block, Direction dir, int x, int y, int z, u8 
 }
 
 Block* BlockGrass_Init(BlockId id) {
-	Block* b = Block_Init("grass_block", id, 0.f, 0.6f, MATERIAL_GRASS);
+	Block* b = Block_Init("grass_block", id, 0.6f, 0.6f, MATERIAL_GRASS);
 
 	b->vptr->registerIcons	 = registerIcons;
 	b->vptr->getBlockColor	 = getBlockColor;

@@ -4,6 +4,7 @@
 #include "util/math/NumberUtils.h"
 
 #include "client/renderer/texture/TextureMap.h"
+#include "world/level/block/Block.h"
 
 #include <string.h>
 
@@ -51,8 +52,8 @@ void Hand_Draw(int projUniform, C3D_Mtx* projection, ItemStack stack) {
 
 			s16 iconUV[2];
 			u8 color[3];
-			Block_GetBlockTexture(BLOCKS[stack.block], i, 0, -1, 0, stack.meta, iconUV);
-			Block_GetBlockColor(BLOCKS[stack.block], stack.meta, i, color);
+			Block_GetBlockTexture(BLOCKS[stack.block], i, 0, 0, 0, stack.meta, iconUV);
+			Block_GetBlockColor(BLOCKS[stack.block], i, 0, 0, 0, stack.meta, color);
 
 #define oneDivIconsPerRow (32768 / 8)
 #define halfTexel (6)

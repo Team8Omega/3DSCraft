@@ -14,6 +14,7 @@
 #include <client/renderer/WorldRenderer.h>
 #include <client/renderer/texture/SpriteBatch.h>
 #include <client/renderer/texture/TextureMap.h>
+#include <world/GrassColors.h>
 #include <world/level/block/Block.h>
 
 #include "client/gui/screens/PauseScreen.h"
@@ -41,7 +42,6 @@ Shader shaderGui, shaderWorld, shaderWire;
 static WorkQueue* workqueue;
 
 void Renderer_RenderGameOverlay();
-void renderExpBar();
 
 void Renderer_Init(WorkQueue* queue) {
 	workqueue = queue;
@@ -80,6 +80,10 @@ void Renderer_Init(WorkQueue* queue) {
 	C3D_CullFace(GPU_CULL_BACK_CCW);
 
 	Blocks_Init();
+
+	GrassColors_Init();
+
+	BiomeGenType_Init();
 
 	Item_Init();
 
@@ -180,6 +184,9 @@ void Renderer_Render() {
 	C3D_FrameEnd(0);
 }
 
+void renderExpBar();
+void renderHealth();
+
 void Renderer_RenderGameOverlay() {
 	SpriteBatch_BindGuiTexture(GuiTexture_Icons);
 	SpriteBatch_PushQuad(200 / 2 - 16 / 2, 120 / 2 - 16 / 2, 0, 16, 16, 0, 0, 16, 16);
@@ -191,47 +198,47 @@ void Renderer_RenderGameOverlay() {
 // this is actual minecraft ported code
 
 void renderHealth() {
-	//basic implementation from Minecraft indev
-	//TODO: more features will be added later#
+	// basic implementation from Minecraft indev
+	// TODO: more features will be added later#
 
 	int health = gPlayer.hp;
-	int yPos = 120 - 21;
+	int yPos   = 120 - 21;
 	SpriteBatch_BindGuiTexture(GuiTexture_Icons);
-	for(int amount = 0; amount < 10; ++amount) {
-
-		int var6 = 0;
+	for (int amount = 0; amount < 10; ++amount) {
+		int var6  = 0;
 		bool var9 = true;
-		if(var9) {
+		if (var9) {
 			var6 = 1;
 		}
 
 		int spriteSize = 9;
 
 		int prevHealth = gPlayer.hp;
-
-		if(health <= 4){
-			yPos += nextafter(2,0);
+		// TODO: Y- korregieren
+		if (health <= 4) {
+			yPos += rand() % 2;
 		}
-		SpriteBatch_PushQuad(spriteSize + (amount * 8), yPos, -1,spriteSize, spriteSize,  16 + var6 * spriteSize, 0, spriteSize, spriteSize);
+		u8 width = (amount * 8);
 
-		if(var9) {
-			if((amount << 1) + 1 < prevHealth) {
-				SpriteBatch_PushQuad(spriteSize+ (amount * 8), yPos,0,spriteSize, spriteSize, 70, 0, spriteSize, spriteSize);
+		SpriteBatch_PushQuad(spriteSize + width, yPos, -1, spriteSize, spriteSize, 16 + var6 * spriteSize, 0, spriteSize, spriteSize);
+
+		if (var9) {
+			if ((amount << 1) + 1 < prevHealth) {
+				SpriteBatch_PushQuad(spriteSize + (amount * 8), yPos, 0, spriteSize, spriteSize, 70, 0, spriteSize, spriteSize);
 			}
 
-			if((amount << 1) + 1 == prevHealth) {
-				SpriteBatch_PushQuad(spriteSize+ (amount * 8), yPos,0,spriteSize, spriteSize,79, 0, spriteSize, spriteSize);
+			if ((amount << 1) + 1 == prevHealth) {
+				SpriteBatch_PushQuad(spriteSize + (amount * 8), yPos, 0, spriteSize, spriteSize, 79, 0, spriteSize, spriteSize);
 			}
 		}
 
-		if((amount << 1) + 1 < health) {
-			SpriteBatch_PushQuad(spriteSize+ (amount * 8), yPos,0,spriteSize, spriteSize, 52, 0, spriteSize, spriteSize);
+		if ((amount << 1) + 1 < health) {
+			SpriteBatch_PushQuad(spriteSize + (amount * 8), yPos, 0, spriteSize, spriteSize, 52, 0, spriteSize, spriteSize);
 		}
 
-		if((amount << 1) + 1 == health) {
-			SpriteBatch_PushQuad(spriteSize+ (amount * 8), yPos,0,spriteSize, spriteSize, 61, 0, spriteSize, spriteSize);
+		if ((amount << 1) + 1 == health) {
+			SpriteBatch_PushQuad(spriteSize + (amount * 8), yPos, 0, spriteSize, spriteSize, 61, 0, spriteSize, spriteSize);
 		}
-
 	}
 }
 

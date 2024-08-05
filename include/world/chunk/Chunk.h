@@ -1,9 +1,9 @@
 #pragma once
 
-#include "world/level/block/Block.h"
-
-
+#include "core/Direction.h"
+#include "world/level/biome/BiomeGenType.h"
 #include "world/level/block/Blocks.h"
+#include "world/level/block/material/Material.h"
 
 #include "client/renderer/VBOCache.h"
 #include "util/math/Xorshift.h"
@@ -61,6 +61,8 @@ typedef struct {
 	u32 displayRevision;
 	bool forceVBOUpdate;
 
+	BiomeGenType biome;
+
 	int references;
 } Chunk;
 
@@ -84,6 +86,8 @@ static inline void Chunk_Init(Chunk* chunk, int x, int z) {
 		chunk->clusters[i].empty	  = true;
 	}
 	chunk->uuid = Xorshift32_Next(&uuidGenerator);
+
+	chunk->biome = BIOME_PLAINS;
 }
 
 static inline void Chunk_RequestGraphicsUpdate(Chunk* chunk, int cluster) {
@@ -129,6 +133,9 @@ static inline void Chunk_SetBlockAndMeta(Chunk* chunk, int x, int y, int z, Bloc
 
 	++cluster->revision;
 	++chunk->revision;
+}
+static inline BiomeGenType Chunk_GetBiome(Chunk* chunk) {
+	return chunk->biome;
 }
 
 bool Cluster_IsEmpty(Cluster* cluster);

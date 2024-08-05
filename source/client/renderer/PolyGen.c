@@ -3,6 +3,7 @@
 #include "client/gui/DebugUI.h"
 #include "client/renderer/VBOCache.h"
 #include "core/Direction.h"
+#include "world/level/block/Block.h"
 
 #include "client/player/Player.h"
 
@@ -352,11 +353,11 @@ void PolyGen_GeneratePolygons(WorkQueue* queue, WorkerItem item, void* this) {
 					WorldVertex* data = face.transparent ? transparentData : opaqueData;
 					memcpy(data, &block_sides_lut[face.direction * 6], sizeof(WorldVertex) * 6);
 
+					u8 color[3];
+					Block_GetBlockColor(BLOCKS[face.block], face.direction, face.x, face.y, face.z, face.metadata, color);
+
 #define oneDivIconsPerRow (32768 / 8)
 #define halfTexel (6)
-
-					u8 color[3];
-					Block_GetBlockColor(BLOCKS[face.block], face.metadata, face.direction, color);
 
 					for (int k = 0; k < 6; k++) {
 						data[k].pos[0] += offsetX;

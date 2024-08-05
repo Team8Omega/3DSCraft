@@ -2,7 +2,7 @@
 
 // clang-format off
 const u32 COLORS[COLOR_COUNT] = {
-	[COLOR_AIR]		= 0,
+	[COLOR_AIR]		= 16777215,
 	[COLOR_GRASS]	= 8368696,
 	[COLOR_SAND]	= 16247203,
 	[COLOR_WOOL]	= 13092807,

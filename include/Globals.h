@@ -8,7 +8,8 @@
 #define DEBUG_INFO 1
 #define DEBUG_LOG 1
 #define DEBUG_UI 1
-//#define DEBUG_WORLDNAME
+#define DEBUG_WORLDNAME
+
 #endif
 
 // GET VERSION FROM MAKEFILE
@@ -19,6 +20,6 @@
 #endif
 #define APP_VERSION VERSION_STRING_BAKER(_VER_MAJ, _VER_MIN, _VER_MIC)
 
-#define AUTHOR "Team Omega"
+#define AUTHOR STRING_GET(_AUTHOR)
 
 extern bool gIsNew3ds;

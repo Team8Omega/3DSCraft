@@ -73,8 +73,8 @@ void Player_Init() {
 	{
 		int l				   = 0;
 		gPlayer.inventory[l++] = (ItemStack){ BLOCK_STONE, 0, 1 };
-		// gPlayer.inventory[l++] = (ItemStack){ Block_Dirt, 0, 1 };
 		gPlayer.inventory[l++] = (ItemStack){ BLOCK_GRASS, 0, 1 };
+		gPlayer.inventory[l++] = (ItemStack){ BLOCK_DIRT, 0, 1 };
 		/*gPlayer.inventory[l++] = (ItemStack){ Block_Cobblestone, 0, 1 };
 		gPlayer.inventory[l++] = (ItemStack){ Block_Sand, 0, 1 };
 		gPlayer.inventory[l++] = (ItemStack){ Block_Log, 0, 1 };

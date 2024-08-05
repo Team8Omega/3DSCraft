@@ -4,7 +4,6 @@
 
 void SmeaGen_Init(SmeaGen* gen) {
 }
-#define Block_Dirt BLOCK_STONE
 // based off https://github.com/smealum/3dscraft/blob/master/source/generation.c
 void SmeaGen_Generate(WorkQueue* queue, WorkerItem item, void* this) {
 	for (int x = 0; x < CHUNK_SIZE; x++) {
@@ -21,7 +20,7 @@ void SmeaGen_Generate(WorkQueue* queue, WorkerItem item, void* this) {
 				Chunk_SetBlock(item.chunk, x, y, z, BLOCK_STONE);
 			}
 			for (int y = height - 3; y < height; y++) {
-				Chunk_SetBlock(item.chunk, x, y, z, Block_Dirt);
+				Chunk_SetBlock(item.chunk, x, y, z, BLOCK_DIRT);
 			}
 			Chunk_SetBlock(item.chunk, x, height, z, BLOCK_GRASS);
 		}

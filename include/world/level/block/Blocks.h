@@ -7,6 +7,7 @@ typedef enum
 	BLOCK_AIR,
 	BLOCK_STONE,
 	BLOCK_GRASS,
+	BLOCK_DIRT,
 	BLOCK_COUNT
 } BlockId;
 

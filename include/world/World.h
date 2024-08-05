@@ -14,6 +14,7 @@
 #define CHUNKPOOL_SIZE (CHUNKCACHE_SIZE * CHUNKCACHE_SIZE + UNDEADCHUNKS_COUNT)
 
 typedef struct Block Block;
+typedef struct BiomeGen BiomeGen;
 
 typedef enum
 {
@@ -106,3 +107,5 @@ int World_GetHeight(int x, int z);
 bool World_IsBlockOpaqueCube(int x, int y, int z);
 
 const Material* World_GetMaterial(int x, int y, int z);
+
+BiomeGen* World_GetBiomeGenAt(int x, int y, int z);

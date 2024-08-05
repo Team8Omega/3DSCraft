@@ -255,3 +255,10 @@ bool World_IsBlockOpaqueCube(int x, int y, int z) {
 const Material* World_GetMaterial(int x, int y, int z) {
 	return &MATERIALS[BLOCKS[World_GetBlock(x, y, z)]->material];
 }
+BiomeGen* World_GetBiomeGenAt(int x, int y, int z) {
+	Chunk* chunk;
+	if (!(chunk = World_GetChunk(WorldToChunkCoord(x), WorldToChunkCoord(z))))
+		return NULL;
+
+	return BIOMEGENTYPES[Chunk_GetBiome(chunk)];
+}

@@ -5,6 +5,7 @@
 #include "client/model/VertexFmt.h"
 #include "client/renderer/texture/TextureMap.h"
 #include "util/StringUtils.h"
+#include "world/level/block/Block.h"
 
 #include <stdarg.h>
 
@@ -118,13 +119,13 @@ void SpriteBatch_PushIcon(BlockId block, u8 metadata, int x, int y, int z) {
 		if (i != Direction_Top && i != Direction_South && i != Direction_West)
 			continue;
 		s16 iconUV[2];
-		Block_GetBlockTexture(BLOCKS[block], i, x, -1, z, metadata, iconUV);
+		Block_GetBlockTexture(BLOCKS[block], i, 0, 0, 0, metadata, iconUV);
 
 #define oneDivIconsPerRow (32768 / 8)
 #define halfTexel (6)
 
 		u8 color[3];
-		Block_GetBlockColor(BLOCKS[block], metadata, i, color);
+		Block_GetBlockColor(BLOCKS[block], i, metadata, 0, 0, 0, color);
 
 		for (int j = 0; j < 5; j++) {
 			int k	   = i * 6 + j;
