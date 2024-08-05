@@ -47,20 +47,15 @@ void Clouds_Deinit() {
 	linearFree(cloudVBO);
 }
 
-void Clouds_Render(int projUniform, C3D_Mtx* projectionview, float tx, float tz) {
-	C3D_Mtx model;
-	Mtx_Identity(&model);
-	Mtx_Translate(&model, tx, 90.f, tz, true);
-	Mtx_Scale(&model, 90.f, 90.f, 90.f);
+static C3D_Mtx modelMtx;
 
-	C3D_CullFace(GPU_CULL_NONE);
+void Clouds_Tick(float tx, float ty, float tz) {
+	Mtx_Identity(&modelMtx);
+	Mtx_Translate(&modelMtx, tx, ty + 69.f, tz, true);
+	Mtx_Scale(&modelMtx, 90.f, 90.f, 90.f);
 
-	C3D_AlphaTest(true, GPU_GREATER, 0);
-
-	C3D_TexBind(0, &texture);
-
-	const int stepX = 4;
-	const int stepZ = 6;
+	const int stepX = 8;
+	const int stepZ = 14;
 	if (((int)cloudVBO[0].uv[0]) - stepX < -INT16_MAX) {
 		for (int i = 0; i < 6; i++) {
 			if (cloudVBO[i].pos[0] == -1)
@@ -85,10 +80,19 @@ void Clouds_Render(int projUniform, C3D_Mtx* projectionview, float tx, float tz)
 			cloudVBO[i].uv[1] += stepZ;
 		}
 	}
+}
+
+void Clouds_Render(int projUniform, C3D_Mtx* projectionview) {
+	C3D_CullFace(GPU_CULL_NONE);
+
+	C3D_AlphaTest(true, GPU_GREATER, 0);
+
+	C3D_TexBind(0, &texture);
+
 	GSPGPU_FlushDataCache(cloudVBO, sizeof(vertices));
 
 	C3D_Mtx mvp;
-	Mtx_Multiply(&mvp, projectionview, &model);
+	Mtx_Multiply(&mvp, projectionview, &modelMtx);
 
 	C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, projUniform, &mvp);
 

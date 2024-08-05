@@ -15,7 +15,8 @@ typedef struct {
 	bool (*renderAsNormalBlock)();	// If to render as a normal block
 	bool (*isOpaqueCube)();
 	u8 (*getRenderType)();
-	u8 (*getBlockColor)(Block *b, Direction dir, int x, int y, int z, u8 meta);
+	u8 (*getBlockColorId)(Block *b, Direction dir, int x, int y, int z, u8 meta);
+	u32 (*getBlockColor)(Block *b, Direction dir, int x, int y, int z, u8 meta);
 	u16 (*getBlockTexture)(Block *b, Direction dir, int x, int y, int z, u8 meta);
 	void (*registerIcons)(Block *b);
 } BlockVtable;
@@ -60,11 +61,14 @@ static inline u8 Block_GetRenderType(Block *block) {
 #define colG(c) (((c) >> 8) & 0xff)
 #define colB(c) ((c)&0xff)
 static inline void Block_GetBlockColor(Block *b, Direction dir, int x, int y, int z, u8 meta, u8 out[]) {
-	u32 color = COLORS[b->vptr->getBlockColor(b, dir, x, y, z, meta)];
+	u32 color;
+	if (b->vptr->getBlockColor != NULL) {
+		color = b->vptr->getBlockColor(b, dir, x, y, z, meta);
+	} else {
+		color = COLORS[b->vptr->getBlockColorId(b, dir, x, y, z, meta)];
+	}
 
-	u8 brightness = 6;
-	if (b->id == BLOCK_GRASS && dir == Direction_Top)
-		brightness = 15;
+	u8 brightness = 8;	// 0 - 15
 	brightness *= 17;
 
 	out[0] = (colR(color) * brightness + brightness) / 255;

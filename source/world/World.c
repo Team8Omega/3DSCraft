@@ -4,6 +4,7 @@
 #include "client/gui/DebugUI.h"
 #include "world/level/block/BlockEvents.h"
 
+#include "client/player/Player.h"
 #include "world/level/block/Block.h"
 
 #include <string.h>
@@ -217,6 +218,9 @@ void World_UpdateChunkCache(int orginX, int orginZ) {
 }
 
 void World_Tick() {
+}
+
+void World_UpdateChunkGen() {
 	for (int x = 0; x < CHUNKCACHE_SIZE; x++)
 		for (int z = 0; z < CHUNKCACHE_SIZE; z++) {
 			Chunk* chunk = gWorld.chunkCache[x][z];

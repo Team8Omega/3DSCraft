@@ -1,11 +1,12 @@
 #include "client/gui/screens/CreateWorldScreen.h"
 
 #include "Globals.h"
-#include "Minecraft.h"
 #include "client/Crash.h"
+#include "client/Minecraft.h"
 #include "client/gui/Gui.h"
 #include "client/gui/screens/TitleScreen.h"
 #include "client/renderer/CubeMap.h"
+
 
 WorldGenType worldGenType		 = WorldGen_SuperFlat;
 Gamemode gamemode				 = Gamemode_Survival;

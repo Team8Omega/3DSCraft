@@ -102,6 +102,8 @@ void World_SetBlockAndMeta(int x, int y, int z, BlockId block, u8 metadata);
 
 void World_UpdateChunkCache(int orginX, int orginZ);
 
+void World_UpdateChunkGen();
+
 int World_GetHeight(int x, int z);
 
 bool World_IsBlockOpaqueCube(int x, int y, int z);

@@ -18,12 +18,12 @@ static void registerIcons(Block* block) {
 	path			 = String_ParseTextureNamePrefix("block", block->name, "_side_overlay");
 	iconGrassOverlay = Texture_MapAdd(path);
 }
-static u8 getBlockColor(Block* b, Direction dir, int x, int y, int z, u8 meta) {
+static u32 getBlockColor(Block* b, Direction dir, int x, int y, int z, u8 meta) {
 	if (dir == Direction_Top) {
 		BiomeGen* b = World_GetBiomeGenAt(x, y, z);
 		return BiomeGen_GetGrassColor(b);
 	} else
-		return 0;
+		return COLORS[COLOR_AIR];
 }
 static u16 getBlockTexture(Block* block, Direction dir, int x, int y, int z, u8 metadata) {
 	switch (dir) {

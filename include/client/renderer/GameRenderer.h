@@ -5,7 +5,8 @@
 #include "world/World.h"
 #include <Globals.h>
 
-void Renderer_Init(WorkQueue* queue);
-void Renderer_Deinit();
+void GameRenderer_Init(WorkQueue* queue);
+void GameRenderer_Deinit();
 
-void Renderer_Render();
+void GameRenderer_Tick();
+void GameRenderer_Render();

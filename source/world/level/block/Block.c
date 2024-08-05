@@ -20,7 +20,7 @@ static void registerIcons(Block* block) {
 	const char* path = String_ParseTextureName("block", block->name);
 	block->icon		 = Texture_MapAdd(path);
 }
-static u8 getBlockColor(Block* b, Direction dir, int x, int y, int z, u8 meta) {
+static u8 getBlockColorId(Block* b, Direction dir, int x, int y, int z, u8 meta) {
 	return COLOR_AIR;
 }
 static u16 getBlockTexture(Block* block, Direction dir, int x, int y, int z, u8 metadata) {
@@ -32,7 +32,8 @@ static BlockVtable vtable_default = {
 	.getRenderType		 = getRenderType,
 	.isOpaqueCube		 = isOpaqueCube,
 	.registerIcons		 = registerIcons,
-	.getBlockColor		 = getBlockColor,
+	.getBlockColor		 = NULL,
+	.getBlockColorId	 = getBlockColorId,
 	.getBlockTexture	 = getBlockTexture,
 };
 

@@ -7,4 +7,5 @@
 void Clouds_Init();
 void Clouds_Deinit();
 
-void Clouds_Render(int projUniform, C3D_Mtx* projectionview, float tx, float tz);
+void Clouds_Tick(float tx, float ty, float tz);
+void Clouds_Render(int projUniform, C3D_Mtx* projectionview);

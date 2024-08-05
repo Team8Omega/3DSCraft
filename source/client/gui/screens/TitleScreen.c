@@ -60,7 +60,6 @@ void TitleScreen_DrawDown() {
 }
 
 void TitleScreen_DrawUp() {
-	CubeMap_Update(&gCamera.projection, f3_new(0.f, 0.0013f, 0.f));
 	CubeMap_Draw();
 
 	SpriteBatch_SetScale(2);

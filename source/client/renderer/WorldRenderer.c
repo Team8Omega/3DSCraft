@@ -88,6 +88,9 @@ void WorldRenderer_Deinit() {
 }
 
 static void renderWorld() {
+	World_UpdateChunkGen();
+	World_UpdateChunkCache(WorldToChunkCoord(FastFloor(gPlayer.position.x)), WorldToChunkCoord(FastFloor(gPlayer.position.z)));
+
 	C3D_FogColor(0xffd990);
 
 	memset(chunkRendered, 0, sizeof(chunkRendered));
@@ -205,6 +208,11 @@ static void renderWorld() {
 				 gWorld.chunkCache[CHUNKCACHE_SIZE / 2][CHUNKCACHE_SIZE / 2]->genProgress, workqueue->queue.length);
 }
 
+void WorldRenderer_Tick() {
+	World_Tick();
+	Clouds_Tick(gPlayer.position.x, gPlayer.position.y, gPlayer.position.z);
+}
+
 void WorldRenderer_Render(float iod) {
 	Camera_Update(iod);
 
@@ -225,5 +233,5 @@ void WorldRenderer_Render(float iod) {
 					gPlayer.viewRayCast.direction);
 	}
 
-	Clouds_Render(projectionUniform, &gCamera.vp, gPlayer.position.x, gPlayer.position.z);
+	Clouds_Render(projectionUniform, &gCamera.vp);
 }

@@ -1,7 +1,7 @@
 #include "client/gui/screens/PauseScreen.h"
 
 #include "Globals.h"
-#include "Minecraft.h"
+#include "client/Minecraft.h"
 #include "client/gui/DebugUI.h"
 #include "client/gui/Gui.h"
 #include "client/gui/screens/SelectWorldScreen.h"

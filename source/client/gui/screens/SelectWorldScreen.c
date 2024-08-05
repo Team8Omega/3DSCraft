@@ -1,7 +1,7 @@
 #include "client/gui/screens/SelectWorldScreen.h"
 
-#include "Minecraft.h"
 #include "client/Crash.h"
+#include "client/Minecraft.h"
 #include "client/gui/Gui.h"
 #include "client/gui/screens/ConfirmDeletionScreen.h"
 #include "client/gui/screens/CreateWorldScreen.h"
@@ -9,6 +9,7 @@
 #include "client/renderer/CubeMap.h"
 #include "client/renderer/SpriteBatch.h"
 #include "util/Paths.h"
+
 
 #include <dirent.h>
 #include <stdio.h>

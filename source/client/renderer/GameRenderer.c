@@ -1,4 +1,4 @@
-#include "client/renderer/Renderer.h"
+#include "client/renderer/GameRenderer.h"
 
 #include <client/Camera.h>
 #include <client/Crash.h>
@@ -42,7 +42,7 @@ Shader shaderGui, shaderWorld, shaderWire;
 
 static WorkQueue* workqueue;
 
-void Renderer_Init(WorkQueue* queue) {
+void GameRenderer_Init(WorkQueue* queue) {
 	workqueue = queue;
 
 	C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
@@ -91,7 +91,7 @@ void Renderer_Init(WorkQueue* queue) {
 	TitleScreen_Init();
 }
 
-void Renderer_Deinit() {
+void GameRenderer_Deinit() {
 	Item_Deinit();
 
 	Texture_MapDeinit(&gTexMapBlock);
@@ -113,7 +113,22 @@ void Renderer_Deinit() {
 	C3D_Fini();
 }
 
-void Renderer_Render() {
+void GameRenderer_Tick() {
+	if (gWorld.active) {
+		WorldRenderer_Tick();
+
+		if (gInput.keysdown & KEY_START && !currentScreen) {
+			ScreenManager_SetScreen(&sPauseScreen);
+		}
+	} else {
+		CubeMap_Update(&gCamera.projection, f3_new(0.f, 0.003f, 0.f));
+	}
+	if (currentScreen) {
+		ScreenManager_Update();
+	}
+}
+
+void GameRenderer_Render() {
 	float iod = osGet3DSliderState() * PLAYER_HALFEYEDIFF;
 
 	C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
