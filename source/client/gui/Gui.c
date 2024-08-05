@@ -4,7 +4,7 @@
 
 #include "client/model/VertexFmt.h"
 #include "client/player/InputData.h"
-#include "client/renderer/texture/SpriteBatch.h"
+#include "client/renderer/SpriteBatch.h"
 #include "util/math/NumberUtils.h"
 
 void Gui_Init() {

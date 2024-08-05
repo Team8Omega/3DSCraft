@@ -3,7 +3,7 @@
 #include "client/Crash.h"
 #include "client/gui/Gui.h"
 #include "client/renderer/CubeMap.h"
-#include "client/renderer/texture/SpriteBatch.h"
+#include "client/renderer/SpriteBatch.h"
 #include "util/Paths.h"
 
 #include <dirent.h>

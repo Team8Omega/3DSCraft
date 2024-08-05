@@ -1,4 +1,4 @@
-#include "client/renderer/texture/SpriteBatch.h"
+#include "client/renderer/SpriteBatch.h"
 
 #include "client/gui/DebugUI.h"
 #include "client/gui/font/FontLoader.h"

@@ -2,7 +2,7 @@
 
 #include "client/gui/Gui.h"
 #include "client/model/VertexFmt.h"
-#include "client/renderer/texture/SpriteBatch.h"
+#include "client/renderer/SpriteBatch.h"
 
 static ItemStack *sourceStack = NULL, *proposedSourceStack = NULL;
 

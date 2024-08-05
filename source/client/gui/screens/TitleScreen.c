@@ -7,7 +7,7 @@
 #include "client/model/VertexFmt.h"
 #include "client/renderer/CubeMap.h"
 #include "client/renderer/Shader.h"
-#include "client/renderer/texture/SpriteBatch.h"
+#include "client/renderer/SpriteBatch.h"
 #include "client/renderer/texture/TextureMap.h"
 
 #include "Globals.h"

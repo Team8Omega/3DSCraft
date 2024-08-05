@@ -7,7 +7,7 @@
 #include "client/gui/screens/CreateWorldScreen.h"
 #include "client/gui/screens/TitleScreen.h"
 #include "client/renderer/CubeMap.h"
-#include "client/renderer/texture/SpriteBatch.h"
+#include "client/renderer/SpriteBatch.h"
 #include "util/Paths.h"
 
 #include <dirent.h>

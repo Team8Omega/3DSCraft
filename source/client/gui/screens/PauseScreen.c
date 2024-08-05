@@ -5,7 +5,7 @@
 #include "client/gui/DebugUI.h"
 #include "client/gui/Gui.h"
 #include "client/gui/screens/SelectWorldScreen.h"
-#include "client/renderer/texture/SpriteBatch.h"
+#include "client/renderer/SpriteBatch.h"
 
 #include <citro3d.h>
 

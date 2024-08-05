@@ -13,13 +13,13 @@ void SuperFlatGen_Generate(WorkQueue* queue, WorkerItem item, void* this) {
 				block = BLOCK_STONE;  // Block_Bedrock;
 				break;
 			case 1 ... 10:
-				block = BLOCK_STONE;  // Block_Stone;
+				block = BLOCK_STONE;
 				break;
 			case 11 ... 15:
-				block = BLOCK_DIRT;	 // Block_Dirt;
+				block = BLOCK_DIRT;
 				break;
 			case 16:
-				block = BLOCK_GRASS;  // Block_Grass;
+				block = BLOCK_GRASS;
 				break;
 			default:
 				block = BLOCK_AIR;
