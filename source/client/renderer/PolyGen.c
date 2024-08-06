@@ -74,7 +74,7 @@ typedef struct {
 	int x, y, z;
 	size_t vertices, transparentVertices;
 	u8 delay;
-	u16 visibility;
+	u16 seeThrough;
 } VBOUpdate;
 
 static vec_t(VBOUpdate) vboUpdates;
@@ -144,7 +144,7 @@ void PolyGen_Harvest() {
 						chunk->clusters[update.y].vertices			  = update.vertices;
 						chunk->clusters[update.y].transparentVBO	  = update.transparentVBO;
 						chunk->clusters[update.y].transparentVertices = update.transparentVertices;
-						chunk->clusters[update.y].seeThrough		  = update.visibility;
+						chunk->clusters[update.y].seeThrough		  = update.seeThrough;
 					}
 				}
 		}
@@ -206,13 +206,13 @@ static u16 floodFill(Chunk* chunk, Cluster* cluster, int x, int y, int z, Direct
 			}
 		}
 	}
-	u16 visiblity = 0;
+	u16 seeThrough = 0;
 	for (int i = 0; i < 6; i++)
 		if (exitPoints[i])
 			for (int j = 0; j < 6; j++)
 				if (i != j && exitPoints[j])
-					visiblity |= ChunkSeeThrough(i, j);
-	return visiblity;
+					seeThrough |= ChunkSeeThrough(i, j);
+	return seeThrough;
 }
 
 void PolyGen_GeneratePolygons(WorkQueue* queue, WorkerItem item, void* this) {
@@ -226,7 +226,7 @@ void PolyGen_GeneratePolygons(WorkQueue* queue, WorkerItem item, void* this) {
 			currentFace		 = 0;
 			transparentFaces = 0;
 
-			u16 visibility = 0;
+			u16 seeThrough = 0;
 
 			memset(floodfill_visited, 0, sizeof(floodfill_visited));
 			for (int x = 0; x < CHUNK_SIZE; x += CHUNK_SIZE - 1) {
@@ -244,15 +244,16 @@ void PolyGen_GeneratePolygons(WorkQueue* queue, WorkerItem item, void* this) {
 						else if (y == CHUNK_SIZE - 1)
 							yDir = Direction_Top;
 
-						if (!Block_GetMaterial(BLOCKS[cluster->blocks[x][y][z]])->opaque)
-							visibility |= floodFill(item.chunk, cluster, x, y, z, xDir, yDir, zDir);
+						Block* block = BLOCKS[cluster->blocks[x][y][z]];
+						if (!Block_GetMaterial(block)->opaque || Block_GetMaterial(block)->transculent)
+							seeThrough |= floodFill(item.chunk, cluster, x, y, z, xDir, yDir, zDir);
 
-						BlockId block = fastBlockFetch(item.chunk, cluster, x + (!x ? -1 : 1), y, z);
+						BlockId blockId = fastBlockFetch(item.chunk, cluster, x + (!x ? -1 : 1), y, z);
 
-						if (!Block_GetMaterial(BLOCKS[block])->opaque && cluster->blocks[x][y][z] != BLOCK_AIR) {
+						if (!Block_GetMaterial(BLOCKS[blockId])->opaque && cluster->blocks[x][y][z] != BLOCK_AIR) {
 							BlockId block2	 = cluster->blocks[x][y][z];
 							u8 meta			 = cluster->metadataLight[x][y][z] & 0xf;
-							bool transparent = !Block_GetMaterial(BLOCKS[cluster->blocks[x][y][z]])->opaque;
+							bool transparent = Block_GetMaterial(block)->transculent;
 
 							addFace(x, y, z, xDir, block2, meta, 0, transparent);
 						}
@@ -274,15 +275,16 @@ void PolyGen_GeneratePolygons(WorkQueue* queue, WorkerItem item, void* this) {
 						else if (z == CHUNK_SIZE - 1)
 							zDir = Direction_North;
 
-						if (!Block_GetMaterial(BLOCKS[cluster->blocks[x][y][z]])->opaque)
-							visibility |= floodFill(item.chunk, cluster, x, y, z, xDir, yDir, zDir);
+						Block* block = BLOCKS[cluster->blocks[x][y][z]];
+						if (!Block_GetMaterial(block)->opaque || Block_GetMaterial(block)->transculent)
+							seeThrough |= floodFill(item.chunk, cluster, x, y, z, xDir, yDir, zDir);
 
-						BlockId block = fastBlockFetch(item.chunk, cluster, x, y + (!y ? -1 : 1), z);
+						BlockId blockId = fastBlockFetch(item.chunk, cluster, x + (!x ? -1 : 1), y, z);
 
-						if (!Block_GetMaterial(BLOCKS[block])->opaque && cluster->blocks[x][y][z] != BLOCK_AIR) {
+						if (!Block_GetMaterial(BLOCKS[blockId])->opaque && cluster->blocks[x][y][z] != BLOCK_AIR) {
 							BlockId block2	 = cluster->blocks[x][y][z];
 							u8 meta			 = cluster->metadataLight[x][y][z] & 0xf;
-							bool transparent = !Block_GetMaterial(BLOCKS[cluster->blocks[x][y][z]])->opaque;
+							bool transparent = Block_GetMaterial(block)->transculent;
 
 							addFace(x, y, z, yDir, block2, meta, 0, transparent);
 						}
@@ -303,15 +305,17 @@ void PolyGen_GeneratePolygons(WorkQueue* queue, WorkerItem item, void* this) {
 							yDir = Direction_Bottom;
 						else if (y == CHUNK_SIZE - 1)
 							yDir = Direction_Top;
-						if (!Block_GetMaterial(BLOCKS[cluster->blocks[x][y][z]])->opaque)
-							visibility |= floodFill(item.chunk, cluster, x, y, z, xDir, yDir, zDir);
 
-						BlockId block = fastBlockFetch(item.chunk, cluster, x, y, z + (!z ? -1 : 1));
+						Block* block = BLOCKS[cluster->blocks[x][y][z]];
+						if (!Block_GetMaterial(block)->opaque || Block_GetMaterial(block)->transculent)
+							seeThrough |= floodFill(item.chunk, cluster, x, y, z, xDir, yDir, zDir);
 
-						if (!Block_GetMaterial(BLOCKS[block])->opaque && cluster->blocks[x][y][z] != BLOCK_AIR) {
+						BlockId blockId = fastBlockFetch(item.chunk, cluster, x, y, z + (!z ? -1 : 1));
+
+						if (!Block_GetMaterial(BLOCKS[blockId])->opaque && cluster->blocks[x][y][z] != BLOCK_AIR) {
 							BlockId block2	 = cluster->blocks[x][y][z];
 							u8 meta			 = cluster->metadataLight[x][y][z] & 0xf;
-							bool transparent = !Block_GetMaterial(BLOCKS[cluster->blocks[x][y][z]])->opaque;
+							bool transparent = Block_GetMaterial(block)->transculent;
 
 							addFace(x, y, z, zDir, block2, meta, 0, transparent);
 						}
@@ -385,7 +389,7 @@ void PolyGen_GeneratePolygons(WorkQueue* queue, WorkerItem item, void* this) {
 			update.z				   = item.chunk->z;
 			update.vertices			   = verticesTotal;
 			update.delay			   = 0;
-			update.visibility		   = visibility;
+			update.seeThrough		   = seeThrough;
 			update.transparentVertices = transparentVertices;
 
 			LightLock_Lock(&updateLock);

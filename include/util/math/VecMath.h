@@ -5,14 +5,14 @@
 #include "util/math/NumberUtils.h"
 
 typedef union {
-		float v[3];
-		struct {
-				float x, y, z;
-		};
+	float v[3];
+	struct {
+		float x, y, z;
+	};
 } float3;
 
 static inline float3 f3_new(float x, float y, float z) {
-	return (float3){{x, y, z}};
+	return (float3){ { x, y, z } };
 }
 
 static inline float3 f3_add(float3 a, float3 b) {

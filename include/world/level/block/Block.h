@@ -68,7 +68,7 @@ static inline void Block_GetBlockColor(Block *b, Direction dir, int x, int y, in
 		color = COLORS[b->vptr->getBlockColorId(b, dir, x, y, z, meta)];
 	}
 
-	u8 brightness = 7;	// 0 - 15
+	u8 brightness = 8;	// 0 - 15
 	if (b->id == BLOCK_GRASS && dir == Direction_Top)
 		brightness = 15;
 	brightness *= 17;
