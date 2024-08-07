@@ -60,6 +60,7 @@ static inline u8 Block_GetRenderType(Block *block) {
 #define colR(c) ((c >> 16) & 0xff)
 #define colG(c) (((c) >> 8) & 0xff)
 #define colB(c) ((c)&0xff)
+#define COLOR_MUL 255 / 15
 static inline void Block_GetBlockColor(Block *b, Direction dir, int x, int y, int z, u8 meta, u8 out[]) {
 	u32 color;
 	if (b->vptr->getBlockColor != NULL) {
@@ -68,10 +69,11 @@ static inline void Block_GetBlockColor(Block *b, Direction dir, int x, int y, in
 		color = COLORS[b->vptr->getBlockColorId(b, dir, x, y, z, meta)];
 	}
 
-	u8 brightness = 8;	// 0 - 15
-	if (b->id == BLOCK_GRASS && dir == Direction_Top)
-		brightness = 15;
-	brightness *= 17;
+	u8 brightness = 15;	 // 0 - 15, if implemented check, for max value (bitwise and)
+	brightness *= COLOR_MUL;
+	if (b->id != BLOCK_GRASS || dir != Direction_Top) {
+		brightness = brightness >> 1;
+	}
 
 	out[0] = (colR(color) * brightness + brightness) / 255;
 	out[1] = (colG(color) * brightness + brightness) / 255;

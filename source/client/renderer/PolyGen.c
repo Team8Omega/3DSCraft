@@ -15,58 +15,58 @@
 const WorldVertex block_sides_lut[] = {
 	// Fourth face (MX) - West
 	// First triangle
-	{ { 0, 0, 0 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 0, 0, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 0, 1, 1 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 0, 0 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { 0, 0, 1 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
+	{ { 0, 1, 1 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
 	// Second triangle
-	{ { 0, 1, 1 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 0, 1, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 0, 0, 0 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 1, 1 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
+	{ { 0, 1, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
+	{ { 0, 0, 0 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
 	// Third face (PX) - East
 	// First triangle
-	{ { 1, 0, 0 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 1, 1, 0 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 1, 1, 1 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 0, 0 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
+	{ { 1, 1, 0 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
+	{ { 1, 1, 1 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
 	// Second triangle
-	{ { 1, 1, 1 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 1, 0, 1 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 1, 0, 0 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 1, 1 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
+	{ { 1, 0, 1 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { 1, 0, 0 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
 	// Sixth face (MY) - Down
 	// First triangle
-	{ { 0, 0, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 1, 0, 0 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 1, 0, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 0, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
+	{ { 1, 0, 0 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
+	{ { 1, 0, 1 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
 	// Second triangle
-	{ { 1, 0, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 0, 0, 1 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 0, 0, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 0, 1 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
+	{ { 0, 0, 1 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { 0, 0, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
 	// Fifth face (PY) - Up
 	// First triangle
-	{ { 0, 1, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 0, 1, 1 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 1, 1, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 1, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
+	{ { 0, 1, 1 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { 1, 1, 1 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
 	// Second triangle
-	{ { 1, 1, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 1, 1, 0 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 0, 1, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 1, 1 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
+	{ { 1, 1, 0 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
+	{ { 0, 1, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
 	// Second face (MZ) - North
 	// First triangle
-	{ { 0, 0, 0 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 0, 1, 0 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 1, 1, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 0, 0 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
+	{ { 0, 1, 0 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
+	{ { 1, 1, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
 	// Second triangle
-	{ { 1, 1, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 1, 0, 0 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 0, 0, 0 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 1, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
+	{ { 1, 0, 0 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { 0, 0, 0 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
 	// First face (PZ) - South
 	// First triangle
-	{ { 0, 0, 1 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 1, 0, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 1, 1, 1 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 0, 1 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { 1, 0, 1 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
+	{ { 1, 1, 1 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
 	// Second triangle
-	{ { 1, 1, 1 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 0, 1, 1 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { 0, 0, 1 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 1, 1 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
+	{ { 0, 1, 1 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
+	{ { 0, 0, 1 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
 };
 
 typedef struct {
@@ -127,30 +127,27 @@ void PolyGen_Deinit() {
 }
 
 void PolyGen_Harvest() {
-	if (LightLock_TryLock(&updateLock) == 0) {
+	if (LightLock_TryLock(&updateLock) == 0 && vboUpdates.length > 0 && vboUpdates.data[0].delay++ > 2) {
 		DebugUI_Text("VBOUpdates %d", vboUpdates.length);
-		if (vboUpdates.length > 0) {
-			if (vboUpdates.data[0].delay++ > 2)
-				while (vboUpdates.length > 0) {
-					VBOUpdate update = vec_pop(&vboUpdates);
 
-					Chunk* chunk = World_GetChunk(update.x, update.z);
-					if (chunk) {
-						if (chunk->clusters[update.y].vertices > 0)
-							VBO_Free(chunk->clusters[update.y].vbo);
-						if (chunk->clusters[update.y].transparentVertices > 0)
-							VBO_Free(chunk->clusters[update.y].transparentVBO);
-						chunk->clusters[update.y].vbo				  = update.vbo;
-						chunk->clusters[update.y].vertices			  = update.vertices;
-						chunk->clusters[update.y].transparentVBO	  = update.transparentVBO;
-						chunk->clusters[update.y].transparentVertices = update.transparentVertices;
-						chunk->clusters[update.y].seeThrough		  = update.seeThrough;
-					}
-				}
+		while (vboUpdates.length > 0) {
+			VBOUpdate update = vec_pop(&vboUpdates);
+
+			Chunk* chunk = World_GetChunk(update.x, update.z);
+			if (chunk) {
+				if (chunk->clusters[update.y].vertices > 0)
+					VBO_Free(chunk->clusters[update.y].vbo);
+				if (chunk->clusters[update.y].transparentVertices > 0)
+					VBO_Free(chunk->clusters[update.y].transparentVBO);
+				chunk->clusters[update.y].vbo				  = update.vbo;
+				chunk->clusters[update.y].vertices			  = update.vertices;
+				chunk->clusters[update.y].transparentVBO	  = update.transparentVBO;
+				chunk->clusters[update.y].transparentVertices = update.transparentVertices;
+				chunk->clusters[update.y].seeThrough		  = update.seeThrough;
+			}
 		}
-
-		LightLock_Unlock(&updateLock);
 	}
+	LightLock_Unlock(&updateLock);
 }
 
 static Face faceBuffer[MAX_FACES_PER_CLUSTER];
@@ -279,7 +276,7 @@ void PolyGen_GeneratePolygons(WorkQueue* queue, WorkerItem item, void* this) {
 						if (!Block_GetMaterial(block)->opaque || Block_GetMaterial(block)->transculent)
 							seeThrough |= floodFill(item.chunk, cluster, x, y, z, xDir, yDir, zDir);
 
-						BlockId blockId = fastBlockFetch(item.chunk, cluster, x + (!x ? -1 : 1), y, z);
+						BlockId blockId = fastBlockFetch(item.chunk, cluster, x, y + (!y ? -1 : 1), z);
 
 						if (!Block_GetMaterial(BLOCKS[blockId])->opaque && cluster->blocks[x][y][z] != BLOCK_AIR) {
 							BlockId block2	 = cluster->blocks[x][y][z];
@@ -367,8 +364,8 @@ void PolyGen_GeneratePolygons(WorkQueue* queue, WorkerItem item, void* this) {
 						data[k].pos[0] += offsetX;
 						data[k].pos[1] += offsetY;
 						data[k].pos[2] += offsetZ;
-						data[k].uv[0] = (data[k].uv[0] == 1 ? (oneDivIconsPerRow - 1) : 1) + iconUV[0];
-						data[k].uv[1] = (data[k].uv[1] == 1 ? (oneDivIconsPerRow - 1) : 1) + iconUV[1];
+						data[k].uv0[0] = (data[k].uv0[0] == 1 ? (oneDivIconsPerRow - 1) : 1) + iconUV[0];
+						data[k].uv0[1] = (data[k].uv0[1] == 1 ? (oneDivIconsPerRow - 1) : 1) + iconUV[1];
 
 						data[k].rgb[0] = color[0];
 						data[k].rgb[1] = color[1];

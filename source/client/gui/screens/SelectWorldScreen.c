@@ -10,7 +10,6 @@
 #include "client/renderer/SpriteBatch.h"
 #include "util/Paths.h"
 
-
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>

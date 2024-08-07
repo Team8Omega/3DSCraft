@@ -118,6 +118,7 @@ void SpriteBatch_PushIcon(BlockId block, u8 metadata, int x, int y, int z) {
 	for (int i = 0; i < 6; i++) {
 		if (i != Direction_Top && i != Direction_South && i != Direction_West)
 			continue;
+
 		s16 iconUV[2];
 		Block_GetBlockTexture(BLOCKS[block], i, 0, 0, 0, metadata, iconUV);
 

@@ -61,8 +61,8 @@ void Hand_Draw(int projUniform, C3D_Mtx* projection, ItemStack stack) {
 			for (int j = 0; j < 6; j++) {
 				int idx = i * 6 + j;
 
-				handVBO[idx].uv[0] = (handVBO[idx].uv[0] == 1 ? (oneDivIconsPerRow - 1) : 1) + iconUV[0];
-				handVBO[idx].uv[1] = (handVBO[idx].uv[1] == 1 ? (oneDivIconsPerRow - 1) : 1) + iconUV[1];
+				handVBO[idx].uv0[0] = (handVBO[idx].uv0[0] == 1 ? (oneDivIconsPerRow - 1) : 1) + iconUV[0];
+				handVBO[idx].uv0[1] = (handVBO[idx].uv0[1] == 1 ? (oneDivIconsPerRow - 1) : 1) + iconUV[1];
 
 				handVBO[idx].rgb[0] = color[0];
 				handVBO[idx].rgb[1] = color[1];
@@ -77,11 +77,11 @@ void Hand_Draw(int projUniform, C3D_Mtx* projection, ItemStack stack) {
 					{ { { 1, 0 }, { 1, 1 } }, { { 0, 0 }, { 0, 1 } } },
 				};
 				for (int j = 0; j < 6; j++) {
-					int idx			   = i * 6 + j;
-					int u			   = handVBO[idx].uv[0];
-					int v			   = handVBO[idx].uv[1];
-					handVBO[idx].uv[0] = uvRotationTable[(i == Direction_West) ? 1 : 0][v][u][0];
-					handVBO[idx].uv[1] = uvRotationTable[(i == Direction_East) ? 1 : 0][v][u][1];
+					int idx				= i * 6 + j;
+					int u				= handVBO[idx].uv0[0];
+					int v				= handVBO[idx].uv0[1];
+					handVBO[idx].uv0[0] = uvRotationTable[(i == Direction_West) ? 1 : 0][v][u][0];
+					handVBO[idx].uv0[1] = uvRotationTable[(i == Direction_East) ? 1 : 0][v][u][1];
 				}
 			}
 			for (int j = 0; j < 6; j++) {
@@ -96,8 +96,8 @@ void Hand_Draw(int projUniform, C3D_Mtx* projection, ItemStack stack) {
 					{ toTexCoord(44, 64), toTexCoord(48, 64), toTexCoord(16, 64), toTexCoord(20, 64) },	 // north = top
 				};
 
-				handVBO[idx].uv[0] = uvLookUp[i][handVBO[idx].uv[0]];
-				handVBO[idx].uv[1] = uvLookUp[i][handVBO[idx].uv[1] + 2];
+				handVBO[idx].uv0[0] = uvLookUp[i][handVBO[idx].uv0[0]];
+				handVBO[idx].uv0[1] = uvLookUp[i][handVBO[idx].uv0[1] + 2];
 			}
 		}
 	}

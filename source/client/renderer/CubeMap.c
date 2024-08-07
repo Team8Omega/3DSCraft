@@ -10,55 +10,54 @@
 
 #define vSize 3
 #define vUV ((1 << 15) - 1)
-
 const WorldVertex vertices[6 * 6] = {
-	// Front face - Face 0
-	{ { -vSize, -vSize, vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { vSize, -vSize, vSize }, { 0, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { vSize, vSize, vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { -vSize, -vSize, vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { vSize, vSize, vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { -vSize, vSize, vSize }, { vUV, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Face 1
+	{ { -vSize, -vSize, vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
+	{ { vSize, -vSize, vSize }, { 0, vUV }, { 0, 0 }, { 255, 255, 255 } },
+	{ { vSize, vSize, vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { -vSize, -vSize, vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
+	{ { vSize, vSize, vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { -vSize, vSize, vSize }, { vUV, 0 }, { 0, 0 }, { 255, 255, 255 } },
 
-	// Left face - Face 1
-	{ { -vSize, -vSize, -vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { -vSize, -vSize, vSize }, { 0, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { -vSize, vSize, vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { -vSize, -vSize, -vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { -vSize, vSize, vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { -vSize, vSize, -vSize }, { vUV, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Face 2
+	{ { -vSize, -vSize, -vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
+	{ { -vSize, -vSize, vSize }, { 0, vUV }, { 0, 0 }, { 255, 255, 255 } },
+	{ { -vSize, vSize, vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { -vSize, -vSize, -vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
+	{ { -vSize, vSize, vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { -vSize, vSize, -vSize }, { vUV, 0 }, { 0, 0 }, { 255, 255, 255 } },
 
-	// Back face - Face 2
-	{ { vSize, -vSize, -vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { -vSize, -vSize, -vSize }, { 0, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { -vSize, vSize, -vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { vSize, -vSize, -vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { -vSize, vSize, -vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { vSize, vSize, -vSize }, { vUV, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Face 3
+	{ { vSize, -vSize, -vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
+	{ { -vSize, -vSize, -vSize }, { 0, vUV }, { 0, 0 }, { 255, 255, 255 } },
+	{ { -vSize, vSize, -vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { vSize, -vSize, -vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
+	{ { -vSize, vSize, -vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { vSize, vSize, -vSize }, { vUV, 0 }, { 0, 0 }, { 255, 255, 255 } },
 
-	// Right face - Face 3
-	{ { vSize, -vSize, vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { vSize, -vSize, -vSize }, { 0, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { vSize, vSize, -vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { vSize, -vSize, vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { vSize, vSize, -vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { vSize, vSize, vSize }, { vUV, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Face 4
+	{ { vSize, -vSize, vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
+	{ { vSize, -vSize, -vSize }, { 0, vUV }, { 0, 0 }, { 255, 255, 255 } },
+	{ { vSize, vSize, -vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { vSize, -vSize, vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
+	{ { vSize, vSize, -vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { vSize, vSize, vSize }, { vUV, 0 }, { 0, 0 }, { 255, 255, 255 } },
 
-	// Up face - Face 4
-	{ { -vSize, vSize, vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { vSize, vSize, vSize }, { 0, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { vSize, vSize, -vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { -vSize, vSize, vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { vSize, vSize, -vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { -vSize, vSize, -vSize }, { vUV, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Face 5
+	{ { -vSize, vSize, vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
+	{ { vSize, vSize, vSize }, { 0, vUV }, { 0, 0 }, { 255, 255, 255 } },
+	{ { vSize, vSize, -vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { -vSize, vSize, vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
+	{ { vSize, vSize, -vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { -vSize, vSize, -vSize }, { vUV, 0 }, { 0, 0 }, { 255, 255, 255 } },
 
-	// Down face - Face 5
-	{ { -vSize, -vSize, -vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { vSize, -vSize, -vSize }, { 0, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { vSize, -vSize, vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { -vSize, -vSize, -vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { vSize, -vSize, vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
-	{ { -vSize, -vSize, vSize }, { vUV, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Face 6
+	{ { -vSize, -vSize, -vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
+	{ { vSize, -vSize, -vSize }, { 0, vUV }, { 0, 0 }, { 255, 255, 255 } },
+	{ { vSize, -vSize, vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { -vSize, -vSize, -vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
+	{ { vSize, -vSize, vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { -vSize, -vSize, vSize }, { vUV, 0 }, { 0, 0 }, { 255, 255, 255 } },
 };
 
 static int projUniform;

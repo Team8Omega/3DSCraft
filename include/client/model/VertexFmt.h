@@ -8,20 +8,15 @@
 
 typedef struct {
 	float pos[3];
-	s16 uv[2];
+	s16 uv0[2];
+	s16 uv1[2];
 	u8 rgb[3];
-	u8 fxyz[3];
 } WorldVertex;
 
 typedef struct {
 	s16 pos[3];
 	s16 uvc[3];
 } GuiVertex;
-
-/*typedef struct {
-		s16 xyz[3];
-		s16 uv[2];
-} CubeMapVertex;*/
 
 #define SHADER_RGB(r, g, b) (((b & 0x1f)) | (((g)&0x1f) << 5) | (((r)&0x1f) << 10))
 

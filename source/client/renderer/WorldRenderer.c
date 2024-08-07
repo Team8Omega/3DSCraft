@@ -228,10 +228,10 @@ void WorldRenderer_Render(float iod) {
 		Player_Draw();
 	}
 
+	Clouds_Render(projectionUniform, &gCamera.vp);
+
 	if (gPlayer.blockInActionRange) {
 		Cursor_Draw(projectionUniform, &gCamera.vp, gPlayer.viewRayCast.x, gPlayer.viewRayCast.y, gPlayer.viewRayCast.z,
 					gPlayer.viewRayCast.direction);
 	}
-
-	Clouds_Render(projectionUniform, &gCamera.vp);
 }
