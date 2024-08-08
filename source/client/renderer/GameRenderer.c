@@ -74,21 +74,15 @@ void GameRenderer_Init(WorkQueue* queue) {
 
 	SpriteBatch_Init(shaderGui.uLocProjection);
 
-	Gui_Init();
-
 	C3D_CullFace(GPU_CULL_BACK_CCW);
 
 	Blocks_Init();
 
-	GrassColors_Init();
+	// GrassColors_Init();
 
 	BiomeGenType_Init();
 
 	Item_Init();
-
-	ScreenManager_SetScreen(&sTitleScreen);
-
-	TitleScreen_Init();
 }
 
 void GameRenderer_Deinit() {
@@ -101,8 +95,6 @@ void GameRenderer_Deinit() {
 	TitleScreen_Deinit();
 
 	WorldRenderer_Deinit();
-
-	Gui_Deinit();
 
 	SpriteBatch_Deinit();
 
@@ -117,14 +109,11 @@ void GameRenderer_Tick() {
 	if (gWorld.active) {
 		WorldRenderer_Tick();
 
-		if (gInput.keysdown & KEY_START && !currentScreen) {
-			ScreenManager_SetScreen(&sPauseScreen);
-		}
 	} else {
-		CubeMap_Update(&gCamera.projection, f3_new(0.f, 0.003f, 0.f));
+		CubeMap_Tick(&gCamera.projection, f3_new(0.f, 0.003f, 0.f));
 	}
 	if (currentScreen) {
-		ScreenManager_Update();
+		ScreenManager_Tick();
 	}
 }
 
@@ -182,9 +171,8 @@ void GameRenderer_Render() {
 	else {
 		if (gWorld.active) {
 			SpriteBatch_SetScale(2);
-			gPlayer.quickSelectBarSlots = 9;
-			Inventory_DrawQuickSelect(160 / 2 - Inventory_QuickSelectCalcWidth(gPlayer.quickSelectBarSlots) / 2,
-									  120 - INVENTORY_QUICKSELECT_HEIGHT, gPlayer.quickSelectBar, gPlayer.quickSelectBarSlots,
+			Inventory_DrawQuickSelect(160 / 2 - Inventory_QuickSelectCalcWidth(INVENTORY_QUICKSELECT_MAXSLOTS) / 2,
+									  120 - INVENTORY_QUICKSELECT_HEIGHT, gPlayer.quickSelectBar, INVENTORY_QUICKSELECT_MAXSLOTS,
 									  &gPlayer.quickSelectBarSlot);
 			gPlayer.inventorySite =
 				Inventory_Draw(16, 0, 160, gPlayer.inventory, sizeof(gPlayer.inventory) / sizeof(ItemStack), gPlayer.inventorySite);

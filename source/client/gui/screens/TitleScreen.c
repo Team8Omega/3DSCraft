@@ -21,7 +21,7 @@ void TitleScreen_Deinit();
 void TitleScreen_DrawDown();
 void TitleScreen_DrawUp();
 
-Screen sTitleScreen = { .OnDrawDown = TitleScreen_DrawDown };
+Screen sTitleScreen = { .OnInit = TitleScreen_Init, .OnDrawDown = TitleScreen_DrawDown };
 
 extern Shader shaderWorld;
 

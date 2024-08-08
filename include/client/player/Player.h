@@ -35,26 +35,22 @@ typedef struct {
 	float breakPlaceTimeout;
 	int hungertimer;
 
-	int hp;
+	u8 hp;
 	int armour;
 	int oxygen;
-	int hunger;
+	u8 hunger;
 	float experience;
 	float experienceLevel;
-	int difficulty;
+	u8 difficulty;
 	float rndy;
 
-	float spawnx;
-	float spawny;
-	float spawnz;
-	int spawnset;
+	float3 spawnPos;
 
-	int gamemode;
+	u8 gamemode;
 	bool cheats;
 
-	int quickSelectBarSlots;
-	int quickSelectBarSlot;
-	int inventorySite;
+	u8 quickSelectBarSlot;
+	u8 inventorySite;
 	ItemStack quickSelectBar[INVENTORY_QUICKSELECT_MAXSLOTS];
 
 	Raycast_Result viewRayCast;

@@ -13,9 +13,9 @@ static bool clicked_play = false;
 static bool clicked_quit = false;
 
 void PauseScreen_Draw();
-void PauseScreen_Update();
+void PauseScreen_Tick();
 
-Screen sPauseScreen = { .OnDrawDown = PauseScreen_Draw, .OnUpdate = PauseScreen_Update };
+Screen sPauseScreen = { .OnDrawDown = PauseScreen_Draw, .OnUpdate = PauseScreen_Tick };
 
 void PauseScreen_Draw() {
 	Gui_DrawBackgroundFull(3, -45);
@@ -23,7 +23,7 @@ void PauseScreen_Draw() {
 	clicked_play = Gui_IconButton(0, 45, 160, 20, 0, true, SHADER_RGB(20, 20, 20), "Back to Game");
 	clicked_quit = Gui_IconButton(0, 65, 160, 20, 0, true, SHADER_RGB(20, 20, 20), "Quit to Title");
 }
-void PauseScreen_Update() {
+void PauseScreen_Tick() {
 	if (clicked_play) {
 		ScreenManager_SetScreen(NULL);
 	}

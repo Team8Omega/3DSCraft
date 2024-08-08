@@ -17,7 +17,7 @@ void SaveManager_InitFileSystem();
 void SaveManager_Init(SaveManager* mgr);
 void SaveManager_Deinit(SaveManager* mgr);
 
-void SaveManager_Load(SaveManager* mgr, const char* path);
+void SaveManager_Load(SaveManager* mgr);
 void SaveManager_Unload(SaveManager* mgr);
 
 void SaveManager_LoadChunk(WorkQueue* queue, WorkerItem item, void* this);

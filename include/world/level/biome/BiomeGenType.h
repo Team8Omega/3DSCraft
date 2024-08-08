@@ -2,11 +2,12 @@
 
 #include "BiomeGen.h"
 
-typedef enum
+typedef u8 BiomeGenType;
+enum
 {
 	BIOME_PLAINS,
 	BIOME_COUNT
-} BiomeGenType;
+};
 
 extern BiomeGen* BIOMEGENTYPES[BIOME_COUNT];
 

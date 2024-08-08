@@ -41,7 +41,8 @@ typedef struct {
 	const char* name;
 } DebugUI_Menu;
 
-typedef enum
+typedef u8 DebugUI_State;
+enum
 {
 	MENUSTATE_NONE,
 	MENUSTATE_LOG,
@@ -49,8 +50,9 @@ typedef enum
 	MENUSTATE_MENUDBGCOMMON,
 	MENUSTATE_MENUDBGINGAME,
 	MENUSTATE_COUNT
-} DebugUI_State;
+};
 
+static bool isLogPaused			   = false;
 static bool isInfoBG			   = false;
 static bool isShowButton		   = true;
 static DebugUI_State menuState	   = MENUSTATE_NONE;
@@ -112,6 +114,9 @@ void DebugUI_Text(const char* text, ...) {
 
 void DebugUI_Log(const char* text, ...) {
 #ifdef DEBUG_LOG
+	if (isLogPaused)
+		return;
+
 	if (strlen(text) < 0)
 		return;
 
@@ -173,6 +178,8 @@ void DebugUI_DrawLog() {
 		if (yOffset >= 240)
 			break;
 	}
+	if (Gui_Button(true, 320 - 45, 54, 40, 100, "Pause"))
+		isLogPaused = isLogPaused ? false : true;
 }
 #endif
 #ifdef DEBUG_UI

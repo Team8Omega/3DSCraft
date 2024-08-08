@@ -58,7 +58,7 @@ You can change following controls in `sd:/3dscraft/options.ini`:
 # History
  - [Our repo here](https://github.com/Team8Omega/3DSCraft) is a [reupload of](https://github.com/EinfachEli08/3DSCraft) the fork from
  - ["Modification of Craftus Redesigned"](https://github.com/Onixiya/craftus) by Onixiya, which forked 
- - [Craftus Redesigned](https://github.com/yunes-0840/Craftus-Redesigned) by yunes-0840, which forked 
+ - [Craftus Redesigned](https://github.com/yunes-0840/Craftus-Redesigned) by GamesSanti/yunes-0840, which forked 
  - [Craftus_Reloaded](https://github.com/RSDuck/craftus_reloaded) by RSDuck, which forked the original 
  - [Craftus3DS](https://github.com/RSDuck/Craftus3DS) by RSDuck.
 
@@ -66,6 +66,7 @@ You can change following controls in `sd:/3dscraft/options.ini`:
 * ag_0815 for fixing audio
 * People in the nintendo homebrew discord server willing to answer stupid questions
 * KosmicDev for better y spawning code
+* Onixiya who modified Craftus Redesigned(fork)
 * GamesSanti who made Craftus Redesigned
 * RSDuck who made Craftus and Craftus Reloaded
 * Contributors who Forked Craftus and contibuted their changes each time
@@ -77,5 +78,3 @@ You can change following controls in `sd:/3dscraft/options.ini`:
 * Tommaso Checchi, for his [culling algorithm](https://tomcc.github.io/2014/08/31/visibility-1.html), orginally developed for the use in MC PE
 * Of course all other MC devs, how could I forget them?
 * All people who worked on the libraries Craftus is depending on(see the lib folder)
-
-@EinfachEli08 get pinged lol

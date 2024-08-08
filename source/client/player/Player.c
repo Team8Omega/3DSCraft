@@ -40,6 +40,7 @@ void Player_Deinit() {
 
 void Player_Init() {
 	gPlayer.position = f3_new(0.f, 0.f, 0.f);
+	gPlayer.spawnPos = f3_new(0.f, 0.f, 0.f);
 
 	gPlayer.bobbing = 0.f;
 	gPlayer.pitch	= 0.f;
@@ -67,51 +68,13 @@ void Player_Init() {
 
 	gPlayer.breakPlaceTimeout = 0.f;
 
-	gPlayer.quickSelectBarSlots = INVENTORY_QUICKSELECT_MAXSLOTS;
-	gPlayer.quickSelectBarSlot	= 0;
-	gPlayer.inventorySite		= 1;
+	gPlayer.quickSelectBarSlot = 0;
+	gPlayer.inventorySite	   = 1;
 	{
-		int l				   = 0;
-		gPlayer.inventory[l++] = (ItemStack){ BLOCK_STONE, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ BLOCK_GRASS, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ BLOCK_DIRT, 0, 1 };
-		/*gPlayer.inventory[l++] = (ItemStack){ Block_Cobblestone, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Sand, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Log, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Leaves, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Glass, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Stonebrick, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Brick, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Planks, 0, 1 };
-		for (int i = 0; i < 16; i++)
-			gPlayer.inventory[l++] = (ItemStack){ Block_Wool, i, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Bedrock, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Gravel, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Coarse, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Door_Top, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Door_Bottom, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Snow_Grass, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Snow, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Obsidian, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Netherrack, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Sandstone, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Smooth_Stone, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Crafting_Table, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Grass_Path, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Lava, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Water, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Iron_Block, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Iron_Ore, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Coal_Block, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Coal_Ore, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Gold_Block, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Gold_Ore, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Diamond_Block, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Diamond_Ore, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Emerald_Block, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Emerald_Ore, 0, 1 };
-		gPlayer.inventory[l++] = (ItemStack){ Block_Furnace, 0, 1 };
-		// gPlayer.inventory[l++] = (ItemStack){Item_Totem, 0, 1};*/
+		for (u8 i = 0; i < BLOCK_COUNT; ++i) {
+			// if(i != BLOCK_WOOL)
+			gPlayer.inventory[i] = (ItemStack){ i, 0, 1 };
+		}
 
 		for (int i = 0; i < INVENTORY_QUICKSELECT_MAXSLOTS; i++)
 			gPlayer.quickSelectBar[i] = (ItemStack){ BLOCK_AIR, 0, 0 };
@@ -167,37 +130,21 @@ void Player_Update(Sound* sound) {
 	// Respawning stuff
 	if (gPlayer.hp <= 0 /*&&gPlayer.totem==false*/) {
 		if (gPlayer.difficulty != 4) {
-			if (gPlayer.spawnset == 0) {
-				if (gPlayer.dmg.cause == DAMAGECAUSE_NONE)
-					DebugUI_Log("Player died");
-				else
-					DebugUI_Log("Died by %s", gPlayer.dmg.cause);
-
-				DebugUI_Log("No spawn was set");
-				gPlayer.position.x = 0.0;
-				int spawnY		   = 1;
-				while (World_GetBlock(gPlayer.spawnx, spawnY, gPlayer.spawnz) != BLOCK_AIR)
-					spawnY++;
-
-				bool shouldOffset  = gWorld.genSettings.type != WorldGen_SuperFlat;
-				gPlayer.position.y = shouldOffset ? spawnY + 1 : spawnY;
-				gPlayer.position.z = 0.0;
+			if (gPlayer.dmg.cause == DAMAGECAUSE_NONE) {
+				DebugUI_Log("Player died");
+			} else {
+				DebugUI_Log("Died by %s", gPlayer.dmg.cause);
 			}
-			if (gPlayer.spawnset == 1) {
-				if (gPlayer.dmg.cause == DAMAGECAUSE_NONE) {
-					DebugUI_Log("Player died");
-				} else {
-					DebugUI_Log("Died by %s", gPlayer.dmg.cause);
-				}
-				gPlayer.position.x = gPlayer.spawnx;
-				int spawnY		   = 1;
-				while (World_GetBlock(gPlayer.spawnx, spawnY, gPlayer.spawnz) != BLOCK_AIR)
+			int spawnY = FastFloor(gPlayer.spawnPos.y);
+			if (World_GetBlock(gPlayer.spawnPos.x, spawnY, gPlayer.spawnPos.z) != BLOCK_AIR) {
+				while (World_GetBlock(gPlayer.spawnPos.x, spawnY, gPlayer.spawnPos.z) != BLOCK_AIR)
 					spawnY++;
-
-				bool shouldOffset  = gWorld.genSettings.type != WorldGen_SuperFlat;
-				gPlayer.position.y = shouldOffset ? spawnY + 1 : spawnY;
-				gPlayer.position.z = gPlayer.spawnz;
 			}
+
+			gPlayer.position.y = spawnY;
+			gPlayer.position.x = gPlayer.spawnPos.x;
+			gPlayer.position.z = gPlayer.spawnPos.z;
+
 			gPlayer.hp		  = 20;
 			gPlayer.hunger	  = 20;
 			gPlayer.dmg.cause = DAMAGECAUSE_NONE;
@@ -359,7 +306,7 @@ void Player_Move(float dt, float3 accl) {
 
 void Player_PlaceBlock(Sound* sound) {
 	if (gPlayer.blockInActionRange && gPlayer.breakPlaceTimeout < 0.f) {
-		const int* offset = DirectionToOffset[gPlayer.viewRayCast.direction];
+		const s8* offset = DirectionToOffset[gPlayer.viewRayCast.direction];
 		if (AABB_Overlap(gPlayer.position.x - PLAYER_COLLISIONBOX_SIZE / 2.f, gPlayer.position.y,
 						 gPlayer.position.z - PLAYER_COLLISIONBOX_SIZE / 2.f, PLAYER_COLLISIONBOX_SIZE, PLAYER_HEIGHT,
 						 PLAYER_COLLISIONBOX_SIZE, gPlayer.viewRayCast.x + offset[0], gPlayer.viewRayCast.y + offset[1],

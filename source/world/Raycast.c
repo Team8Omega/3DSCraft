@@ -1,3 +1,4 @@
+
 #include "world/Raycast.h"
 
 #include <stdbool.h>
@@ -43,50 +44,48 @@ bool Raycast_Cast(float3 inpos, float3 raydir, Raycast_Result* out) {
 		sideDistZ = (mapZ + 1.f - inpos.z) * deltaDistZ;
 	}
 
-	int hit = 0, side = 0, steps = 0;
-	while (hit == 0) {
+	bool isHit = false;
+	Axis side  = Axis_Z;
+	u8 steps   = 0;
+	while (!isHit) {
 		if (sideDistX < sideDistY && sideDistX < sideDistZ) {
 			sideDistX += deltaDistX;
 			mapX += stepX;
-			side = 0;
+			side = Axis_X;
 		} else if (sideDistY < sideDistZ) {
 			sideDistY += deltaDistY;
 			mapY += stepY;
-			side = 1;
+			side = Axis_Y;
 		} else {
 			sideDistZ += deltaDistZ;
 			mapZ += stepZ;
-			side = 2;
+			side = Axis_Z;
 		}
 		if (World_GetBlock(mapX, mapY, mapZ) != BLOCK_AIR /* || World_GetBlock(mapX, mapY, mapZ) == Block_Lava*/)
-			hit = 1;
-		// if (gWorld.errFlags & World_ErrUnloadedBlockRequested) break;
+			isHit = true;
 
 		if (steps++ > INF)
 			break;
 	}
 
 	switch (side) {
-		case 0:	 // X Achse
+		case Axis_X:
 			if (raydir.x > 0.f)
 				out->direction = Direction_West;
 			else
 				out->direction = Direction_East;
 			break;
-		case 1:	 // Y Achse
+		case Axis_Y:
 			if (raydir.y > 0.f)
 				out->direction = Direction_Bottom;
 			else
 				out->direction = Direction_Top;
 			break;
-		case 2:	 // Z Achse
+		case Axis_Z:
 			if (raydir.z > 0.f)
 				out->direction = Direction_North;
 			else
 				out->direction = Direction_South;
-			break;
-		default:
-			printf("Unknown axis! %d\n", side);
 			break;
 	}
 
@@ -96,5 +95,5 @@ bool Raycast_Cast(float3 inpos, float3 raydir, Raycast_Result* out) {
 	out->y		 = mapY;
 	out->z		 = mapZ;
 
-	return hit;
+	return isHit;
 }

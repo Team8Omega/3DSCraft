@@ -2,7 +2,7 @@
 
 // West, East, Bottom, Top, North, South
 
-int DirectionToOffset[7][3] = {
+s8 DirectionToOffset[7][3] = {
 	{ -1, 0, 0 }, { 1, 0, 0 }, { 0, -1, 0 }, { 0, 1, 0 }, { 0, 0, -1 }, { 0, 0, 1 }, { 0, 0, 0 },
 };
 

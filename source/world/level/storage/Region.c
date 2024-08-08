@@ -6,6 +6,9 @@
 #include <unistd.h>
 
 #include "client/Crash.h"
+#include "client/gui/DebugUI.h"
+#include "util/Paths.h"
+#include "world/World.h"
 
 static const int SectorSize			   = 2048;
 static mpack_node_data_t* nodeDataPool = NULL;
@@ -79,10 +82,14 @@ void Region_Init(Region* region, int x, int z) {
 		memset(region->grid, 0x0, sizeof(region->grid));
 	}
 
-	sprintf(buffer, "regions/r.%d.%d.dat", x, z);
+	sprintf(buffer, "%s/regions/r.%d.%d.dat", gWorld.path, x, z);
 	region->dataFile = fopen(buffer, "r+b");
 	if (region->dataFile == NULL)
 		region->dataFile = fopen(buffer, "w+b");
+
+	if (region->dataFile == NULL)
+		Crash("World Path invalid, internal error. Unable to load Region %d.%d.\n\nPath name: %s\nBuffer String: %s\nBuffer Address: 0x%x",
+			  x, z, gWorld.path, buffer, buffer);
 }
 void Region_Deinit(Region* region) {
 	Region_SaveIndex(region);
@@ -92,7 +99,7 @@ void Region_Deinit(Region* region) {
 
 void Region_SaveIndex(Region* region) {
 	char buffer[256];
-	sprintf(buffer, "regions/r.%d.%d.mp", region->x, region->z);
+	sprintf(buffer, "%s/regions/r.%d.%d.mp", gWorld.path, region->x, region->z);
 
 	mpack_writer_t writer;
 	mpack_writer_init_file(&writer, buffer);
@@ -127,7 +134,7 @@ void Region_SaveIndex(Region* region) {
 
 	mpack_error_t err = mpack_writer_destroy(&writer);
 	if (err != mpack_ok) {
-		Crash("Mpack error %d while saving region index %d %d", err, region->x, region->z);
+		Crash("Mpack error %d while saving region index %d %d\nPath: %s", err, region->x, region->z, buffer);
 	}
 }
 
@@ -167,7 +174,7 @@ void Region_SaveChunk(Region* region, Chunk* chunk) {
 		mpack_writer_t writer;
 		mpack_writer_init(&writer, decompressBuffer, decompressBufferSize);
 
-		mpack_start_map(&writer, 3);
+		mpack_start_map(&writer, 4);
 
 		mpack_write_cstr(&writer, "clusters");
 		mpack_start_array(&writer, CLUSTER_PER_CHUNK);
@@ -194,10 +201,13 @@ void Region_SaveChunk(Region* region, Chunk* chunk) {
 		mpack_finish_array(&writer);
 
 		mpack_write_cstr(&writer, "genProgress");
-		mpack_write_int(&writer, chunk->genProgress);
+		mpack_write_u8(&writer, chunk->genProgress);
 
 		mpack_write_cstr(&writer, "heightmap");
 		mpack_write_bin(&writer, (char*)chunk->heightmap, sizeof(chunk->heightmap));
+
+		mpack_write_cstr(&writer, "biome");
+		mpack_write_u8(&writer, chunk->biome);
 
 		mpack_finish_map(&writer);
 		mpack_error_t err = mpack_writer_destroy(&writer);
@@ -228,55 +238,58 @@ void Region_LoadChunk(Region* region, Chunk* chunk) {
 	int x				= ChunkToLocalRegionCoord(chunk->x);
 	int z				= ChunkToLocalRegionCoord(chunk->z);
 	ChunkInfo chunkInfo = region->grid[x][z];
-	if (chunkInfo.actualSize > 0) {
-		fseek(region->dataFile, chunkInfo.position * SectorSize, SEEK_SET);
-		if (fread(fileBuffer, chunkInfo.compressedSize, 1, region->dataFile) != 1)
-			Crash("Read chunk data size isn't equal to the expected size");
-		mz_ulong uncompressedSize = decompressBufferSize;
+	if (chunkInfo.actualSize <= 0)
+		return;
 
-		if (uncompress((u8*)decompressBuffer, &uncompressedSize, (u8*)fileBuffer, chunkInfo.compressedSize) == Z_OK) {
-			mpack_tree_t tree;
-			mpack_tree_init_pool(&tree, decompressBuffer, uncompressedSize, nodeDataPool, nodeDataPoolSize);
-			mpack_node_t root = mpack_tree_root(&tree);
+	fseek(region->dataFile, chunkInfo.position * SectorSize, SEEK_SET);
+	if (fread(fileBuffer, chunkInfo.compressedSize, 1, region->dataFile) != 1)
+		Crash("Read chunk data size isn't equal to the expected size");
+	mz_ulong uncompressedSize = decompressBufferSize;
 
-			mpack_node_t clusters = mpack_node_map_cstr(root, "clusters");
-			for (int i = 0; i < CLUSTER_PER_CHUNK; i++) {
-				mpack_node_t cluster = mpack_node_array_at(clusters, i);
+	if (uncompress((u8*)decompressBuffer, &uncompressedSize, (u8*)fileBuffer, chunkInfo.compressedSize) != Z_OK)
+		DebugUI_Log("Error while decompressing World at Region %d.%d Chunk %d.%d", region->x, region->z, chunk->x, chunk->z);
 
-				chunk->clusters[i].revision = mpack_node_u32(mpack_node_map_cstr(cluster, "revision"));
+	mpack_tree_t tree;
+	mpack_tree_init_pool(&tree, decompressBuffer, uncompressedSize, nodeDataPool, nodeDataPoolSize);
+	mpack_node_t root = mpack_tree_root(&tree);
 
-				mpack_node_t emptyNode = mpack_node_map_cstr_optional(cluster, "empty");
-				if (mpack_node_type(emptyNode) != mpack_type_nil) {
-					chunk->clusters[i].emptyRevision = chunk->clusters[i].revision;
-					chunk->clusters[i].empty		 = mpack_node_bool(emptyNode);
-				} else {
-					chunk->clusters[i].emptyRevision = 0;
-					chunk->clusters[i].empty		 = false;
-				}
+	mpack_node_t clusters = mpack_node_map_cstr(root, "clusters");
+	for (int i = 0; i < CLUSTER_PER_CHUNK; i++) {
+		mpack_node_t cluster = mpack_node_array_at(clusters, i);
 
-				mpack_node_t blocksNode = mpack_node_map_cstr_optional(cluster, "blocks");
-				if (mpack_node_type(blocksNode) == mpack_type_bin)	// preserve savedata, in case of a wrong empty flag
-					memcpy(chunk->clusters[i].blocks, mpack_node_data(blocksNode), sizeof(chunk->clusters[i].blocks));
-				mpack_node_t metadataNode = mpack_node_map_cstr_optional(cluster, "metadataLight");
-				if (mpack_node_type(metadataNode) == mpack_type_bin)
-					memcpy(chunk->clusters[i].metadataLight, mpack_node_data(metadataNode), sizeof(chunk->clusters[i].metadataLight));
-			}
+		chunk->clusters[i].revision = mpack_node_u32(mpack_node_map_cstr(cluster, "revision"));
 
-			chunk->genProgress = mpack_node_int(mpack_node_map_cstr(root, "genProgress"));
-
-			mpack_node_t heightmapNode = mpack_node_map_cstr(root, "heightmap");
-			if (mpack_node_type(heightmapNode) != mpack_type_nil) {
-				memcpy(chunk->heightmap, mpack_node_data(heightmapNode), sizeof(chunk->heightmap));
-				chunk->heightmapRevision = chunkInfo.revision;
-			} else
-				chunk->heightmapRevision = 0;
-
-			mpack_error_t err = mpack_tree_destroy(&tree);
-			if (err != mpack_ok) {
-				Crash("MPack error %d while loading chunk(%d %d) from region", err, chunk->x, chunk->z);
-			}
-
-			chunk->revision = chunkInfo.revision;
+		mpack_node_t emptyNode = mpack_node_map_cstr_optional(cluster, "empty");
+		if (mpack_node_type(emptyNode) != mpack_type_nil) {
+			chunk->clusters[i].emptyRevision = chunk->clusters[i].revision;
+			chunk->clusters[i].empty		 = mpack_node_bool(emptyNode);
+		} else {
+			chunk->clusters[i].emptyRevision = 0;
+			chunk->clusters[i].empty		 = false;
 		}
+
+		mpack_node_t blocksNode = mpack_node_map_cstr_optional(cluster, "blocks");
+		if (mpack_node_type(blocksNode) == mpack_type_bin)	// preserve savedata, in case of a wrong empty flag
+			memcpy(chunk->clusters[i].blocks, mpack_node_data(blocksNode), sizeof(chunk->clusters[i].blocks));
+		mpack_node_t metadataNode = mpack_node_map_cstr_optional(cluster, "metadataLight");
+		if (mpack_node_type(metadataNode) == mpack_type_bin)
+			memcpy(chunk->clusters[i].metadataLight, mpack_node_data(metadataNode), sizeof(chunk->clusters[i].metadataLight));
 	}
+
+	chunk->genProgress = mpack_node_u8(mpack_node_map_cstr(root, "genProgress"));
+	chunk->biome	   = mpack_node_u8(mpack_node_map_cstr(root, "biome"));
+
+	mpack_node_t heightmapNode = mpack_node_map_cstr(root, "heightmap");
+	if (mpack_node_type(heightmapNode) != mpack_type_nil) {
+		memcpy(chunk->heightmap, mpack_node_data(heightmapNode), sizeof(chunk->heightmap));
+		chunk->heightmapRevision = chunkInfo.revision;
+	} else
+		chunk->heightmapRevision = 0;
+
+	mpack_error_t err = mpack_tree_destroy(&tree);
+	if (err != mpack_ok) {
+		Crash("MPack error %d while loading chunk(%d %d) from region", err, chunk->x, chunk->z);
+	}
+
+	chunk->revision = chunkInfo.revision;
 }

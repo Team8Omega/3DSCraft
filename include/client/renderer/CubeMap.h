@@ -10,4 +10,4 @@ void CubeMap_Deinit();
 
 void CubeMap_Draw();
 
-void CubeMap_Update(C3D_Mtx* projection, float3 rotationOffset);
+void CubeMap_Tick(C3D_Mtx* projection, float3 rotationOffset);

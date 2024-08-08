@@ -137,8 +137,8 @@ static void renderWorld() {
 		// if (polysTotal >= 150000) break;
 
 		for (int i = 0; i < 6; i++) {
-			Direction dir	  = i;
-			const int* offset = DirectionToOffset[dir];
+			Direction dir	 = i;
+			const s8* offset = DirectionToOffset[dir];
 
 			int newX = chunk->x + offset[0], newY = cluster->y + offset[1], newZ = chunk->z + offset[2];
 			if (newX < gWorld.cacheTranslationX - CHUNKCACHE_SIZE / 2 + 1 || newX > gWorld.cacheTranslationX + CHUNKCACHE_SIZE / 2 - 1 ||

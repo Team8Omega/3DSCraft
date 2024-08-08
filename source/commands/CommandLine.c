@@ -4,7 +4,6 @@
 #include <3ds.h>
 
 #include "client/gui/DebugUI.h"
-#include <mpack/mpack.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -23,8 +22,6 @@ void CommandLine_Activate() {
 
 void CommandLine_Execute(const char* text) {
 	int length = strlen(text);
-	mpack_writer_t writer;
-	mpack_error_t err = mpack_writer_destroy(&writer);
 	if (length >= 1 && text[0] == '/' && gPlayer.cheats == true) {
 		if (length >= 9) {
 			float x, y, z;
@@ -49,25 +46,12 @@ void CommandLine_Execute(const char* text) {
 				DebugUI_Log("Cannot set hp to %i", hp);
 			}
 		}
-		float sx, sy, sz;
-		if (sscanf(&text[1], "ws %f %f %f", &sx, &sy, &sz) == 3) {
-			gPlayer.spawnx	 = sx;
-			gPlayer.spawny	 = sy;
-			gPlayer.spawnz	 = sz;
-			gPlayer.spawnset = 1;
-			mpack_write_cstr(&writer, "sx");
-			mpack_write_float(&writer, gPlayer.spawnx);
-			mpack_write_cstr(&writer, "sy");
-			mpack_write_float(&writer, gPlayer.spawny);
-			mpack_write_cstr(&writer, "sz");
-			mpack_write_float(&writer, gPlayer.spawnz);
-			mpack_write_cstr(&writer, "ss");
-			mpack_write_int(&writer, gPlayer.spawnset);
-			DebugUI_Log("Set spawn to %f, %f %f", sx, sy, sz);
-			if (err != mpack_ok) {
-				DebugUI_Log("Mpack error %d while saving world manifest", err);
-				DebugUI_Log("Save file possibly corrupted, don't hit me plz");
-			}
+		float3 spawn;
+		if (sscanf(&text[1], "ws %f %f %f", &spawn.x, &spawn.y, &spawn.z) == 3) {
+			gPlayer.spawnPos.x = spawn.x;
+			gPlayer.spawnPos.y = spawn.y;
+			gPlayer.spawnPos.z = spawn.z;
+			DebugUI_Log("Set spawn to %f, %f %f", spawn.x, spawn.y, spawn.z);
 		}
 		int gm;
 		if (sscanf(&text[1], "gm %i", &gm)) {

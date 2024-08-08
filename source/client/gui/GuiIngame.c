@@ -22,19 +22,19 @@ void renderHealth() {
 	// basic implementation from Minecraft indev
 	// TODO: more features will be added later#
 
-	int health = gPlayer.hp;
-	int yPos   = 120 - 21;
+	u8 health = gPlayer.hp;
+	u16 yPos  = 120 - 21;
 	SpriteBatch_BindGuiTexture(GuiTexture_Icons);
-	for (int amount = 0; amount < 10; ++amount) {
-		int var6  = 0;
+	for (u8 amount = 0; amount < 10; ++amount) {
+		u8 var6	  = 0;
 		bool var9 = true;
 		if (var9) {
 			var6 = 1;
 		}
 
-		int spriteSize = 9;
+		u8 spriteSize = 9;
 
-		int prevHealth = gPlayer.hp;
+		u8 prevHealth = gPlayer.hp;
 		// TODO: Y- korregieren
 		if (health <= 4) {
 			yPos += rand() % 2;
@@ -43,37 +43,29 @@ void renderHealth() {
 
 		SpriteBatch_PushQuad(spriteSize + width, yPos, -1, spriteSize, spriteSize, 16 + var6 * spriteSize, 0, spriteSize, spriteSize);
 
+		u8 healthVar = (amount << 1) + 1;
+
 		if (var9) {
-			if ((amount << 1) + 1 < prevHealth) {
-				SpriteBatch_PushQuad(spriteSize + (amount * 8), yPos, 0, spriteSize, spriteSize, 70, 0, spriteSize, spriteSize);
-			}
-
-			if ((amount << 1) + 1 == prevHealth) {
-				SpriteBatch_PushQuad(spriteSize + (amount * 8), yPos, 0, spriteSize, spriteSize, 79, 0, spriteSize, spriteSize);
-			}
+			SpriteBatch_PushQuad(spriteSize + (amount * 8), yPos, 0, spriteSize, spriteSize, healthVar < prevHealth ? 70 : 79, 0,
+								 spriteSize, spriteSize);
 		}
 
-		if ((amount << 1) + 1 < health) {
-			SpriteBatch_PushQuad(spriteSize + (amount * 8), yPos, 0, spriteSize, spriteSize, 52, 0, spriteSize, spriteSize);
-		}
-
-		if ((amount << 1) + 1 == health) {
-			SpriteBatch_PushQuad(spriteSize + (amount * 8), yPos, 0, spriteSize, spriteSize, 61, 0, spriteSize, spriteSize);
-		}
+		SpriteBatch_PushQuad(spriteSize + (amount * 8), yPos, 0, spriteSize, spriteSize, healthVar < health ? 52 : 61, 0, spriteSize,
+							 spriteSize);
 	}
 }
 
 void renderExpBar() {
 	// harcoded cap for now
-	int barCap = 10;
+	u16 barCap = 10;
 
 	SpriteBatch_BindGuiTexture(GuiTexture_Icons);
 
 	if (barCap > 0) {
-		int barLength = 182;
-		int xpFill	  = (int)(gPlayer.experience * (float)(barLength + 1));
+		u8 barLength = 182;
+		u16 xpFill	 = (int)(gPlayer.experience * (float)(barLength + 1));
 
-		int y = 120 - 9;
+		u8 y = 120 - 9;
 		SpriteBatch_PushQuad(200 / 2 - 182 / 2, y, 0, barLength, 5, 0, 64, barLength, 5);
 
 		if (xpFill > 0) {
@@ -84,12 +76,12 @@ void renderExpBar() {
 	if (gPlayer.experienceLevel > 0) {
 		char experienceStr[20];	 // buffer to hold the string representation of experience level
 
-		int experienceInt = (int)gPlayer.experienceLevel;
+		u16 experienceInt = (u16)gPlayer.experienceLevel;
 		snprintf(experienceStr, sizeof(experienceStr), "%d", experienceInt);  // Format as integer
 
-		int textWidth = SpriteBatch_CalcTextWidth(experienceStr);
+		u16 textWidth = SpriteBatch_CalcTextWidth(experienceStr);
 
-		int textY = 10;
+		u8 textY = 10;
 
 		SpriteBatch_PushText(200 / 2 - textWidth / 2 + 1, 120 - textY, 2, SHADER_RGB(0, 0, 0), false, INT_MAX, 0, experienceStr);
 		SpriteBatch_PushText(200 / 2 - textWidth / 2 - 1, 120 - textY, 2, SHADER_RGB(0, 0, 0), false, INT_MAX, 0, experienceStr);

@@ -3,7 +3,7 @@
 #include "core/Direction.h"
 #include "world/level/biome/BiomeGenType.h"
 #include "world/level/block/Blocks.h"
-#include "world/level/block/material/Material.h"
+#include "world/level/material/Material.h"
 
 #include "client/renderer/VBOCache.h"
 #include "util/math/Xorshift.h"
@@ -13,6 +13,7 @@
 #include <string.h>
 
 #define CHUNK_SIZE (16)
+#define BLOCK_SIZE (16)
 #define CHUNK_HEIGHT (128)
 #define CLUSTER_PER_CHUNK (CHUNK_HEIGHT / CHUNK_SIZE)
 
@@ -34,12 +35,13 @@ typedef struct {
 	bool forceVBOUpdate;
 } Cluster;
 
-typedef enum
+typedef u8 ChunkGenProgress;
+enum
 {
 	ChunkGen_Empty,	 //
 	ChunkGen_Terrain,
 	ChunkGen_Finished  // Terrain | Decoration
-} ChunkGenProgress;
+};
 
 typedef struct {
 	// Die Gesamtanzahl! >= graphicalTasksRunning

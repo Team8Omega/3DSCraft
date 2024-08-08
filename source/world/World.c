@@ -251,11 +251,6 @@ void World_UpdateChunkGen() {
 			}
 		}
 }
-
-bool World_IsBlockOpaqueCube(int x, int y, int z) {
-	Block* b = BLOCKS[World_GetBlock(x, y, z)];
-	return b == NULL ? false : Block_IsOpaqueCube(b);
-}
 const Material* World_GetMaterial(int x, int y, int z) {
 	return &MATERIALS[BLOCKS[World_GetBlock(x, y, z)]->material];
 }

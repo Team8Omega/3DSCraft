@@ -26,7 +26,7 @@ void ScreenManager_SetPrevious() {
 	else
 		ScreenManager_SetScreen(previousScreen);
 }
-void ScreenManager_Update() {
+void ScreenManager_Tick() {
 	if (currentScreen->OnUpdate != NULL)
 		currentScreen->OnUpdate();
 }

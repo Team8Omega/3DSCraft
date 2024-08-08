@@ -2,6 +2,7 @@
 
 #include "client/Crash.h"
 #include "client/Minecraft.h"
+#include "client/gui/DebugUI.h"
 #include "client/gui/Gui.h"
 #include "client/gui/screens/ConfirmDeletionScreen.h"
 #include "client/gui/screens/CreateWorldScreen.h"
@@ -54,6 +55,8 @@ static void SelectWorldScreen_ScanWorlds() {
 			strcpy(info.path, entry->d_name);
 
 			vec_push(&worlds.list, info);
+		} else {
+			DebugUI_Log("World cannot be fetched: \'%s\'", entry->d_name);
 		}
 	}
 
@@ -64,14 +67,13 @@ void SelectWorldScreen_Init();
 void SelectWorldScreen_Awake();
 void SelectWorldScreen_Deinit();
 void SelectWorldScreen_DrawDown();
-void SelectWorldScreen_Update();
+void SelectWorldScreen_Tick();
 
 Screen sSelectWorldScreen = { .OnInit	  = SelectWorldScreen_Init,
 							  .OnAwake	  = SelectWorldScreen_Awake,
 							  .OnDeinit	  = SelectWorldScreen_Deinit,
 							  .OnDrawDown = SelectWorldScreen_DrawDown,
-							  .OnDrawUp	  = CubeMap_Draw,
-							  .OnUpdate	  = SelectWorldScreen_Update };
+							  .OnUpdate	  = SelectWorldScreen_Tick };
 
 void SelectWorldScreen_Init() {
 	vec_init(&worlds.list);
@@ -181,7 +183,7 @@ void SelectWorldScreen_DrawDown() {
 	clicked_new_world = Gui_Button(true, 20, 97, 120, 0, "+   Create new world");
 }
 
-void SelectWorldScreen_Update() {
+void SelectWorldScreen_Tick() {
 	if (clicked_back) {
 		clicked_back = false;
 		ScreenManager_SetScreen(&sTitleScreen);
@@ -192,8 +194,9 @@ void SelectWorldScreen_Update() {
 	}
 
 	if (clicked_play && selectedWorld != -1) {
-		clicked_play = false;
-		Game_LoadWorld(worlds.list.data[selectedWorld].path, worlds.list.data[selectedWorld].name, 0, false);
+		clicked_play	= false;
+		WorldInfo* info = &worlds.list.data[selectedWorld];
+		Game_LoadWorld(info->path, info->name, 0, false);
 	}
 	if (clicked_delete_world && selectedWorld != -1) {
 		clicked_delete_world = false;

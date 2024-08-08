@@ -110,6 +110,8 @@ static void init() {
 	Cube_InitVBOs();  // needs to be called AFTER all cubes have been built.
 
 	sLastTime = svcGetSystemTick();
+
+	ScreenManager_SetScreen(&sTitleScreen);
 }
 
 static void deinit() {
@@ -137,9 +139,6 @@ static void deinit() {
 	}
 	Sound_Deinit(1);
 
-	ndspExit();
-	sino_exit();
-
 	DebugUI_Deinit();
 
 	ChunkWorker_Deinit(&sChunkWorker);
@@ -147,6 +146,10 @@ static void deinit() {
 	GameRenderer_Deinit();
 
 	Cube_DeinitVBOs();
+
+	sino_exit();
+
+	ndspExit();
 
 	romfsExit();
 
@@ -163,7 +166,7 @@ static void runGameLoop() {
 		DebugUI_Text("HP: %i", gPlayer.hp);
 		// DebugUI_Text("velocity: %f rndy: %f",gPlayer.velocity.y,gPlayer.rndy);
 		// DebugUI_Text("Damage Time: %i Cause: %c",dmg->time,dmg->cause);
-		// DebugUI_Text("Spawn X: %f Y: %f Z: %f",gPlayer.spawnx,gPlayer.spawny,gPlayer.spawnz);
+		// DebugUI_Text("Spawn X: %f Y: %f Z: %f",gPlayer.spawnPos.x,gPlayer.spawnPos.y,gPlayer.spawnPos.z);
 		DebugUI_Text("Hunger: %i Hungertimer: %i", gPlayer.hunger, gPlayer.hungertimer);
 		// DebugUI_Text("Gamemode: %i", gPlayer.gamemode);
 		// DebugUI_Text("quickbar %i",gPlayer.quickSelectBarSlot);}
@@ -189,23 +192,28 @@ static void runGameLoop() {
 		sTickClock	 = 0.f;
 	}
 
-	circlePosition circlePos, cstickPos;
-	touchPosition touchPos;
-
-	hidScanInput();
-	hidCircleRead(&circlePos);
-	hidCstickRead(&cstickPos);
-	hidTouchRead(&touchPos);
-
-	gInputOld = gInput;
-	gInput	  = (InputData){ hidKeysHeld(), hidKeysDown(), hidKeysUp(),	 circlePos.dx, circlePos.dy,
-							 touchPos.px,	touchPos.py,   cstickPos.dx, cstickPos.dy };
-
 	// OG Game has Simulations capped to 20 fps and render is X fps
 	const float tickRate = 1.f / 20.f;
 	// const float tickDt	 = frameTime * (60 / 20);  // once variable fps is in, replace with 60. keep 20.
 	while (sTimeAccum >= tickRate) {
+		circlePosition circlePos, cstickPos;
+		touchPosition touchPos;
+
+		hidScanInput();
+		hidCircleRead(&circlePos);
+		hidCstickRead(&cstickPos);
+		hidTouchRead(&touchPos);
+
+		gInputOld = gInput;
+		gInput	  = (InputData){ hidKeysHeld(), hidKeysDown(), hidKeysUp(),	 circlePos.dx, circlePos.dy,
+								 touchPos.px,	touchPos.py,   cstickPos.dx, cstickPos.dy };
+		// TODO: move key inputs elsewhere, new function
+
 		GameRenderer_Tick();
+
+		if (gInput.keysdown & KEY_START && !currentScreen) {
+			ScreenManager_SetScreen(&sPauseScreen);
+		}
 
 		sTimeAccum -= tickRate;
 		sTickCounter++;
@@ -245,10 +253,14 @@ void Game_ReleaseWorld() {
 
 void Game_LoadWorld(char* path, char* name, WorldGenType worldType, bool newWorld) {
 	// Crash("path: %s\nname: %s\nworlsDtype: %d\nnewWorld: %s", path, name, worldType, newWorld ? "true" : "false");
+	char worldPath[256];
+	sprintf(worldPath, PATH_SAVES "%s", path);
+
 	strcpy(gWorld.name, name);
+	strcpy(gWorld.path, worldPath);
 	gWorld.genSettings.type = worldType;
 
-	SaveManager_Load(&sSavemgr, path);
+	SaveManager_Load(&sSavemgr);
 
 	ChunkWorker_SetHandlerActive(&sChunkWorker, WorkerItemType_BaseGen, &sFlatGen, gWorld.genSettings.type == WorldGen_SuperFlat);
 	ChunkWorker_SetHandlerActive(&sChunkWorker, WorkerItemType_BaseGen, &smeaGen, gWorld.genSettings.type == WorldGen_Default);
@@ -278,11 +290,12 @@ void Game_LoadWorld(char* path, char* name, WorldGenType worldType, bool newWorl
 					highestblock = height;
 			}
 		}
+		gPlayer.position.y = (float)highestblock + 0.2f;
+		gPlayer.spawnPos   = gPlayer.position;
 		gPlayer.hunger	   = 20;
 		gPlayer.hp		   = 20;
-		gPlayer.position.y = (float)highestblock + 0.2f;
 	}
-	ScreenManager_SetScreen(NULL);
 	gWorld.active = true;
-	sLastTime	  = svcGetSystemTick();	 // fix timing
+	ScreenManager_SetScreen(NULL);
+	sLastTime = svcGetSystemTick();	 // fix timing
 }

@@ -1,6 +1,7 @@
 #include "client/model/CubeRaw.h"
 
-typedef enum
+typedef u8 MODELPART_PLAYER;
+enum
 {
 	MODELPART_PLAYER_HEAD,
 	MODELPART_PLAYER_HEADWEAR,
@@ -15,7 +16,7 @@ typedef enum
 	MODELPART_PLAYER_ARML,
 	MODELPART_PLAYER_ARMLWEAR,
 	MODELPART_PLAYER_COUNT
-} MODELPART_PLAYER;
+};
 
 #define rotator M_PI
 

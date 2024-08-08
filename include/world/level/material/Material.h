@@ -1,12 +1,10 @@
 #pragma once
 
-#include "world/level/block/material/MaterialColor.h"
+#include "world/level/material/MapColor.h"
 
 typedef struct {
 	u16 id;
-	MaterialColor color;
 	bool flammable;
-	bool opaque;
 	bool replaceable;
 	bool solid;
 	bool requiresTool;
@@ -14,7 +12,8 @@ typedef struct {
 	bool transculent;
 } Material;
 
-typedef enum
+typedef u8 MaterialType;
+enum
 {
 	MATERIAL_AIR,
 	MATERIAL_GRASS,
@@ -28,6 +27,6 @@ typedef enum
 	MATERIAL_CRAFTED_SNOW,
 	MATERIAL_MISCELLANEOUS,
 	MATERIAL_COUNT
-} MaterialType;
+};
 
 extern const Material MATERIALS[MATERIAL_COUNT];

@@ -32,13 +32,14 @@ enum FrustumCorners
 	FrustumCorners_Count
 };
 
-typedef enum
+typedef u8 CameraMode;
+enum
 {
 	CameraMode_First,
 	CameraMode_Third,
 	CameraMode_Second,
 	CameraMode_Count
-} CameraMode;
+};
 
 typedef struct {
 	C3D_Mtx projection, view, vp;

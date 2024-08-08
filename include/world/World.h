@@ -16,13 +16,15 @@
 typedef struct Block Block;
 typedef struct BiomeGen BiomeGen;
 
-typedef enum
+typedef u8 WorldGenType;
+enum
 {
 	WorldGen_Default,
 	WorldGen_SuperFlat,
 	WorldGenTypes_Count
-} WorldGenType;
-typedef enum
+};
+typedef u8 Gamemode;
+enum
 {
 	Gamemode_Survival,
 	Gamemode_Hardcore,
@@ -30,15 +32,16 @@ typedef enum
 	Gamemode_Adventure,
 	Gamemode_Spectator,
 	Gamemode_Count
-} Gamemode;
-typedef enum
+};
+typedef u8 Difficulty;
+enum
 {
 	Difficulty_Normal,
 	Difficulty_Peaceful,
 	Difficulty_Easy,
 	Difficulty_Hard,
 	Difficulty_Count
-} Difficulty;
+};
 typedef struct {
 	u64 seed;
 	WorldGenType type;
@@ -50,13 +53,15 @@ typedef struct {
 	} settings;
 } GeneratorSettings;
 
-#define WORLD_NAME_SIZE 256
+#define WORLD_NAME_SIZE 128
 typedef struct {
 	bool active;
 
 	int HighestBlock;
 
 	char name[WORLD_NAME_SIZE];
+
+	char path[WORLD_NAME_SIZE];
 
 	GeneratorSettings genSettings;
 
@@ -105,8 +110,6 @@ void World_UpdateChunkCache(int orginX, int orginZ);
 void World_UpdateChunkGen();
 
 int World_GetHeight(int x, int z);
-
-bool World_IsBlockOpaqueCube(int x, int y, int z);
 
 const Material* World_GetMaterial(int x, int y, int z);
 

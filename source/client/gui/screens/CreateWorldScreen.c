@@ -7,7 +7,6 @@
 #include "client/gui/screens/TitleScreen.h"
 #include "client/renderer/CubeMap.h"
 
-
 WorldGenType worldGenType		 = WorldGen_SuperFlat;
 Gamemode gamemode				 = Gamemode_Survival;
 Difficulty difficulty			 = Difficulty_Normal;
@@ -26,9 +25,12 @@ static bool confirmed_world_options = false;
 static bool canceled_world_options	= false;
 
 void CreateWorldScreen_Draw();
-void CreateWorldScreen_Update();
+void CreateWorldScreen_Tick();
 
-Screen sCreateWorldScreen = { .OnUpdate = CreateWorldScreen_Update, .OnDrawDown = CreateWorldScreen_Draw, .OnDrawUp = CubeMap_Draw };
+Screen sCreateWorldScreen = {
+	.OnUpdate	= CreateWorldScreen_Tick,
+	.OnDrawDown = CreateWorldScreen_Draw,
+};
 
 void CreateWorldScreen(u16 selectedIdx, u16 worldNo) {
 	selectedWorld = selectedIdx;
@@ -71,7 +73,7 @@ void CreateWorldScreen_Draw() {
 
 	confirmed_world_options = Gui_Button(true, 80, 92, 75, 0, "Continue");
 }
-void CreateWorldScreen_Update() {
+void CreateWorldScreen_Tick() {
 	if (confirmed_world_options) {
 		confirmed_world_options = false;
 		// gPlayer.gamemode=gamemode3;
@@ -116,10 +118,7 @@ void CreateWorldScreen_Update() {
 				worldpath[length + 1] = '\0';
 				++length;
 			}
-			char buffer[512];
-			sprintf(buffer, PATH_SAVES "%s", name);
-			// Crash("%s", buffer);
-			Game_LoadWorld(buffer, name, worldGenType, true);
+			Game_LoadWorld(name, name, worldGenType, true);
 		}
 	}
 	if (canceled_world_options) {

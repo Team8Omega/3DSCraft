@@ -19,7 +19,7 @@ static void clickAtStack(ItemStack* stack) {
 	}
 }
 
-void Inventory_DrawQuickSelect(int x, int y, ItemStack* stacks, int count, int* selected) {
+void Inventory_DrawQuickSelect(int x, int y, ItemStack* stacks, u8 count, u8* selected) {
 	SpriteBatch_BindGuiTexture(GuiTexture_Widgets);
 	// TODO: Hotbar kleiner machen
 	for (int i = 0; i < count; i++) {
@@ -50,12 +50,12 @@ void Inventory_DrawQuickSelect(int x, int y, ItemStack* stacks, int count, int* 
 	SpriteBatch_PushQuad(x + *selected * 20 - 1, y - 1, -9, 24, 24, 0, 22, 24, 24);
 }
 
-int Inventory_Draw(int x, int y, int w, ItemStack* stacks, int count, int _site) {
+u8 Inventory_Draw(int x, int y, int w, ItemStack* stacks, u8 count, u8 _site) {
 	SpriteBatch_SetScale(1);
 
 	int headX	 = x;
 	int headY	 = y;
-	int site	 = _site;
+	u8 site		 = _site;
 	bool even	 = false;
 	bool newLine = false;
 

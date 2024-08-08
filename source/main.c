@@ -50,5 +50,5 @@ void checkValid() {
 		Crash(
 			"This build is shipped without license information for third parties, and is therefore not legit.\nPlease build with "
 			"\'licenses.txt\' in "
-			"romfs, and retry.");
+			"romfs, and retry. Big thanks to all the people who openly provide their code for people to share.");
 }

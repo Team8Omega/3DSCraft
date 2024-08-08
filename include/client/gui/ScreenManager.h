@@ -11,8 +11,8 @@ typedef struct {
 
 extern Screen *currentScreen, *previousScreen;
 
-void ScreenManager_SetScreen(Screen* screen);
+void ScreenManager_SetScreen();
 void ScreenManager_SetPrevious();
-void ScreenManager_Update();
+void ScreenManager_Tick();
 void ScreenManager_DrawUp();
 void ScreenManager_DrawDown();

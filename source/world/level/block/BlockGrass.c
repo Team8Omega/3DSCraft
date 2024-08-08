@@ -20,9 +20,9 @@ static u32 getBlockColor(Block* b, Direction dir, int x, int y, int z, u8 meta) 
 	if (dir == Direction_Top) {
 		/*BiomeGen* b = World_GetBiomeGenAt(x, y, z);
 		u32 color	= BiomeGen_GetGrassColor(b);*/
-		return 7979098;
+		return 7979098;	 // hardcoded grass for now
 	} else
-		return COLORS[COLOR_AIR];
+		return COLOR_WHITE;
 }
 static u16 getBlockTexture(Block* block, Direction dir, int x, int y, int z, u8 metadata) {
 	switch (dir) {
@@ -40,7 +40,7 @@ static u16 getBlockTexture(Block* block, Direction dir, int x, int y, int z, u8 
 }
 
 Block* BlockGrass_Init(BlockId id) {
-	Block* b = Block_Init("grass_block", id, 0.6f, 0.6f, MATERIAL_GRASS);
+	Block* b = Block_Init("grass_block", id, 0.6f, 0.6f, MATERIAL_GRASS, MAPCOLOR_GRASS);
 
 	b->vptr->registerIcons	 = registerIcons;
 	b->vptr->getBlockColor	 = getBlockColor;

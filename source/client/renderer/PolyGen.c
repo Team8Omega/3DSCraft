@@ -162,8 +162,7 @@ static inline void addFace(int x, int y, int z, Direction dir, BlockId block, u8
 	}
 }
 
-static u16 floodFill(Chunk* chunk, Cluster* cluster, int x, int y, int z, Direction entrySide0, Direction entrySide1,
-					 Direction entrySide2) {
+static u16 floodFill(Cluster* cluster, int x, int y, int z, Direction entrySide0, Direction entrySide1, Direction entrySide2) {
 	if (floodfill_visited[x][y][z] & 1)
 		return 0;
 	u8 exitPoints[6] = { false };
@@ -180,26 +179,27 @@ static u16 floodFill(Chunk* chunk, Cluster* cluster, int x, int y, int z, Direct
 		QueueElement item = vec_pop(&floodfill_queue);
 
 		for (int i = 0; i < 6; i++) {
-			const int* offset = DirectionToOffset[i];
-			int x = item.x + offset[0], y = item.y + offset[1], z = item.z + offset[2];
+			const s8* offset = DirectionToOffset[i];
+			int x			 = item.x + offset[0];
+			int y			 = item.y + offset[1];
+			int z			 = item.z + offset[2];
 			if (x < 0 || y < 0 || z < 0 || x >= CHUNK_SIZE || y >= CHUNK_SIZE || z >= CHUNK_SIZE) {
 				exitPoints[i] = true;
 			} else {
-				if (!Block_GetMaterial(BLOCKS[cluster->blocks[x][y][z]])->opaque && !(floodfill_visited[x][y][z] & 1)) {
+				if (!(cluster->blocks[x][y][z] != BLOCK_AIR) && !(floodfill_visited[x][y][z] & 1)) {
 					floodfill_visited[x][y][z] |= 1;
 					vec_push(&floodfill_queue, ((QueueElement){ x, y, z }));
 				}
 
-				bool itemAir  = cluster->blocks[item.x][item.y][item.z] == BLOCK_AIR;
-				bool isOpaque = Block_GetMaterial(BLOCKS[cluster->blocks[x][y][z]])->opaque;
-				bool isAir	  = cluster->blocks[x][y][z] != BLOCK_AIR;
+				if (cluster->blocks[x][y][z] == BLOCK_AIR)
+					continue;
+				if (BLOCKS[cluster->blocks[item.x][item.y][item.z]]->opaque)
+					continue;
 
-				if (!itemAir || (isOpaque && isAir)) {
-					u8 meta			 = cluster->metadataLight[x][y][z] & 0xf;
-					bool transparent = !Block_GetMaterial(BLOCKS[cluster->blocks[x][y][z]])->opaque;
+				u8 meta			 = cluster->metadataLight[x][z][z] & 0xf;
+				bool transparent = Block_GetMaterial(BLOCKS[cluster->blocks[x][z][z]])->transculent;
 
-					addFace(x, y, z, DirectionOpposite[i], cluster->blocks[x][y][z], meta, 0, transparent);
-				}
+				addFace(x, y, z, DirectionOpposite[i], cluster->blocks[x][y][z], meta, 0, transparent);
 			}
 		}
 	}
@@ -216,183 +216,166 @@ void PolyGen_GeneratePolygons(WorkQueue* queue, WorkerItem item, void* this) {
 	for (int i = 0; i < CLUSTER_PER_CHUNK; i++) {
 		Cluster* cluster = &item.chunk->clusters[i];
 
-		if (cluster->revision != cluster->vboRevision || cluster->forceVBOUpdate) {
-			cluster->vboRevision	= cluster->revision;
-			cluster->forceVBOUpdate = false;
+		if (cluster->revision == cluster->vboRevision && !cluster->forceVBOUpdate)
+			continue;
 
-			currentFace		 = 0;
-			transparentFaces = 0;
+		cluster->vboRevision	= cluster->revision;
+		cluster->forceVBOUpdate = false;
 
-			u16 seeThrough = 0;
+		currentFace		 = 0;
+		transparentFaces = 0;
 
-			memset(floodfill_visited, 0, sizeof(floodfill_visited));
-			for (int x = 0; x < CHUNK_SIZE; x += CHUNK_SIZE - 1) {
-				Direction xDir = !x ? Direction_West : Direction_East;
-				for (int z = 0; z < CHUNK_SIZE; z++) {
-					Direction zDir = Direction_None;
-					if (z == 0)
-						zDir = Direction_North;
-					else if (z == CHUNK_SIZE - 1)
-						zDir = Direction_South;
-					for (int y = 0; y < CHUNK_SIZE; y++) {
-						Direction yDir = Direction_None;
-						if (y == 0)
-							yDir = Direction_Bottom;
-						else if (y == CHUNK_SIZE - 1)
-							yDir = Direction_Top;
+		u16 seeThrough = 0;
 
-						Block* block = BLOCKS[cluster->blocks[x][y][z]];
-						if (!Block_GetMaterial(block)->opaque || Block_GetMaterial(block)->transculent)
-							seeThrough |= floodFill(item.chunk, cluster, x, y, z, xDir, yDir, zDir);
+		memset(floodfill_visited, 0, sizeof(floodfill_visited));
+		for (int x = 0; x < BLOCK_SIZE; x += BLOCK_SIZE - 1) {
+			Direction xDir = !x ? Direction_West : Direction_East;
 
-						BlockId blockId = fastBlockFetch(item.chunk, cluster, x + (!x ? -1 : 1), y, z);
+			for (int z = 0; z < BLOCK_SIZE; z++) {
+				Direction zDir = z == 0 ? Direction_North : z == BLOCK_SIZE - 1 ? Direction_South : Direction_None;
 
-						if (!Block_GetMaterial(BLOCKS[blockId])->opaque && cluster->blocks[x][y][z] != BLOCK_AIR) {
-							BlockId block2	 = cluster->blocks[x][y][z];
-							u8 meta			 = cluster->metadataLight[x][y][z] & 0xf;
-							bool transparent = Block_GetMaterial(block)->transculent;
+				for (int y = 0; y < BLOCK_SIZE; y++) {
+					Direction yDir = y == 0 ? Direction_Bottom : y == BLOCK_SIZE - 1 ? Direction_Top : Direction_None;
 
-							addFace(x, y, z, xDir, block2, meta, 0, transparent);
-						}
-					}
+					if (cluster->blocks[x][y][z] == BLOCK_AIR)
+						continue;
+
+					Block* blockNeighbor = BLOCKS[fastBlockFetch(item.chunk, cluster, x + (!x ? -1 : 1), y, z)];
+					if (blockNeighbor->opaque)
+						continue;
+
+					Block* block = BLOCKS[cluster->blocks[x][y][z]];
+					if (!blockNeighbor->opaque || Block_GetMaterial(blockNeighbor)->transculent)
+						seeThrough |= floodFill(cluster, x, y, z, xDir, yDir, zDir);
+
+					addFace(x, y, z, xDir, cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf, 0,
+							Block_GetMaterial(block)->transculent);
 				}
 			}
-			for (int y = 0; y < CHUNK_SIZE; y += CHUNK_SIZE - 1) {
-				Direction yDir = !y ? Direction_Bottom : Direction_Top;
-				for (int x = 0; x < CHUNK_SIZE; x++) {
-					Direction xDir = Direction_None;
-					if (x == 0)
-						xDir = Direction_West;
-					else if (x == CHUNK_SIZE - 1)
-						xDir = Direction_East;
-					for (int z = 0; z < CHUNK_SIZE; z++) {
-						Direction zDir = Direction_None;
-						if (z == 0)
-							zDir = Direction_South;
-						else if (z == CHUNK_SIZE - 1)
-							zDir = Direction_North;
+		}
+		for (int y = 0; y < BLOCK_SIZE; y += BLOCK_SIZE - 1) {
+			Direction yDir = !y ? Direction_Bottom : Direction_Top;
 
-						Block* block = BLOCKS[cluster->blocks[x][y][z]];
-						if (!Block_GetMaterial(block)->opaque || Block_GetMaterial(block)->transculent)
-							seeThrough |= floodFill(item.chunk, cluster, x, y, z, xDir, yDir, zDir);
+			for (int x = 0; x < BLOCK_SIZE; x++) {
+				Direction xDir = x == 0 ? Direction_West : x == BLOCK_SIZE - 1 ? Direction_East : Direction_None;
 
-						BlockId blockId = fastBlockFetch(item.chunk, cluster, x, y + (!y ? -1 : 1), z);
+				for (int z = 0; z < BLOCK_SIZE; z++) {
+					Direction zDir = z == 0 ? Direction_South : x == BLOCK_SIZE - 1 ? Direction_North : Direction_None;
 
-						if (!Block_GetMaterial(BLOCKS[blockId])->opaque && cluster->blocks[x][y][z] != BLOCK_AIR) {
-							BlockId block2	 = cluster->blocks[x][y][z];
-							u8 meta			 = cluster->metadataLight[x][y][z] & 0xf;
-							bool transparent = Block_GetMaterial(block)->transculent;
+					if (cluster->blocks[x][y][z] == BLOCK_AIR)
+						continue;
 
-							addFace(x, y, z, yDir, block2, meta, 0, transparent);
-						}
-					}
+					Block* blockNeighbor = BLOCKS[fastBlockFetch(item.chunk, cluster, x, y + (!y ? -1 : 1), z)];
+					if (blockNeighbor->opaque)
+						continue;
+
+					Block* block = BLOCKS[cluster->blocks[x][y][z]];
+					if (!blockNeighbor->opaque || Block_GetMaterial(blockNeighbor)->transculent)
+						seeThrough |= floodFill(cluster, x, y, z, xDir, yDir, zDir);
+
+					addFace(x, y, z, yDir, cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf, 0,
+							Block_GetMaterial(block)->transculent);
 				}
 			}
-			for (int z = 0; z < CHUNK_SIZE; z += CHUNK_SIZE - 1) {
-				Direction zDir = !z ? Direction_North : Direction_South;
-				for (int x = 0; x < CHUNK_SIZE; x++) {
-					Direction xDir = Direction_None;
-					if (x == 0)
-						xDir = Direction_West;
-					else if (x == CHUNK_SIZE - 1)
-						xDir = Direction_East;
-					for (int y = 0; y < CHUNK_SIZE; y++) {
-						Direction yDir = Direction_None;
-						if (y == 0)
-							yDir = Direction_Bottom;
-						else if (y == CHUNK_SIZE - 1)
-							yDir = Direction_Top;
+		}
+		for (int z = 0; z < BLOCK_SIZE; z += BLOCK_SIZE - 1) {
+			Direction zDir = !z ? Direction_North : Direction_South;
 
-						Block* block = BLOCKS[cluster->blocks[x][y][z]];
-						if (!Block_GetMaterial(block)->opaque || Block_GetMaterial(block)->transculent)
-							seeThrough |= floodFill(item.chunk, cluster, x, y, z, xDir, yDir, zDir);
+			for (int x = 0; x < BLOCK_SIZE; x++) {
+				Direction xDir = x == 0 ? Direction_West : x == BLOCK_SIZE - 1 ? Direction_East : Direction_None;
 
-						BlockId blockId = fastBlockFetch(item.chunk, cluster, x, y, z + (!z ? -1 : 1));
+				for (int y = 0; y < BLOCK_SIZE; y++) {
+					Direction yDir = y == 0 ? Direction_Bottom : y == BLOCK_SIZE ? Direction_Top : Direction_None;
 
-						if (!Block_GetMaterial(BLOCKS[blockId])->opaque && cluster->blocks[x][y][z] != BLOCK_AIR) {
-							BlockId block2	 = cluster->blocks[x][y][z];
-							u8 meta			 = cluster->metadataLight[x][y][z] & 0xf;
-							bool transparent = Block_GetMaterial(block)->transculent;
+					if (cluster->blocks[x][y][z] == BLOCK_AIR)
+						continue;
 
-							addFace(x, y, z, zDir, block2, meta, 0, transparent);
-						}
-					}
+					Block* blockNeighbor = BLOCKS[fastBlockFetch(item.chunk, cluster, x, y, z + (!z ? -1 : 1))];
+					if (blockNeighbor->opaque)
+						continue;
+
+					Block* block = BLOCKS[cluster->blocks[x][y][z]];
+					if (!blockNeighbor->opaque || Block_GetMaterial(blockNeighbor)->transculent)
+						seeThrough |= floodFill(cluster, x, y, z, xDir, yDir, zDir);
+
+					addFace(x, y, z, zDir, cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf, 0,
+							Block_GetMaterial(block)->transculent);
 				}
 			}
-			int px = FastFloor(gPlayer.position.x);
-			int py = FastFloor(gPlayer.position.y);
-			int pz = FastFloor(gPlayer.position.z);
-			if (WorldToChunkCoord(px) == item.chunk->x && WorldToChunkCoord(pz) == item.chunk->z && WorldToChunkCoord(py) == i) {
-				floodFill(item.chunk, cluster, WorldToLocalCoord(px), WorldToLocalCoord(py), WorldToLocalCoord(pz), Direction_None,
-						  Direction_None, Direction_None);
-			}
+		}
+		int px = FastFloor(gPlayer.position.x);
+		int py = FastFloor(gPlayer.position.y);
+		int pz = FastFloor(gPlayer.position.z);
+		if (WorldToChunkCoord(px) == item.chunk->x && WorldToChunkCoord(pz) == item.chunk->z && WorldToChunkCoord(py) == i) {
+			floodFill(cluster, WorldToLocalCoord(px), WorldToLocalCoord(py), WorldToLocalCoord(pz), Direction_None, Direction_None,
+					  Direction_None);
+		}
 
-			int transparentVertices = transparentFaces * 6;
-			int verticesTotal		= (currentFace * 6) - transparentVertices;
-			VBOUpdate update;
+		int transparentVertices = transparentFaces * 6;
+		int verticesTotal		= (currentFace * 6) - transparentVertices;
+		VBOUpdate update;
 
-			if (currentFace) {
-				VBO_Block memBlock;
-				if (verticesTotal > 0)
-					memBlock = VBO_Alloc(verticesTotal * sizeof(WorldVertex));
-				VBO_Block transparentMem;
-				if (transparentFaces > 0)
-					transparentMem = VBO_Alloc(transparentVertices * sizeof(WorldVertex));
+		if (currentFace) {
+			VBO_Block memBlock;
+			if (verticesTotal > 0)
+				memBlock = VBO_Alloc(verticesTotal * sizeof(WorldVertex));
+			VBO_Block transparentMem;
+			if (transparentFaces > 0)
+				transparentMem = VBO_Alloc(transparentVertices * sizeof(WorldVertex));
 
-				WorldVertex* opaqueData		 = memBlock.memory;
-				WorldVertex* transparentData = transparentMem.memory;
-				for (int j = 0; j < currentFace; j++) {
-					Face face = faceBuffer[j];
+			WorldVertex* opaqueData		 = memBlock.memory;
+			WorldVertex* transparentData = transparentMem.memory;
+			for (int j = 0; j < currentFace; j++) {
+				Face face = faceBuffer[j];
 
-					int offsetX = face.x + item.chunk->x * CHUNK_SIZE;
-					int offsetZ = face.z + item.chunk->z * CHUNK_SIZE;
-					int offsetY = face.y + i * CHUNK_SIZE;
+				int offsetX = face.x + item.chunk->x * CHUNK_SIZE;
+				int offsetZ = face.z + item.chunk->z * CHUNK_SIZE;
+				int offsetY = face.y + i * CHUNK_SIZE;
 
-					s16 iconUV[2];
-					Block_GetBlockTexture(BLOCKS[face.block], face.direction, face.x, face.y, face.z, face.metadata, iconUV);
+				s16 iconUV[2];
+				Block_GetBlockTexture(BLOCKS[face.block], face.direction, face.x, face.y, face.z, face.metadata, iconUV);
 
-					WorldVertex* data = face.transparent ? transparentData : opaqueData;
-					memcpy(data, &block_sides_lut[face.direction * 6], sizeof(WorldVertex) * 6);
+				WorldVertex* data = face.transparent ? transparentData : opaqueData;
+				memcpy(data, &block_sides_lut[face.direction * 6], sizeof(WorldVertex) * 6);
 
-					u8 color[3];
-					Block_GetBlockColor(BLOCKS[face.block], face.direction, face.x, face.y, face.z, face.metadata, color);
+				u8 color[3];
+				Block_GetBlockColor(BLOCKS[face.block], face.direction, face.x, face.y, face.z, face.metadata, color);
 
 #define oneDivIconsPerRow (32768 / 8)
 #define halfTexel (6)
 
-					for (int k = 0; k < 6; k++) {
-						data[k].pos[0] += offsetX;
-						data[k].pos[1] += offsetY;
-						data[k].pos[2] += offsetZ;
-						data[k].uv0[0] = (data[k].uv0[0] == 1 ? (oneDivIconsPerRow - 1) : 1) + iconUV[0];
-						data[k].uv0[1] = (data[k].uv0[1] == 1 ? (oneDivIconsPerRow - 1) : 1) + iconUV[1];
+				for (int k = 0; k < 6; k++) {
+					data[k].pos[0] += offsetX;
+					data[k].pos[1] += offsetY;
+					data[k].pos[2] += offsetZ;
+					data[k].uv0[0] = (data[k].uv0[0] == 1 ? (oneDivIconsPerRow - 1) : 1) + iconUV[0];
+					data[k].uv0[1] = (data[k].uv0[1] == 1 ? (oneDivIconsPerRow - 1) : 1) + iconUV[1];
 
-						data[k].rgb[0] = color[0];
-						data[k].rgb[1] = color[1];
-						data[k].rgb[2] = color[2];
-					}
-					if (face.transparent)
-						transparentData += 6;
-					else
-						opaqueData += 6;
+					data[k].rgb[0] = color[0];
+					data[k].rgb[1] = color[1];
+					data[k].rgb[2] = color[2];
 				}
-
-				update.vbo			  = memBlock;
-				update.transparentVBO = transparentMem;
+				if (face.transparent)
+					transparentData += 6;
+				else
+					opaqueData += 6;
 			}
 
-			update.x				   = item.chunk->x;
-			update.y				   = i;
-			update.z				   = item.chunk->z;
-			update.vertices			   = verticesTotal;
-			update.delay			   = 0;
-			update.seeThrough		   = seeThrough;
-			update.transparentVertices = transparentVertices;
-
-			LightLock_Lock(&updateLock);
-			vec_push(&vboUpdates, update);
-			LightLock_Unlock(&updateLock);
+			update.vbo			  = memBlock;
+			update.transparentVBO = transparentMem;
 		}
+
+		update.x				   = item.chunk->x;
+		update.y				   = i;
+		update.z				   = item.chunk->z;
+		update.vertices			   = verticesTotal;
+		update.delay			   = 0;
+		update.seeThrough		   = seeThrough;
+		update.transparentVertices = transparentVertices;
+
+		LightLock_Lock(&updateLock);
+		vec_push(&vboUpdates, update);
+		LightLock_Unlock(&updateLock);
 	}
 	item.chunk->displayRevision = item.chunk->revision;
 	item.chunk->forceVBOUpdate	= false;

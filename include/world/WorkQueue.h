@@ -10,7 +10,8 @@
 
 #include <3ds.h>
 
-typedef enum
+typedef u8 WorkerItemType;
+enum
 {
 	WorkerItemType_Load,
 	WorkerItemType_Save,
@@ -18,7 +19,7 @@ typedef enum
 	WorkerItemType_Decorate,
 	WorkerItemType_PolyGen,
 	WorkerItemTypes_Count
-} WorkerItemType;
+};
 
 typedef struct {
 	WorkerItemType type;

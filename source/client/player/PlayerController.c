@@ -321,8 +321,8 @@ void PlayerController_Update(PlayerController* ctrl, Sound* sound, float dt) {
 	bool switchBlockLeft  = WasKeyPressed(ctrl->controlScheme.switchBlockLeft, &agnosticInput);
 	bool switchBlockRight = WasKeyPressed(ctrl->controlScheme.switchBlockRight, &agnosticInput);
 	if (switchBlockLeft && --gPlayer.quickSelectBarSlot == -1)
-		gPlayer.quickSelectBarSlot = gPlayer.quickSelectBarSlots - 1;
-	if (switchBlockRight && ++gPlayer.quickSelectBarSlot == gPlayer.quickSelectBarSlots)
+		gPlayer.quickSelectBarSlot = INVENTORY_QUICKSELECT_MAXSLOTS - 1;
+	if (switchBlockRight && ++gPlayer.quickSelectBarSlot == INVENTORY_QUICKSELECT_MAXSLOTS)
 		gPlayer.quickSelectBarSlot = 0;
 
 	if (ctrl->openedCmd) {

@@ -15,11 +15,12 @@ static char path[256];
 static bool confirmed_deletion = false, canceled_deletion = false;
 
 void ConfirmDeletionScreen_Draw();
-void ConfirmDeletionScreen_Update();
+void ConfirmDeletionScreen_Tick();
 
-Screen sConfirmDeletionScreen = { .OnDrawDown = ConfirmDeletionScreen_Draw,
-								  .OnUpdate	  = ConfirmDeletionScreen_Update,
-								  .OnDrawUp	  = CubeMap_Draw };
+Screen sConfirmDeletionScreen = {
+	.OnDrawDown = ConfirmDeletionScreen_Draw,
+	.OnUpdate	= ConfirmDeletionScreen_Tick,
+};
 
 void ConfirmDeletionScreen(const char* path_) {
 	strcpy(path, path_);
@@ -63,7 +64,7 @@ void ConfirmDeletionScreen_Draw() {
 	confirmed_deletion = Gui_Button(true, 80, 92, 75, 0, "Yes");
 }
 
-void ConfirmDeletionScreen_Update() {
+void ConfirmDeletionScreen_Tick() {
 	if (confirmed_deletion) {
 		confirmed_deletion = false;
 		delete_folder(path);
