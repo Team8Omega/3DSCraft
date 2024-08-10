@@ -307,18 +307,20 @@ void Player_Move(float dt, float3 accl) {
 void Player_PlaceBlock(Sound* sound) {
 	if (gPlayer.blockInActionRange && gPlayer.breakPlaceTimeout < 0.f) {
 		const s8* offset = DirectionToOffset[gPlayer.viewRayCast.direction];
+		int x = gPlayer.viewRayCast.x + offset[0], y = gPlayer.viewRayCast.y + offset[1], z = gPlayer.viewRayCast.z + offset[2];
+
 		if (AABB_Overlap(gPlayer.position.x - PLAYER_COLLISIONBOX_SIZE / 2.f, gPlayer.position.y,
 						 gPlayer.position.z - PLAYER_COLLISIONBOX_SIZE / 2.f, PLAYER_COLLISIONBOX_SIZE, PLAYER_HEIGHT,
-						 PLAYER_COLLISIONBOX_SIZE, gPlayer.viewRayCast.x + offset[0], gPlayer.viewRayCast.y + offset[1],
-						 gPlayer.viewRayCast.z + offset[2], 1.f, 1.f, 1.f))
+						 PLAYER_COLLISIONBOX_SIZE, x, y, z, 1.f, 1.f, 1.f))
 			return;
-		World_SetBlockAndMeta(gPlayer.viewRayCast.x + offset[0], gPlayer.viewRayCast.y + offset[1], gPlayer.viewRayCast.z + offset[2],
-							  gPlayer.quickSelectBar[gPlayer.quickSelectBarSlot].block,
-							  gPlayer.quickSelectBar[gPlayer.quickSelectBarSlot].meta);
-		sound->background = false;
+
+		ItemStack slotNow = gPlayer.quickSelectBar[gPlayer.quickSelectBarSlot];
+		World_SetBlockAndMeta(x, y, z, slotNow.block, slotNow.meta);
+
+		/*sound->background = false;
 		sound->path		  = String_ParsePackName(PACK_VANILLA, PATH_PACK_SOUNDS, "entity/player/hit.opus");
 		// DebugUI_Log("File path for player sound %s", sound->path);
-		Sound_PlayOpus(sound);
+		Sound_PlayOpus(sound);*/ // ffs we are writing a *nice* sound class wrapper to handle this, stop hardcoding.
 	}
 	if (gPlayer.breakPlaceTimeout < 0.f)
 		gPlayer.breakPlaceTimeout = PLAYER_PLACE_REPLACE_TIMEOUT;

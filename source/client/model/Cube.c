@@ -8,7 +8,7 @@
 #include "core/Direction.h"
 #include "util/math/NumberUtils.h"
 
-#define CUBE_NUM_MAX 64
+#define CUBE_NUM_MAX 16
 
 static u16 cubeNum = 0;
 static Cube* cubeRef[CUBE_NUM_MAX];

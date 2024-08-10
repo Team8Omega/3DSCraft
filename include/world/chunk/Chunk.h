@@ -13,7 +13,6 @@
 #include <string.h>
 
 #define CHUNK_SIZE (16)
-#define BLOCK_SIZE (16)
 #define CHUNK_HEIGHT (128)
 #define CLUSTER_PER_CHUNK (CHUNK_HEIGHT / CHUNK_SIZE)
 
