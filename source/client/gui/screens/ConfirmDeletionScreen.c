@@ -18,13 +18,13 @@ void ConfirmDeletionScreen_Draw();
 void ConfirmDeletionScreen_Tick();
 
 Screen sConfirmDeletionScreen = {
-	.OnDrawDown = ConfirmDeletionScreen_Draw,
-	.OnUpdate	= ConfirmDeletionScreen_Tick,
+	.DrawDown = ConfirmDeletionScreen_Draw,
+	.Tick	  = ConfirmDeletionScreen_Tick,
 };
 
 void ConfirmDeletionScreen(const char* path_) {
 	strcpy(path, path_);
-	GuiScreen_SetScreen(SCREEN_CONFIRMDELETION);
+	Screen_SetScreen(SCREEN_CONFIRMDELETION);
 }
 
 static void delete_folder(const char* path) {
@@ -68,10 +68,10 @@ void ConfirmDeletionScreen_Tick() {
 	if (confirmed_deletion) {
 		confirmed_deletion = false;
 		delete_folder(path);
-		GuiScreen_SetScreen(SCREEN_SELECTWORLD);
+		Screen_SetScreen(SCREEN_SELECTWORLD);
 	}
 	if (canceled_deletion) {
 		canceled_deletion = false;
-		GuiScreen_SetScreen(SCREEN_SELECTWORLD);
+		Screen_SetScreen(SCREEN_SELECTWORLD);
 	}
 }

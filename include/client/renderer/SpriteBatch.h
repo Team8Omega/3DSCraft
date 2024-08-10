@@ -47,5 +47,6 @@ int SpriteBatch_GetScale();
 int SpriteBatch_GetWidth();
 int SpriteBatch_GetHeight();
 
-void SpriteBatch_StartFrame(int width, int height);
-void SpriteBatch_Render(gfxScreen_t screen);
+void SpriteBatch_Render();
+
+void SpriteBatch_SetScreen(bool isTop);

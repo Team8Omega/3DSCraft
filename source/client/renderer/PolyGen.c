@@ -210,7 +210,7 @@ static u16 floodFill(Cluster* cluster, int x, int y, int z, Direction entrySide0
 	return seeThrough;
 }
 
-void PolyGen_GeneratePolygons(WorkQueue* queue, WorkerItem item, void* this) {
+void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 	for (int i = 0; i < CLUSTER_PER_CHUNK; i++) {
 		Cluster* cluster = &item.chunk->clusters[i];
 
@@ -292,8 +292,8 @@ void PolyGen_GeneratePolygons(WorkQueue* queue, WorkerItem item, void* this) {
 				}
 			}
 		}
-		int px = WorldToChunkCoord(FastFloor(gPlayer.position.x)), py = WorldToChunkCoord(FastFloor(gPlayer.position.y)),
-			pz = WorldToChunkCoord(FastFloor(gPlayer.position.z));
+		int px = WorldToChunkCoord(FastFloor(gPlayer->position.x)), py = WorldToChunkCoord(FastFloor(gPlayer->position.y)),
+			pz = WorldToChunkCoord(FastFloor(gPlayer->position.z));
 		if (px == item.chunk->x && pz == item.chunk->z && py == i) {
 			floodFill(cluster, px, py, pz, 0, 0, 0);
 		}

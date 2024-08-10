@@ -6,7 +6,7 @@
 
 #define CHUNKWORKER_THREAD_STACKSIZE (16 * 1024)
 
-typedef void (*WorkerFunc)(WorkQueue* queue, WorkerItem item, void* this);
+typedef void (*WorkerFunc)(WorkerItem item, void* this);
 typedef struct {
 	WorkerFunc func;
 	void* this;
@@ -15,8 +15,6 @@ typedef struct {
 
 typedef struct {
 	Thread thread;
-
-	WorkQueue queue;
 
 	vec_t(WorkerFuncObj) handler[WorkerItemTypes_Count];
 

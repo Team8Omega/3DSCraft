@@ -20,6 +20,8 @@
 #define PLAYER_PLACE_REPLACE_TIMEOUT (0.2f)
 
 typedef struct {
+	bool active;
+
 	float3 position;
 	float pitch, yaw;
 	float bobbing, fovAdd, crouchAdd;
@@ -60,15 +62,16 @@ typedef struct {
 	Damage dmg;
 } Player;
 
-extern Player gPlayer;
+extern Player* gPlayer;
 
 void Player_Init();
 
-void Player_InitModel();
+void Player_Load();
+void Player_Unload();
 
 void Player_Draw();
 
-void Player_Update(Sound* sound);
+void Player_Tick(Sound* sound);
 
 void Player_Move(float dt, float3 accl);
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "client/gui/GuiScreen.h"
+#include "client/gui/Screen.h"
 #include "world/World.h"
 #include "world/chunk/ChunkWorker.h"
 #include "world/level/storage/SaveManager.h"
@@ -15,4 +15,4 @@ void gStop();
 void gLoadWorld(char* path, char* name, WorldGenType worldType, bool newWorld);
 void gReleaseWorld();
 
-extern bool gSkipWorldRender;
+float gGet3dSlider();

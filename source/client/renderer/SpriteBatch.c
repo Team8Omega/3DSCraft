@@ -33,8 +33,10 @@ static C3D_Tex menuBackgroundTex;
 
 static C3D_Mtx iconModelMtx;
 
-static int screenWidth = 0, screenHeight = 0;
-static int guiScale = 2;
+static u8 screenIdx;
+static const u8 screenHeight = GSP_SCREEN_WIDTH;  // its 240.
+static u16 screenWidth		 = 0;
+static int guiScale			 = 2;
 
 void SpriteBatch_Init(int projUniform_) {
 	vec_init(&cmdList);
@@ -251,7 +253,7 @@ char* SpriteBatch_TextTruncate(const char* text, size_t length) {
 
 	size_t truncatedLength = length + ellipsisLength;
 
-	char* truncated = (char*)malloc(truncatedLength + 1);  // +1 for the null terminator
+	char* truncated = (char*)malloc(truncatedLength + 1);
 
 	strncpy(truncated, text, length);
 
@@ -282,13 +284,17 @@ void SpriteBatch_SetScale(int scale) {
 int SpriteBatch_GetScale() {
 	return guiScale;
 }
-
-void SpriteBatch_StartFrame(int width, int height) {
-	screenWidth	 = width;
-	screenHeight = height;
+void SpriteBatch_SetScreen(bool isTop) {
+	if (isTop) {
+		screenWidth = GSP_SCREEN_HEIGHT_TOP;
+		screenIdx	= 0;
+	} else {
+		screenWidth = GSP_SCREEN_HEIGHT_BOTTOM;
+		screenIdx	= 1;
+	}
 }
 
-void SpriteBatch_Render(gfxScreen_t screen) {
+void SpriteBatch_Render() {
 	rot += M_PI / 60.f;
 	vec_sort(&cmdList, &compareDrawCommands);
 
@@ -304,7 +310,7 @@ void SpriteBatch_Render(gfxScreen_t screen) {
 	C3D_TexEnvSrc(env, C3D_Both, GPU_TEXTURE0, GPU_PRIMARY_COLOR, 0);
 	C3D_TexEnvFunc(env, C3D_Both, GPU_MODULATE);
 
-	GuiVertex* usedVertexList = vertexList[screen];
+	GuiVertex* usedVertexList = vertexList[screenIdx];
 
 	int verticesTotal = 0;
 

@@ -21,7 +21,7 @@ void TitleScreen_Deinit();
 void TitleScreen_DrawDown();
 void TitleScreen_DrawUp();
 
-Screen sTitleScreen = { .OnInit = TitleScreen_Init, .OnDrawDown = TitleScreen_DrawDown };
+Screen sTitleScreen = { .Init = TitleScreen_Init, .DrawDown = TitleScreen_DrawDown };
 
 extern Shader shaderWorld;
 
@@ -41,18 +41,14 @@ void TitleScreen_Deinit() {
 	CubeMap_Deinit();
 }
 void TitleScreen_DrawDown() {
-	for (int i = 0; i < 160 / 16 + 1; i++) {
-		for (int j = 0; j < 120 / 16 + 1; j++) {
-			Gui_DrawBackground(0, i, j, -4);
-		}
-	}
+	Gui_DrawBackgroundFull(0, -4);
 
 	clicked_play = Gui_IconButton(0, 45, 160, 20, 0, true, SHADER_RGB(20, 20, 20), "Singleplayer");
 	clicked_quit = Gui_IconButton(0, 65, 160, 20, 0, true, SHADER_RGB(20, 20, 20), "Quit");
 
 	if (clicked_play) {
 		clicked_play = false;
-		GuiScreen_SetScreen(SCREEN_SELECTWORLD);
+		Screen_SetScreen(SCREEN_SELECTWORLD);
 	}
 	if (clicked_quit) {
 		exit(0);
@@ -60,8 +56,6 @@ void TitleScreen_DrawDown() {
 }
 
 void TitleScreen_DrawUp() {
-	CubeMap_Draw();
-
 	SpriteBatch_SetScale(2);
 
 	SpriteBatch_BindTexture(&texLogo);

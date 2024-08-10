@@ -79,6 +79,9 @@ void Block_SetLightness(Block* b, u8 v) {
 #define COLOR_MUL 255 / 15
 
 void Block_GetBlockColor(Block* b, Direction dir, int x, int y, int z, u8 meta, u8 out[]) {
+	if (!b)
+		return;
+
 	u32 color = b->vptr->getBlockColor(b, dir, x, y, z, meta);
 
 	u8 brightness = 15;	 // 0 - 15, if implemented check, for max value (bitwise and)
@@ -93,7 +96,11 @@ void Block_GetBlockColor(Block* b, Direction dir, int x, int y, int z, u8 meta, 
 }
 
 void Block_GetBlockTexture(Block* b, Direction dir, int x, int y, int z, u8 meta, s16 out_uv[]) {
-	const Icon icon = gTexMapBlock.icons[b->vptr->getBlockTexture(b, dir, x, y, z, meta)];
+	if (!b)
+		return;
+
+	u16 tex			= b->vptr->getBlockTexture(b, dir, x, y, z, meta);
+	const Icon icon = gTexMapBlock.icons[tex];
 
 	out_uv[0] = icon.u;
 	out_uv[1] = icon.v;

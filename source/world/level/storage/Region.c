@@ -82,14 +82,14 @@ void Region_Init(Region* region, int x, int z) {
 		memset(region->grid, 0x0, sizeof(region->grid));
 	}
 
-	sprintf(buffer, "%s/regions/r.%d.%d.dat", gWorld.path, x, z);
+	sprintf(buffer, "%s/regions/r.%d.%d.dat", gWorld->path, x, z);
 	region->dataFile = fopen(buffer, "r+b");
 	if (region->dataFile == NULL)
 		region->dataFile = fopen(buffer, "w+b");
 
 	if (region->dataFile == NULL)
 		Crash("World Path invalid, internal error. Unable to load Region %d.%d.\n\nPath name: %s\nBuffer String: %s\nBuffer Address: 0x%x",
-			  x, z, gWorld.path, buffer, buffer);
+			  x, z, gWorld->path, buffer, buffer);
 }
 void Region_Deinit(Region* region) {
 	Region_SaveIndex(region);
@@ -99,7 +99,7 @@ void Region_Deinit(Region* region) {
 
 void Region_SaveIndex(Region* region) {
 	char buffer[256];
-	sprintf(buffer, "%s/regions/r.%d.%d.mp", gWorld.path, region->x, region->z);
+	sprintf(buffer, "%s/regions/r.%d.%d.mp", gWorld->path, region->x, region->z);
 
 	mpack_writer_t writer;
 	mpack_writer_init_file(&writer, buffer);

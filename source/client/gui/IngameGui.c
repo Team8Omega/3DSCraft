@@ -1,4 +1,4 @@
-#include "client/gui/GuiIngame.h"
+#include "client/gui/IngameGui.h"
 
 #include <string.h>
 
@@ -8,7 +8,7 @@
 void renderExpBar();
 void renderHealth();
 
-void GuiIngame_RenderGameOverlay() {
+void IngameGui_RenderGameOverlay() {
 	SpriteBatch_BindGuiTexture(GuiTexture_Icons);
 	SpriteBatch_PushQuad(200 / 2 - 16 / 2, 120 / 2 - 16 / 2, 0, 16, 16, 0, 0, 16, 16);
 
@@ -22,7 +22,7 @@ void renderHealth() {
 	// basic implementation from Minecraft indev
 	// TODO: more features will be added later#
 
-	u8 health = gPlayer.hp;
+	u8 health = gPlayer->hp;
 	u16 yPos  = 120 - 21;
 	SpriteBatch_BindGuiTexture(GuiTexture_Icons);
 	for (u8 amount = 0; amount < 10; ++amount) {
@@ -34,7 +34,7 @@ void renderHealth() {
 
 		u8 spriteSize = 9;
 
-		u8 prevHealth = gPlayer.hp;
+		u8 prevHealth = gPlayer->hp;
 		// TODO: Y- korregieren
 		if (health <= 4) {
 			yPos += rand() % 2;
@@ -63,7 +63,7 @@ void renderExpBar() {
 
 	if (barCap > 0) {
 		u8 barLength = 182;
-		u16 xpFill	 = (int)(gPlayer.experience * (float)(barLength + 1));
+		u16 xpFill	 = (int)(gPlayer->experience * (float)(barLength + 1));
 
 		u8 y = 120 - 9;
 		SpriteBatch_PushQuad(200 / 2 - 182 / 2, y, 0, barLength, 5, 0, 64, barLength, 5);
@@ -73,10 +73,10 @@ void renderExpBar() {
 		}
 	}
 
-	if (gPlayer.experienceLevel > 0) {
+	if (gPlayer->experienceLevel > 0) {
 		char experienceStr[20];	 // buffer to hold the string representation of experience level
 
-		u16 experienceInt = (u16)gPlayer.experienceLevel;
+		u16 experienceInt = (u16)gPlayer->experienceLevel;
 		snprintf(experienceStr, sizeof(experienceStr), "%d", experienceInt);  // Format as integer
 
 		u16 textWidth = SpriteBatch_CalcTextWidth(experienceStr);

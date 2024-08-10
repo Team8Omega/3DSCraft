@@ -109,7 +109,7 @@ void CubeMap_Tick(C3D_Mtx* projection, float3 rotationOffset) {
 
 	Mtx_Multiply(&cubeMatrix, projection, &model);
 }
-void CubeMap_Draw() {
+void CubeMap_Render() {
 	C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, projUniform, &cubeMatrix);
 
 	C3D_CullFace(GPU_CULL_FRONT_CCW);

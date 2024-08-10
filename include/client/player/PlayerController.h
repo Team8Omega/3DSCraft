@@ -34,4 +34,4 @@ typedef struct {
 } PlayerController;
 
 void PlayerController_Init(PlayerController* ctrl);
-void PlayerController_Update(PlayerController* ctrl, Sound* sound, float dt);
+void PlayerController_Tick(PlayerController* ctrl, Sound* sound, float dt);

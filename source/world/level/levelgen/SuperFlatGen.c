@@ -5,7 +5,7 @@
 void SuperFlatGen_Init(SuperFlatGen* gen) {
 }
 
-void SuperFlatGen_Generate(WorkQueue* queue, WorkerItem item, void* this) {
+void SuperFlatGen_Generate(WorkerItem item, void* this) {
 	for (int y = 0; y < 17; y++) {
 		BlockId block = BLOCK_AIR;
 		switch (y) {  // TODO: Mit einem Lookup Table ersetzen, Superflach Gen konfigurierbar machen

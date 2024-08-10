@@ -71,14 +71,12 @@ typedef struct {
 	Chunk* chunkCache[CHUNKCACHE_SIZE][CHUNKCACHE_SIZE];
 	vec_t(Chunk*) freeChunks;
 
-	WorkQueue* workqueue;
-
 	Xorshift32 randomTickGen;
 
 	int weather;
 } World;
 
-extern World gWorld;
+extern World* gWorld;
 
 static inline int WorldToChunkCoord(int x) {
 	return (x + (int)(x < 0)) / CHUNK_SIZE - (int)(x < 0);
@@ -87,9 +85,9 @@ static inline int WorldToLocalCoord(int x) {
 	return x - WorldToChunkCoord(x) * CHUNK_SIZE;
 }
 
-void World_Init(WorkQueue* workqueue);
+void World_Init();
 
-void World_Reset();
+void World_Deinit();
 
 void World_Tick();
 

@@ -31,51 +31,51 @@ void SaveManager_Deinit(SaveManager* mgr) {
 
 void SaveManager_Load(SaveManager* mgr) {
 	// char buffer[256];
-	// sprintf(buffer, "%s", gWorld.path);
+	// sprintf(buffer, "%s", gWorld->path);
 
-	mkdir(gWorld.path, mkdirFlags);
-	if (access(gWorld.path, F_OK))
-		Crash("World path invalid, internal error. Cannot create world folder.\n\nPath: %s", gWorld.path);
+	mkdir(gWorld->path, mkdirFlags);
+	if (access(gWorld->path, F_OK))
+		Crash("World path invalid, internal error. Cannot create world folder.\n\nPath: %s", gWorld->path);
 
-	chdir(gWorld.path);
+	chdir(gWorld->path);
 
 	mkdir("regions", mkdirFlags);
 
-	// printf(buffer, "%s/level.mp", gWorld.path);
+	// printf(buffer, "%s/level.mp", gWorld->path);
 
 	if (access("level.mp", F_OK) != -1) {
 		mpack_tree_t levelTree;
 		mpack_tree_init_file(&levelTree, "level.mp", 0);
 		mpack_node_t root = mpack_tree_root(&levelTree);
 
-		mpack_node_copy_utf8_cstr(mpack_node_map_cstr(root, "name"), gWorld.name, sizeof(gWorld.name));
+		mpack_node_copy_utf8_cstr(mpack_node_map_cstr(root, "name"), gWorld->name, sizeof(gWorld->name));
 
-		gWorld.genSettings.type = mpack_get(root, u8, "worldType", WorldGen_Default);
+		gWorld->genSettings.type = mpack_get(root, u8, "worldType", WorldGen_Default);
 
 		mpack_node_t player = mpack_node_array_at(mpack_node_map_cstr(root, "players"), 0);
 
-		gPlayer.position.x = mpack_get(player, float, "x", 0);
-		gPlayer.position.y = mpack_get(player, float, "y", 0) + 0.1f;
-		gPlayer.position.z = mpack_get(player, float, "z", 0);
+		gPlayer->position.x = mpack_get(player, float, "x", 0);
+		gPlayer->position.y = mpack_get(player, float, "y", 0) + 0.1f;
+		gPlayer->position.z = mpack_get(player, float, "z", 0);
 
-		gPlayer.spawnPos.x = mpack_get(player, float, "sx", 0);
-		gPlayer.spawnPos.y = mpack_get(player, float, "sy", 0);
-		gPlayer.spawnPos.z = mpack_get(player, float, "sz", 0);
+		gPlayer->spawnPos.x = mpack_get(player, float, "sx", 0);
+		gPlayer->spawnPos.y = mpack_get(player, float, "sy", 0);
+		gPlayer->spawnPos.z = mpack_get(player, float, "sz", 0);
 
-		gPlayer.pitch = mpack_get(player, float, "pitch", 0.f);
-		gPlayer.yaw	  = mpack_get(player, float, "yaw", 0.f);
+		gPlayer->pitch = mpack_get(player, float, "pitch", 0.f);
+		gPlayer->yaw   = mpack_get(player, float, "yaw", 0.f);
 
-		gPlayer.hp		 = mpack_get(player, u8, "hp", 20);
-		gPlayer.hunger	 = mpack_get(player, u8, "hunger", 20);
-		gPlayer.gamemode = mpack_get(player, u8, "gamemode", Gamemode_Survival);
+		gPlayer->hp		  = mpack_get(player, u8, "hp", 20);
+		gPlayer->hunger	  = mpack_get(player, u8, "hunger", 20);
+		gPlayer->gamemode = mpack_get(player, u8, "gamemode", Gamemode_Survival);
 
-		gPlayer.flying	  = mpack_get(player, bool, "flying", false);
-		gPlayer.crouching = mpack_get(player, bool, "crouching", false);
-		gPlayer.cheats	  = mpack_get(player, bool, "cheats", true);
+		gPlayer->flying	   = mpack_get(player, bool, "flying", false);
+		gPlayer->crouching = mpack_get(player, bool, "crouching", false);
+		gPlayer->cheats	   = mpack_get(player, bool, "cheats", true);
 
 		mpack_error_t err = mpack_tree_destroy(&levelTree);
 		if (err != mpack_ok) {
-			Crash("Mpack error %d while loading world manifest\nPath: %s", err, gWorld.path);
+			Crash("Mpack error %d while loading world manifest\nPath: %s", err, gWorld->path);
 		}
 	}
 }
@@ -107,32 +107,32 @@ void SaveManager_Unload(SaveManager* mgr) {
 	mpack_writer_init_file(&writer, "level.mp");
 	mpack_start_map(&writer, 3);
 
-	write_str(&writer, "name", gWorld.name);
+	write_str(&writer, "name", gWorld->name);
 
-	write_u8(&writer, "worldType", gWorld.genSettings.type);
+	write_u8(&writer, "worldType", gWorld->genSettings.type);
 
 	mpack_write_cstr(&writer, "players");
 	mpack_start_array(&writer, 1);
 	mpack_start_map(&writer, PARAM_NUM_PER_PLAYER);
 
-	write_float(&writer, "x", gPlayer.position.x);
-	write_float(&writer, "y", gPlayer.position.y);
-	write_float(&writer, "z", gPlayer.position.z);
+	write_float(&writer, "x", gPlayer->position.x);
+	write_float(&writer, "y", gPlayer->position.y);
+	write_float(&writer, "z", gPlayer->position.z);
 
-	write_float(&writer, "sx", gPlayer.spawnPos.x);
-	write_float(&writer, "sy", gPlayer.spawnPos.y);
-	write_float(&writer, "sz", gPlayer.spawnPos.z);
+	write_float(&writer, "sx", gPlayer->spawnPos.x);
+	write_float(&writer, "sy", gPlayer->spawnPos.y);
+	write_float(&writer, "sz", gPlayer->spawnPos.z);
 
-	write_float(&writer, "pitch", gPlayer.pitch);
-	write_float(&writer, "yaw", gPlayer.yaw);
+	write_float(&writer, "pitch", gPlayer->pitch);
+	write_float(&writer, "yaw", gPlayer->yaw);
 
-	write_u8(&writer, "hp", gPlayer.hp);
-	write_u8(&writer, "hunger", gPlayer.hunger);
-	write_u8(&writer, "gamemode", gPlayer.gamemode);
+	write_u8(&writer, "hp", gPlayer->hp);
+	write_u8(&writer, "hunger", gPlayer->hunger);
+	write_u8(&writer, "gamemode", gPlayer->gamemode);
 
-	write_bool(&writer, "cheats", gPlayer.cheats);
-	write_bool(&writer, "flying", gPlayer.flying);
-	write_bool(&writer, "crouching", gPlayer.crouching);
+	write_bool(&writer, "cheats", gPlayer->cheats);
+	write_bool(&writer, "flying", gPlayer->flying);
+	write_bool(&writer, "crouching", gPlayer->crouching);
 
 	mpack_finish_map(&writer);
 	mpack_finish_array(&writer);
@@ -152,7 +152,7 @@ void SaveManager_Unload(SaveManager* mgr) {
 }
 
 static Region* fetchRegion(SaveManager* mgr, int x, int z) {
-	if (gWorld.active) {
+	if (gWorld) {
 		for (int i = 0; i < mgr->regions.length; i++) {
 			if (mgr->regions.data[i]->x == x && mgr->regions.data[i]->z == z) {
 				return mgr->regions.data[i];
@@ -166,7 +166,7 @@ static Region* fetchRegion(SaveManager* mgr, int x, int z) {
 	return region;
 }
 
-void SaveManager_LoadChunk(WorkQueue* queue, WorkerItem item, void* this) {
+void SaveManager_LoadChunk(WorkerItem item, void* this) {
 	SaveManager* mgr = (SaveManager*)this;
 	int x			 = ChunkToRegionCoord(item.chunk->x);
 	int z			 = ChunkToRegionCoord(item.chunk->z);
@@ -174,7 +174,7 @@ void SaveManager_LoadChunk(WorkQueue* queue, WorkerItem item, void* this) {
 
 	Region_LoadChunk(region, item.chunk);
 }
-void SaveManager_SaveChunk(WorkQueue* queue, WorkerItem item, void* this) {
+void SaveManager_SaveChunk(WorkerItem item, void* this) {
 	SaveManager* mgr = (SaveManager*)this;
 	int x			 = ChunkToRegionCoord(item.chunk->x);
 	int z			 = ChunkToRegionCoord(item.chunk->z);

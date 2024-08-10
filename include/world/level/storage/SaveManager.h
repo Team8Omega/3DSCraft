@@ -20,5 +20,5 @@ void SaveManager_Deinit(SaveManager* mgr);
 void SaveManager_Load(SaveManager* mgr);
 void SaveManager_Unload(SaveManager* mgr);
 
-void SaveManager_LoadChunk(WorkQueue* queue, WorkerItem item, void* this);
-void SaveManager_SaveChunk(WorkQueue* queue, WorkerItem item, void* this);
+void SaveManager_LoadChunk(WorkerItem item, void* this);
+void SaveManager_SaveChunk(WorkerItem item, void* this);

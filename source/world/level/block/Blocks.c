@@ -25,9 +25,9 @@ void Blocks_Init() {
 
 	Block_SetNotOpaque(BLOCKS[BLOCK_AIR]);
 
-	for (BlockId i = 1; i < BLOCK_COUNT; ++i) {
+	for (BlockId i = 0; i < BLOCK_COUNT; ++i) {
 		if (BLOCKS[i] == NULL)
-			Crash("ERROR: Blocks missing in initializer loop, please fix. internal error.");
+			Crash("ERROR: Block/s missing in initializer loop, please fix. internal error.");
 
 		BLOCKS[i]->vptr->registerIcons(BLOCKS[i]);
 

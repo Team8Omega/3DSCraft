@@ -29,14 +29,14 @@ void CreateWorldScreen_Draw();
 void CreateWorldScreen_Tick();
 
 Screen sCreateWorldScreen = {
-	.OnUpdate	= CreateWorldScreen_Tick,
-	.OnDrawDown = CreateWorldScreen_Draw,
+	.Tick	  = CreateWorldScreen_Tick,
+	.DrawDown = CreateWorldScreen_Draw,
 };
 
 void CreateWorldScreen(u16 selectedIdx, u16 worldNo) {
 	selectedWorld = selectedIdx;
 	worldNum	  = worldNo;
-	GuiScreen_SetScreen(SCREEN_CREATEWORLD);
+	Screen_SetScreen(SCREEN_CREATEWORLD);
 }
 
 void CreateWorldScreen_Draw() {
@@ -56,7 +56,7 @@ void CreateWorldScreen_Draw() {
 		if (gamemode == Gamemode_Spectator) {
 			gamemode++;
 		}
-		// gPlayer.gamemode = gamemode;
+		// gPlayer->gamemode = gamemode;
 		if (gamemode >= Gamemode_Count)
 			gamemode = 0;
 	}
@@ -65,7 +65,7 @@ void CreateWorldScreen_Draw() {
 	if (Gui_Button(true, 95, 60, 60, 0, difficultyTypesStr[difficulty])) {
 		difficulty++;
 
-		// gPlayer.difficulty = difficulty;
+		// gPlayer->difficulty = difficulty;
 		if (difficulty == Difficulty_Count)
 			difficulty = 0;
 	}
@@ -77,7 +77,7 @@ void CreateWorldScreen_Draw() {
 void CreateWorldScreen_Tick() {
 	if (confirmed_world_options) {
 		confirmed_world_options = false;
-		// gPlayer.gamemode=gamemode3;
+		// gPlayer->gamemode=gamemode3;
 
 		static char name[WORLD_NAME_SIZE];
 
@@ -125,9 +125,9 @@ void CreateWorldScreen_Tick() {
 	if (canceled_world_options) {
 		canceled_world_options = false;
 		if (worldNum == 0) {
-			GuiScreen_SetScreen(SCREEN_TITLE);
+			Screen_SetScreen(SCREEN_TITLE);
 		} else {
-			GuiScreen_SetScreen(SCREEN_SELECTWORLD);
+			Screen_SetScreen(SCREEN_SELECTWORLD);
 		}
 	}
 }

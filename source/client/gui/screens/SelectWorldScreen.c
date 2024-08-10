@@ -69,11 +69,11 @@ void SelectWorldScreen_Deinit();
 void SelectWorldScreen_DrawDown();
 void SelectWorldScreen_Tick();
 
-Screen sSelectWorldScreen = { .OnInit	  = SelectWorldScreen_Init,
-							  .OnAwake	  = SelectWorldScreen_Awake,
-							  .OnDeinit	  = SelectWorldScreen_Deinit,
-							  .OnDrawDown = SelectWorldScreen_DrawDown,
-							  .OnUpdate	  = SelectWorldScreen_Tick };
+Screen sSelectWorldScreen = { .Init		= SelectWorldScreen_Init,
+							  .Awake	= SelectWorldScreen_Awake,
+							  .Deinit	= SelectWorldScreen_Deinit,
+							  .DrawDown = SelectWorldScreen_DrawDown,
+							  .Tick		= SelectWorldScreen_Tick };
 
 void SelectWorldScreen_Init() {
 	vec_init(&worlds.list);
@@ -186,7 +186,7 @@ void SelectWorldScreen_DrawDown() {
 void SelectWorldScreen_Tick() {
 	if (clicked_back) {
 		clicked_back = false;
-		GuiScreen_SetScreen(SCREEN_TITLE);
+		Screen_SetScreen(SCREEN_TITLE);
 	}
 	if (clicked_new_world) {
 		clicked_new_world = false;

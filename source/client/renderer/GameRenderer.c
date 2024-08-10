@@ -2,9 +2,10 @@
 
 #include <client/Camera.h>
 #include <client/Crash.h>
+#include <client/Minecraft.h>
 #include <client/gui/DebugUI.h>
 #include <client/gui/Gui.h>
-#include <client/gui/GuiIngame.h>
+#include <client/gui/IngameGui.h>
 #include <client/gui/Inventory.h>
 #include <client/gui/screens/TitleScreen.h>
 #include <client/renderer/Clouds.h>
@@ -40,19 +41,15 @@ static C3D_RenderTarget* lowerScreen;
 
 Shader shaderGui, shaderWorld, shaderWire;
 
-static WorkQueue* workqueue;
-
-void GameRenderer_Init(WorkQueue* queue) {
-	workqueue = queue;
-
+void GameRenderer_Init() {
 	C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
 
-	renderTargets[0] = C3D_RenderTargetCreate(240, 400, GPU_RB_RGBA8, GPU_RB_DEPTH16);
-	renderTargets[1] = C3D_RenderTargetCreate(240, 400, GPU_RB_RGBA8, GPU_RB_DEPTH16);
+	renderTargets[0] = C3D_RenderTargetCreate(GSP_SCREEN_WIDTH, GSP_SCREEN_HEIGHT_TOP, GPU_RB_RGBA8, GPU_RB_DEPTH16);
+	renderTargets[1] = C3D_RenderTargetCreate(GSP_SCREEN_WIDTH, GSP_SCREEN_HEIGHT_TOP, GPU_RB_RGBA8, GPU_RB_DEPTH16);
 	C3D_RenderTargetSetOutput(renderTargets[0], GFX_TOP, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
 	C3D_RenderTargetSetOutput(renderTargets[1], GFX_TOP, GFX_RIGHT, DISPLAY_TRANSFER_FLAGS);
 
-	lowerScreen = C3D_RenderTargetCreate(240, 320, GPU_RB_RGBA8, GPU_RB_DEPTH16);
+	lowerScreen = C3D_RenderTargetCreate(GSP_SCREEN_WIDTH, GSP_SCREEN_HEIGHT_BOTTOM, GPU_RB_RGBA8, GPU_RB_DEPTH16);
 	C3D_RenderTargetSetOutput(lowerScreen, GFX_BOTTOM, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
 
 	// World Shader
@@ -70,7 +67,7 @@ void GameRenderer_Init(WorkQueue* queue) {
 
 	PolyGen_Init();
 
-	WorldRenderer_Init(gWorld.workqueue, shaderWorld.uLocProjection);
+	WorldRenderer_Init(shaderWorld.uLocProjection);
 
 	SpriteBatch_Init(shaderGui.uLocProjection);
 
@@ -104,34 +101,17 @@ void GameRenderer_Deinit() {
 
 	C3D_Fini();
 }
-
-void GameRenderer_Tick() {
-	if (gWorld.active) {
-		WorldRenderer_Tick();
-
-	} else {
-		CubeMap_Tick(&gCamera.projection, f3_new(0.f, 0.003f, 0.f));
-	}
-	if (currentScreen) {
-		GuiScreen_Tick();
-	}
-}
-
+extern float sDt;
 void GameRenderer_Render() {
-	float iod = osGet3DSliderState() * PLAYER_HALFEYEDIFF;
-
 	C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 
-	if (gWorld.active) {
-		PolyGen_Harvest();
-	}
+	CubeMap_Tick(&gCamera.projection, f3_new(0.f, 0.1f * sDt, 0.f));
 
+	float iod = gGet3dSlider();
 	for (int i = 0; i < 2; i++) {
-		C3D_RenderTargetClear(renderTargets[i], C3D_CLEAR_ALL, gWorld.active ? CLEAR_COLOR_SKY : 0x000000FF, 0);
+		C3D_RenderTargetClear(renderTargets[i], C3D_CLEAR_ALL, gWorld ? CLEAR_COLOR_SKY : CLEAR_COLOR_BLACK, 0);
 
 		C3D_FrameDrawOn(renderTargets[i]);
-
-		SpriteBatch_StartFrame(400, 240);
 
 		C3D_TexEnv* env = C3D_GetTexEnv(0);
 		C3D_TexEnvInit(env);
@@ -140,48 +120,51 @@ void GameRenderer_Render() {
 
 		Shader_Bind(&shaderWorld);
 
-		if (gWorld.active) {
-			C3D_TexBind(0, &gTexMapBlock.texture);
-			WorldRenderer_Render(!i ? -iod : iod);
+		SpriteBatch_SetScreen(true);
 
-			if (!currentScreen)
-				GuiIngame_RenderGameOverlay();
+		if (gWorld && gWorld->active) {
+			Camera_Update(!i ? -iod : iod);
+
+			WorldRenderer_Render();
+
+			IngameGui_RenderGameOverlay();
 		} else {
+			CubeMap_Render();
 			TitleScreen_DrawUp();
 		}
 
-		if (currentScreen)
-			GuiScreen_DrawUp();
-
 		Shader_Bind(&shaderGui);
 
-		SpriteBatch_Render(GFX_TOP);
+		if (currentScreen) {
+			Screen_DrawUp();
+		}
 
-		if (iod <= 0.f)
+		SpriteBatch_Render();
+
+		if (gGet3dSlider() <= 0.f)
 			break;
 	}
 
 	C3D_RenderTargetClear(lowerScreen, C3D_CLEAR_ALL, CLEAR_COLOR_BLACK, 0);
 	C3D_FrameDrawOn(lowerScreen);
+	SpriteBatch_SetScreen(false);
 
-	SpriteBatch_StartFrame(320, 240);
+	if (!currentScreen && gWorld) {
+		SpriteBatch_SetScale(2);
+		Inventory_DrawQuickSelect(160 / 2 - Inventory_QuickSelectCalcWidth(INVENTORY_QUICKSELECT_MAXSLOTS) / 2,
+								  120 - INVENTORY_QUICKSELECT_HEIGHT, gPlayer->quickSelectBar, INVENTORY_QUICKSELECT_MAXSLOTS,
+								  &gPlayer->quickSelectBarSlot);
+		gPlayer->inventorySite =
+			Inventory_Draw(16, 0, 160, gPlayer->inventory, sizeof(gPlayer->inventory) / sizeof(ItemStack), gPlayer->inventorySite);
+	}
 
-	if (currentScreen)
-		GuiScreen_DrawDown();
-	else {
-		if (gWorld.active) {
-			SpriteBatch_SetScale(2);
-			Inventory_DrawQuickSelect(160 / 2 - Inventory_QuickSelectCalcWidth(INVENTORY_QUICKSELECT_MAXSLOTS) / 2,
-									  120 - INVENTORY_QUICKSELECT_HEIGHT, gPlayer.quickSelectBar, INVENTORY_QUICKSELECT_MAXSLOTS,
-									  &gPlayer.quickSelectBarSlot);
-			gPlayer.inventorySite =
-				Inventory_Draw(16, 0, 160, gPlayer.inventory, sizeof(gPlayer.inventory) / sizeof(ItemStack), gPlayer.inventorySite);
-		}
+	if (currentScreen) {
+		Screen_DrawDown();
 	}
 
 	DebugUI_Draw();
 
-	SpriteBatch_Render(GFX_BOTTOM);
+	SpriteBatch_Render();
 
 	C3D_FrameEnd(0);
 }

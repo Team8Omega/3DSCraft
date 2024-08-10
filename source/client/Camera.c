@@ -23,19 +23,20 @@ void Camera_Init() {
 }
 
 void Camera_Update(float iod) {
-	float fov = gCamera.fov + C3D_AngleFromDegrees(12.f) * gPlayer.fovAdd;
+	float fov = gCamera.fov + C3D_AngleFromDegrees(12.f) * gPlayer->fovAdd;
 
-	float3 playerHead = f3_new(gPlayer.position.x, gPlayer.position.y + PLAYER_EYEHEIGHT + sinf(gPlayer.bobbing) * 0.1f + gPlayer.crouchAdd,
-							   gPlayer.position.z);
+	float3 playerHead =
+		f3_new(gPlayer->position.x, gPlayer->position.y + PLAYER_EYEHEIGHT + sinf(gPlayer->bobbing) * 0.1f + gPlayer->crouchAdd,
+			   gPlayer->position.z);
 
 	Mtx_Identity(&gCamera.view);
 
-	float3 forward = gPlayer.view;
+	float3 forward = gPlayer->view;
 	float3 right   = f3_crs(f3_new(0, 1, 0), forward);
 	float3 up	   = f3_crs(forward, right);
 
-	Mtx_RotateX(&gCamera.view, -gPlayer.pitch, true);
-	Mtx_RotateY(&gCamera.view, -gPlayer.yaw, true);
+	Mtx_RotateX(&gCamera.view, -gPlayer->pitch, true);
+	Mtx_RotateY(&gCamera.view, -gPlayer->yaw, true);
 
 	switch (gCamera.mode) {
 		case CameraMode_First:
@@ -66,7 +67,6 @@ void Camera_Update(float iod) {
 	Mtx_Multiply(&vp, &gCamera.projection, &gCamera.view);
 	Mtx_Copy(&gCamera.vp, &vp);
 
-	// Frustum plane calculations remain the same
 	C3D_FVec rowX = vp.r[0];
 	C3D_FVec rowY = vp.r[1];
 	C3D_FVec rowZ = vp.r[2];

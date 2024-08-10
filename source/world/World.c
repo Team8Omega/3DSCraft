@@ -13,54 +13,54 @@
 #include <limits.h>
 #include <stdint.h>
 
-World gWorld;
+World* gWorld;
 
-void World_Init(WorkQueue* workqueue) {
-	gWorld.workqueue = workqueue;
+void World_Init() {
+	gWorld = (World*)malloc(sizeof(World));
 
-	gWorld.genSettings.seed = 28112000;
-	gWorld.genSettings.type = WorldGen_SuperFlat;
+	gWorld->randomTickGen = Xorshift32_New();
 
-	vec_init(&gWorld.freeChunks);
+	gWorld->genSettings.seed = 28112000;
+	gWorld->genSettings.type = WorldGen_SuperFlat;
 
-	World_Reset();
-}
-
-void World_Reset() {
-	gWorld.cacheTranslationX = 0;
-	gWorld.cacheTranslationZ = 0;
-
-	vec_clear(&gWorld.freeChunks);
+	vec_init(&gWorld->freeChunks);
 
 	for (size_t i = 0; i < CHUNKPOOL_SIZE; i++) {
-		gWorld.chunkPool[i].x = INT_MAX;
-		gWorld.chunkPool[i].z = INT_MAX;
-		vec_push(&gWorld.freeChunks, &gWorld.chunkPool[i]);
+		gWorld->chunkPool[i].x = INT_MAX;
+		gWorld->chunkPool[i].z = INT_MAX;
+		vec_push(&gWorld->freeChunks, &gWorld->chunkPool[i]);
 	}
 
-	gWorld.randomTickGen = Xorshift32_New();
+	Player_Load();
+}
 
-	gWorld.active = false;
+void World_Deinit() {
+	vec_clear(&gWorld->freeChunks);
+
+	Player_Unload();
+
+	free(gWorld);
+	gWorld = NULL;
 }
 
 Chunk* World_LoadChunk(int x, int z) {
-	for (int i = 0; i < gWorld.freeChunks.length; i++) {
-		if (gWorld.freeChunks.data[i]->x == x && gWorld.freeChunks.data[i]->z == z) {
-			Chunk* chunk = gWorld.freeChunks.data[i];
-			vec_splice(&gWorld.freeChunks, i, 1);
+	for (int i = 0; i < gWorld->freeChunks.length; i++) {
+		if (gWorld->freeChunks.data[i]->x == x && gWorld->freeChunks.data[i]->z == z) {
+			Chunk* chunk = gWorld->freeChunks.data[i];
+			vec_splice(&gWorld->freeChunks, i, 1);
 
 			chunk->references++;
 			return chunk;
 		}
 	}
 
-	for (int i = 0; i < gWorld.freeChunks.length; i++) {
-		if (!gWorld.freeChunks.data[i]->tasksRunning) {
-			Chunk* chunk = gWorld.freeChunks.data[i];
-			vec_splice(&gWorld.freeChunks, i, 1);
+	for (int i = 0; i < gWorld->freeChunks.length; i++) {
+		if (!gWorld->freeChunks.data[i]->tasksRunning) {
+			Chunk* chunk = gWorld->freeChunks.data[i];
+			vec_splice(&gWorld->freeChunks, i, 1);
 
 			Chunk_Init(chunk, x, z);
-			WorkQueue_AddItem(gWorld.workqueue, (WorkerItem){ WorkerItemType_Load, chunk });
+			WorkQueue_AddItem((WorkerItem){ WorkerItemType_Load, chunk });
 			DebugUI_Text("loading world");
 			chunk->references++;
 			return chunk;
@@ -70,19 +70,19 @@ Chunk* World_LoadChunk(int x, int z) {
 	return NULL;
 }
 void World_UnloadChunk(Chunk* chunk) {
-	WorkQueue_AddItem(gWorld.workqueue, (WorkerItem){ WorkerItemType_Save, chunk });
-	vec_push(&gWorld.freeChunks, chunk);
+	WorkQueue_AddItem((WorkerItem){ WorkerItemType_Save, chunk });
+	vec_push(&gWorld->freeChunks, chunk);
 	chunk->references--;
 }
 
 Chunk* World_GetChunk(int x, int z) {
 	int halfS = CHUNKCACHE_SIZE / 2;
-	int lowX  = gWorld.cacheTranslationX - halfS;
-	int lowZ  = gWorld.cacheTranslationZ - halfS;
-	int highX = gWorld.cacheTranslationX + halfS;
-	int highZ = gWorld.cacheTranslationZ + halfS;
+	int lowX  = gWorld->cacheTranslationX - halfS;
+	int lowZ  = gWorld->cacheTranslationZ - halfS;
+	int highX = gWorld->cacheTranslationX + halfS;
+	int highZ = gWorld->cacheTranslationZ + halfS;
 	if (x >= lowX && z >= lowZ && x <= highX && z <= highZ)
-		return gWorld.chunkCache[x - lowX][z - lowZ];
+		return gWorld->chunkCache[x - lowX][z - lowZ];
 	return NULL;
 }
 
@@ -180,15 +180,15 @@ int World_GetHeight(int x, int z) {
 }
 
 void World_UpdateChunkCache(int orginX, int orginZ) {
-	if (orginX != gWorld.cacheTranslationX || orginZ != gWorld.cacheTranslationZ) {
+	if (orginX != gWorld->cacheTranslationX || orginZ != gWorld->cacheTranslationZ) {
 		Chunk* tmpBuffer[CHUNKCACHE_SIZE][CHUNKCACHE_SIZE];
-		memcpy(tmpBuffer, gWorld.chunkCache, sizeof(tmpBuffer));
+		memcpy(tmpBuffer, gWorld->chunkCache, sizeof(tmpBuffer));
 
-		int oldBufferStartX = gWorld.cacheTranslationX - CHUNKCACHE_SIZE / 2;
-		int oldBufferStartZ = gWorld.cacheTranslationZ - CHUNKCACHE_SIZE / 2;
+		int oldBufferStartX = gWorld->cacheTranslationX - CHUNKCACHE_SIZE / 2;
+		int oldBufferStartZ = gWorld->cacheTranslationZ - CHUNKCACHE_SIZE / 2;
 
-		int diffX = orginX - gWorld.cacheTranslationX;
-		int diffZ = orginZ - gWorld.cacheTranslationZ;
+		int diffX = orginX - gWorld->cacheTranslationX;
+		int diffZ = orginZ - gWorld->cacheTranslationZ;
 
 		for (int i = 0; i < CHUNKCACHE_SIZE; i++) {
 			for (int j = 0; j < CHUNKCACHE_SIZE; j++) {
@@ -196,10 +196,10 @@ void World_UpdateChunkCache(int orginX, int orginZ) {
 				int wz = orginZ + (j - CHUNKCACHE_SIZE / 2);
 				if (wx >= oldBufferStartX && wx < oldBufferStartX + CHUNKCACHE_SIZE && wz >= oldBufferStartZ &&
 					wz < oldBufferStartZ + CHUNKCACHE_SIZE) {
-					gWorld.chunkCache[i][j]			= tmpBuffer[i + diffX][j + diffZ];
+					gWorld->chunkCache[i][j]		= tmpBuffer[i + diffX][j + diffZ];
 					tmpBuffer[i + diffX][j + diffZ] = NULL;
 				} else {
-					gWorld.chunkCache[i][j] = World_LoadChunk(wx, wz);
+					gWorld->chunkCache[i][j] = World_LoadChunk(wx, wz);
 				}
 			}
 		}
@@ -212,41 +212,42 @@ void World_UpdateChunkCache(int orginX, int orginZ) {
 			}
 		}
 
-		gWorld.cacheTranslationX = orginX;
-		gWorld.cacheTranslationZ = orginZ;
+		gWorld->cacheTranslationX = orginX;
+		gWorld->cacheTranslationZ = orginZ;
 	}
 }
 
 void World_Tick() {
+	World_UpdateChunkGen();
 }
 
 void World_UpdateChunkGen() {
 	for (int x = 0; x < CHUNKCACHE_SIZE; x++)
 		for (int z = 0; z < CHUNKCACHE_SIZE; z++) {
-			Chunk* chunk = gWorld.chunkCache[x][z];
+			Chunk* chunk = gWorld->chunkCache[x][z];
 
 			if (chunk->genProgress == ChunkGen_Empty && !chunk->tasksRunning)
-				WorkQueue_AddItem(gWorld.workqueue, (WorkerItem){ WorkerItemType_BaseGen, chunk });
+				WorkQueue_AddItem((WorkerItem){ WorkerItemType_BaseGen, chunk });
 
 			if (x > 0 && z > 0 && x < CHUNKCACHE_SIZE - 1 && z < CHUNKCACHE_SIZE - 1 && chunk->genProgress == ChunkGen_Terrain &&
 				!chunk->tasksRunning) {
 				bool clear = true;
 				for (int xOff = -1; xOff < 2 && clear; xOff++)
 					for (int zOff = -1; zOff < 2 && clear; zOff++) {
-						Chunk* borderChunk = gWorld.chunkCache[x + xOff][z + zOff];
+						Chunk* borderChunk = gWorld->chunkCache[x + xOff][z + zOff];
 						if (borderChunk->genProgress == ChunkGen_Empty || !borderChunk->tasksRunning)
 							clear = false;
 					}
 				if (clear)
-					WorkQueue_AddItem(gWorld.workqueue, (WorkerItem){ WorkerItemType_Decorate, chunk });
+					WorkQueue_AddItem((WorkerItem){ WorkerItemType_Decorate, chunk });
 
 				/*int xVals[RANDOMTICKS_PER_CHUNK];
 				int yVals[RANDOMTICKS_PER_CHUNK];
 				int zVals[RANDOMTICKS_PER_CHUNK];
 				for (int i = 0; i < RANDOMTICKS_PER_CHUNK; i++) {
-					xVals[i] = WorldToLocalCoord(Xorshift32_Next(&gWorld.randomTickGen));
-					yVals[i] = WorldToLocalCoord(Xorshift32_Next(&gWorld.randomTickGen));
-					zVals[i] = WorldToLocalCoord(Xorshift32_Next(&gWorld.randomTickGen));
+					xVals[i] = WorldToLocalCoord(Xorshift32_Next(&gWorld->randomTickGen));
+					yVals[i] = WorldToLocalCoord(Xorshift32_Next(&gWorld->randomTickGen));
+					zVals[i] = WorldToLocalCoord(Xorshift32_Next(&gWorld->randomTickGen));
 				}*/
 			}
 		}

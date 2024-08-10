@@ -15,7 +15,7 @@ static bool clicked_quit = false;
 void PauseScreen_Draw();
 void PauseScreen_Tick();
 
-Screen sPauseScreen = { .OnDrawDown = PauseScreen_Draw, .OnUpdate = PauseScreen_Tick };
+Screen sPauseScreen = { .DrawDown = PauseScreen_Draw, .Tick = PauseScreen_Tick };
 
 void PauseScreen_Draw() {
 	Gui_DrawBackgroundFull(3, -45);
@@ -25,10 +25,10 @@ void PauseScreen_Draw() {
 }
 void PauseScreen_Tick() {
 	if (clicked_play) {
-		GuiScreen_SetScreen(SCREEN_NONE);
+		Screen_SetScreen(SCREEN_NONE);
 	}
 	if (clicked_quit) {
 		gReleaseWorld();
-		GuiScreen_SetScreen(SCREEN_SELECTWORLD);
+		Screen_SetScreen(SCREEN_SELECTWORLD);
 	}
 }

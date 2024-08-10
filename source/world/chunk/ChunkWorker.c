@@ -5,8 +5,10 @@
 
 #include <stdio.h>
 
+WorkQueue gWorkqueue;
+
 void ChunkWorker_Init(ChunkWorker* chunkworker) {
-	WorkQueue_Init(&chunkworker->queue);
+	WorkQueue_Init(&gWorkqueue);
 
 	if (R_FAILED(APT_SetAppCpuTimeLimit(30))) {
 		Crash("Couldn't set AppCpuTimeLimit");
@@ -29,11 +31,11 @@ void ChunkWorker_Init(ChunkWorker* chunkworker) {
 static volatile ChunkWorker* workerToStop = NULL;
 void ChunkWorker_Deinit(ChunkWorker* chunkworker) {
 	workerToStop = chunkworker;
-	LightEvent_Signal(&chunkworker->queue.itemAddedEvent);
+	LightEvent_Signal(&gWorkqueue.itemAddedEvent);
 	threadJoin(chunkworker->thread, UINT64_MAX);
 
 	threadFree(chunkworker->thread);
-	WorkQueue_Deinit(&chunkworker->queue);
+	WorkQueue_Deinit(&gWorkqueue);
 
 	for (int i = 0; i < WorkerItemTypes_Count; i++) {
 		vec_deinit(&chunkworker->handler[i]);
@@ -41,8 +43,8 @@ void ChunkWorker_Deinit(ChunkWorker* chunkworker) {
 }
 
 void ChunkWorker_Finish(ChunkWorker* chunkworker) {
-	LightEvent_Signal(&chunkworker->queue.itemAddedEvent);
-	while (chunkworker->working || chunkworker->queue.queue.length > 0)
+	LightEvent_Signal(&gWorkqueue.itemAddedEvent);
+	while (chunkworker->working || gWorkqueue.queue.length > 0)
 		svcSleepThread(1000000);
 }
 
@@ -63,18 +65,18 @@ void ChunkWorker_Mainloop(void* _this) {
 	vec_t(WorkerItem) privateQueue;
 	vec_init(&privateQueue);
 	ChunkWorker* chunkworker = (ChunkWorker*)_this;
-	while (workerToStop != chunkworker || chunkworker->queue.queue.length > 0) {
+	while (workerToStop != chunkworker || gWorkqueue.queue.length > 0) {
 		chunkworker->working = false;
 
-		LightEvent_Wait(&chunkworker->queue.itemAddedEvent);
-		LightEvent_Clear(&chunkworker->queue.itemAddedEvent);
+		LightEvent_Wait(&gWorkqueue.itemAddedEvent);
+		LightEvent_Clear(&gWorkqueue.itemAddedEvent);
 
 		chunkworker->working = true;
 
-		LightLock_Lock(&chunkworker->queue.listInUse);
-		vec_pusharr(&privateQueue, chunkworker->queue.queue.data, chunkworker->queue.queue.length);
-		vec_clear(&chunkworker->queue.queue);
-		LightLock_Unlock(&chunkworker->queue.listInUse);
+		LightLock_Lock(&gWorkqueue.listInUse);
+		vec_pusharr(&privateQueue, gWorkqueue.queue.data, gWorkqueue.queue.length);
+		vec_clear(&gWorkqueue.queue);
+		LightLock_Unlock(&gWorkqueue.listInUse);
 
 		while (privateQueue.length > 0) {
 			WorkerItem item = vec_pop(&privateQueue);
@@ -82,8 +84,7 @@ void ChunkWorker_Mainloop(void* _this) {
 			if (item.uuid == item.chunk->uuid) {
 				for (int i = 0; i < chunkworker->handler[item.type].length; i++) {
 					if (chunkworker->handler[item.type].data[i].active)
-						chunkworker->handler[item.type].data[i].func(&chunkworker->queue, item,
-																	 chunkworker->handler[item.type].data[i].this);
+						chunkworker->handler[item.type].data[i].func(item, chunkworker->handler[item.type].data[i].this);
 					svcSleepThread(7000);
 				}
 
