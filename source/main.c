@@ -26,9 +26,9 @@ int main() {
 	const bool isDemo = false;
 #endif
 
-	Game_Init(nickname, isNew, isDemo);
+	gInit(nickname, isNew, isDemo);
 
-	Game_Run();
+	gRun();
 
 	return 0;
 }

@@ -25,10 +25,10 @@ void PauseScreen_Draw() {
 }
 void PauseScreen_Tick() {
 	if (clicked_play) {
-		ScreenManager_SetScreen(NULL);
+		GuiScreen_SetScreen(SCREEN_NONE);
 	}
 	if (clicked_quit) {
-		Game_ReleaseWorld();
-		ScreenManager_SetScreen(&sSelectWorldScreen);
+		gReleaseWorld();
+		GuiScreen_SetScreen(SCREEN_SELECTWORLD);
 	}
 }

@@ -4,6 +4,7 @@
 #include "client/Crash.h"
 #include "client/Minecraft.h"
 #include "client/gui/Gui.h"
+#include "client/gui/screens/SelectWorldScreen.h"
 #include "client/gui/screens/TitleScreen.h"
 #include "client/renderer/CubeMap.h"
 
@@ -35,7 +36,7 @@ Screen sCreateWorldScreen = {
 void CreateWorldScreen(u16 selectedIdx, u16 worldNo) {
 	selectedWorld = selectedIdx;
 	worldNum	  = worldNo;
-	ScreenManager_SetScreen(&sCreateWorldScreen);
+	GuiScreen_SetScreen(SCREEN_CREATEWORLD);
 }
 
 void CreateWorldScreen_Draw() {
@@ -118,15 +119,15 @@ void CreateWorldScreen_Tick() {
 				worldpath[length + 1] = '\0';
 				++length;
 			}
-			Game_LoadWorld(name, name, worldGenType, true);
+			gLoadWorld(name, name, worldGenType, true);
 		}
 	}
 	if (canceled_world_options) {
 		canceled_world_options = false;
 		if (worldNum == 0) {
-			ScreenManager_SetScreen(&sTitleScreen);
+			GuiScreen_SetScreen(SCREEN_TITLE);
 		} else {
-			ScreenManager_SetPrevious();
+			GuiScreen_SetScreen(SCREEN_SELECTWORLD);
 		}
 	}
 }

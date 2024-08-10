@@ -113,7 +113,7 @@ void GameRenderer_Tick() {
 		CubeMap_Tick(&gCamera.projection, f3_new(0.f, 0.003f, 0.f));
 	}
 	if (currentScreen) {
-		ScreenManager_Tick();
+		GuiScreen_Tick();
 	}
 }
 
@@ -151,7 +151,7 @@ void GameRenderer_Render() {
 		}
 
 		if (currentScreen)
-			ScreenManager_DrawUp();
+			GuiScreen_DrawUp();
 
 		Shader_Bind(&shaderGui);
 
@@ -167,7 +167,7 @@ void GameRenderer_Render() {
 	SpriteBatch_StartFrame(320, 240);
 
 	if (currentScreen)
-		ScreenManager_DrawDown();
+		GuiScreen_DrawDown();
 	else {
 		if (gWorld.active) {
 			SpriteBatch_SetScale(2);

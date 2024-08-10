@@ -24,7 +24,7 @@ Screen sConfirmDeletionScreen = {
 
 void ConfirmDeletionScreen(const char* path_) {
 	strcpy(path, path_);
-	ScreenManager_SetScreen(&sConfirmDeletionScreen);
+	GuiScreen_SetScreen(SCREEN_CONFIRMDELETION);
 }
 
 static void delete_folder(const char* path) {
@@ -68,10 +68,10 @@ void ConfirmDeletionScreen_Tick() {
 	if (confirmed_deletion) {
 		confirmed_deletion = false;
 		delete_folder(path);
-		ScreenManager_SetPrevious();
+		GuiScreen_SetScreen(SCREEN_SELECTWORLD);
 	}
 	if (canceled_deletion) {
 		canceled_deletion = false;
-		ScreenManager_SetPrevious();
+		GuiScreen_SetScreen(SCREEN_SELECTWORLD);
 	}
 }

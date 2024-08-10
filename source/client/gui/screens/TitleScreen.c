@@ -52,7 +52,7 @@ void TitleScreen_DrawDown() {
 
 	if (clicked_play) {
 		clicked_play = false;
-		ScreenManager_SetScreen(&sSelectWorldScreen);
+		GuiScreen_SetScreen(SCREEN_SELECTWORLD);
 	}
 	if (clicked_quit) {
 		exit(0);

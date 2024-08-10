@@ -186,7 +186,7 @@ void SelectWorldScreen_DrawDown() {
 void SelectWorldScreen_Tick() {
 	if (clicked_back) {
 		clicked_back = false;
-		ScreenManager_SetScreen(&sTitleScreen);
+		GuiScreen_SetScreen(SCREEN_TITLE);
 	}
 	if (clicked_new_world) {
 		clicked_new_world = false;
@@ -196,7 +196,7 @@ void SelectWorldScreen_Tick() {
 	if (clicked_play && selectedWorld != -1) {
 		clicked_play	= false;
 		WorldInfo* info = &worlds.list.data[selectedWorld];
-		Game_LoadWorld(info->path, info->name, 0, false);
+		gLoadWorld(info->path, info->name, 0, false);
 	}
 	if (clicked_delete_world && selectedWorld != -1) {
 		clicked_delete_world = false;

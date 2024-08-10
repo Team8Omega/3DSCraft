@@ -16,7 +16,7 @@
 #include "client/Crash.h"
 #include "client/gui/DebugUI.h"
 #include "client/gui/Gui.h"
-#include "client/gui/ScreenManager.h"
+#include "client/gui/GuiScreen.h"
 #include "client/gui/screens/PauseScreen.h"
 #include "client/gui/screens/TitleScreen.h"
 #include "client/model/Cube.h"
@@ -53,12 +53,15 @@ static u64 sLastTime, sCurrentTime;
 static float sTimeAccum = 0.f, sFpsClock = 0.f, sTickClock = 0.f;
 static int sFrameCounter = 0, sFps = 0, sTickCounter = 0, sTps = 0;
 
+static aptHookCookie sAptHook;
+
 static bool sRunning;
+static bool sExiting;
 static char* sUsername;
 static bool sIsNew3ds;
 static bool sIsDemo;
 
-void Game_Init(const char* name, bool isNew, bool demo) {
+void gInit(const char* name, bool isNew, bool demo) {
 	sUsername = (char*)malloc(strlen(name) + 1);
 	strcpy(sUsername, name);
 	sIsNew3ds = isNew;
@@ -66,6 +69,24 @@ void Game_Init(const char* name, bool isNew, bool demo) {
 
 	// temporary
 	gIsNew3ds = isNew;
+}
+
+static void onApt(APT_HookType hook, void* param) {
+	switch (hook) {
+		case APTHOOK_ONSLEEP:
+			if (gWorld.active)
+				gDisplayPauseMenu();
+			break;
+		case APTHOOK_ONWAKEUP:
+			aptHook(&sAptHook, onApt, (void*)NULL);
+			break;
+		case APTHOOK_ONEXIT:
+			deinit();
+			break;
+
+		default:
+			break;
+	}
 }
 
 static void init() {
@@ -102,7 +123,7 @@ static void init() {
 	ChunkWorker_AddHandler(&sChunkWorker, WorkerItemType_Load, (WorkerFuncObj){ &SaveManager_LoadChunk, &sSavemgr, true });
 	ChunkWorker_AddHandler(&sChunkWorker, WorkerItemType_Save, (WorkerFuncObj){ &SaveManager_SaveChunk, &sSavemgr, true });
 
-	ndspInit();
+	// ndspInit();
 	sBackgroundSound.background = true;
 	sBackgroundSound.path		= String_ParsePackName(PACK_VANILLA, PATH_PACK_SOUNDS, "music/1.opus");
 	Sound_PlayOpus(&sBackgroundSound);
@@ -111,12 +132,14 @@ static void init() {
 
 	sLastTime = svcGetSystemTick();
 
-	ScreenManager_SetScreen(&sTitleScreen);
+	GuiScreen_SetScreen(SCREEN_TITLE);
 }
 
 static void deinit() {
+	sExiting = true;
+
 	if (gWorld.active) {
-		Game_ReleaseWorld();
+		gReleaseWorld();
 	}
 
 	SaveManager_Deinit(&sSavemgr);
@@ -147,9 +170,11 @@ static void deinit() {
 
 	Cube_DeinitVBOs();
 
+	aptUnhook(&sAptHook);
+
 	sino_exit();
 
-	ndspExit();
+	// ndspExit();
 
 	romfsExit();
 
@@ -169,7 +194,6 @@ static void runGameLoop() {
 		// DebugUI_Text("Spawn X: %f Y: %f Z: %f",gPlayer.spawnPos.x,gPlayer.spawnPos.y,gPlayer.spawnPos.z);
 		DebugUI_Text("Hunger: %i Hungertimer: %i", gPlayer.hunger, gPlayer.hungertimer);
 		// DebugUI_Text("Gamemode: %i", gPlayer.gamemode);
-		// DebugUI_Text("quickbar %i",gPlayer.quickSelectBarSlot);}
 	}
 
 	sCurrentTime	= svcGetSystemTick();
@@ -212,7 +236,7 @@ static void runGameLoop() {
 		GameRenderer_Tick();
 
 		if (gInput.keysdown & KEY_START && !currentScreen) {
-			ScreenManager_SetScreen(&sPauseScreen);
+			GuiScreen_SetScreen(SCREEN_PAUSE);
 		}
 
 		sTimeAccum -= tickRate;
@@ -223,7 +247,7 @@ static void runGameLoop() {
 	GameRenderer_Render();
 }
 
-void Game_Run() {
+void gRun() {
 	sRunning = true;
 
 	init();
@@ -235,11 +259,11 @@ void Game_Run() {
 	deinit();
 }
 
-void Game_Stop() {
+void gStop() {
 	sRunning = false;
 }
 
-void Game_ReleaseWorld() {
+void gReleaseWorld() {
 	for (int i = 0; i < CHUNKCACHE_SIZE; i++) {
 		for (int j = 0; j < CHUNKCACHE_SIZE; j++) {
 			World_UnloadChunk(gWorld.chunkCache[i][j]);
@@ -251,7 +275,7 @@ void Game_ReleaseWorld() {
 	SaveManager_Unload(&sSavemgr);
 }
 
-void Game_LoadWorld(char* path, char* name, WorldGenType worldType, bool newWorld) {
+void gLoadWorld(char* path, char* name, WorldGenType worldType, bool newWorld) {
 	// Crash("path: %s\nname: %s\nworlsDtype: %d\nnewWorld: %s", path, name, worldType, newWorld ? "true" : "false");
 	char worldPath[256];
 	sprintf(worldPath, PATH_SAVES "%s", path);
@@ -296,6 +320,13 @@ void Game_LoadWorld(char* path, char* name, WorldGenType worldType, bool newWorl
 		gPlayer.hp		   = 20;
 	}
 	gWorld.active = true;
-	ScreenManager_SetScreen(NULL);
+	GuiScreen_SetScreen(SCREEN_NONE);
 	sLastTime = svcGetSystemTick();	 // fix timing
+}
+void gSetScreen(u8 idx) {
+	GuiScreen_SetScreen(idx);
+}
+
+void gDisplayPauseMenu() {
+	gSetScreen(SCREEN_PAUSE);
 }
