@@ -52,8 +52,8 @@ typedef struct {
 
 extern Camera gCamera;
 
-void Camera_Init(float iod);
-void Camera_Update();
+void Camera_Init();
+void Camera_Update(float iod);
 
 bool Camera_IsPointVisible(C3D_FVec point);
 bool Camera_IsAABBVisible(C3D_FVec orgin, C3D_FVec size);

@@ -226,6 +226,15 @@ run:
 rund: #run dima
 	@3dslink $(TARGET).3dsx -a 192.168.178.37
 
+ifneq ($(OS),Windows_NT)
+ADDR2LINE   ?= $(DEVKITARM)/bin/arm-none-eabi-addr2line
+else
+ADDR2LINE   ?= $(DEVKITARM)/bin/arm-none-eabi-addr2line.exe
+endif
+
+addr:
+	@ADDR2LINE -e $(TARGET).elf -i -r -p -f -s $(A)
+
 clean-cia:
 	@rm -f $(TARGET).cia $(TARGET).cxi $(TARGET).cfa
 
