@@ -210,8 +210,6 @@ static void processButtonBinds() {
 }
 
 static void runTick(float tickDt) {
-	fetchInput();
-
 	processButtonBinds();
 
 	if (gWorld) {
@@ -262,6 +260,8 @@ static void runGameLoop() {
 			gDisplayPauseMenu();
 		}
 	}
+
+	fetchInput();
 
 	// OG Game has Simulations capped to 20 fps and render is X fps
 	const float tickDt = sDt * (60 / 20);
