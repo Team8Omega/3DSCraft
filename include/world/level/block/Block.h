@@ -16,6 +16,7 @@ typedef struct Block Block;
 typedef struct {
 	u8 (*getRenderType)();
 	u32 (*getBlockColor)(Block *b, Direction dir, int x, int y, int z, u8 meta);
+	u32 (*getItemColor)(Direction dir, u8 meta);
 	u16 (*getBlockTexture)(Block *b, Direction dir, int x, int y, int z, u8 meta);
 	void (*registerIcons)(Block *b);
 } BlockVtable;
@@ -50,7 +51,8 @@ void Block_SetNotOpaque(Block *b);
 
 bool Block_ShouldSideBeRendered(Block *block, int x, int y, int z, Direction dir);
 void Block_GetBlockColor(Block *b, Direction dir, int x, int y, int z, u8 meta, u8 out[]);
-void Block_GetBlockTexture(Block *b, Direction dir, int x, int y, int z, u8 meta, s16 out_uv[]);
+void Block_GetTexture(Block *b, Direction dir, int x, int y, int z, u8 meta, s16 out_uv[]);
+void Block_GetItemColor(Block *b, Direction dir, u8 meta, u8 out[]);
 
 static inline u8 Block_GetRenderType(Block *block) {
 	return block->vptr->getRenderType();

@@ -1,3 +1,4 @@
 #pragma once
 
-void IngameGui_RenderGameOverlay();
+void IngameGui_RenderTop();
+void IngameGui_RenderBottom();

@@ -17,6 +17,9 @@ static void registerIcons(Block* block) {
 static u32 getBlockColor(Block* b, Direction dir, int x, int y, int z, u8 meta) {
 	return COLOR_WHITE;
 }
+static u32 getItemColor(Direction dir, u8 meta) {
+	return COLOR_WHITE;
+}
 static u16 getBlockTexture(Block* block, Direction dir, int x, int y, int z, u8 metadata) {
 	return block->icon;
 }
@@ -26,6 +29,7 @@ static BlockVtable vtable_default = {
 	.registerIcons	 = registerIcons,
 	.getBlockColor	 = getBlockColor,
 	.getBlockTexture = getBlockTexture,
+	.getItemColor	 = getItemColor,
 };
 
 static const Box boxDefault = { { { 0.0F, 0.0F, 0.0F } }, { { 1.0F, 1.0F, 1.0F } } };
@@ -75,7 +79,7 @@ void Block_SetLightness(Block* b, u8 v) {
 
 #define colR(c) ((c >> 16) & 0xff)
 #define colG(c) (((c) >> 8) & 0xff)
-#define colB(c) ((c)&0xff)
+#define colB(c) ((c) & 0xff)
 #define COLOR_MUL 255 / 15
 
 void Block_GetBlockColor(Block* b, Direction dir, int x, int y, int z, u8 meta, u8 out[]) {
@@ -84,18 +88,34 @@ void Block_GetBlockColor(Block* b, Direction dir, int x, int y, int z, u8 meta, 
 
 	u32 color = b->vptr->getBlockColor(b, dir, x, y, z, meta);
 
-	u8 brightness = 15;	 // 0 - 15, if implemented check, for max value (bitwise and)
+	u16 brightness = 15;  // 0 - 15. if implemented, check for max value (bitwise and)
 	brightness *= COLOR_MUL;
-	if (b->id != BLOCK_GRASS || dir != Direction_Top) {
-		brightness = brightness >> 1;
-	}
+	brightness--;
 
 	out[0] = (colR(color) * brightness + brightness) / 255;
 	out[1] = (colG(color) * brightness + brightness) / 255;
 	out[2] = (colB(color) * brightness + brightness) / 255;
+
+#define GRASS_ADD 31
+	if (b->id == BLOCK_GRASS && dir == Direction_Top) {
+		out[0] += GRASS_ADD;
+		out[1] += GRASS_ADD;
+		out[2] += GRASS_ADD;
+	}
 }
 
-void Block_GetBlockTexture(Block* b, Direction dir, int x, int y, int z, u8 meta, s16 out_uv[]) {
+void Block_GetItemColor(Block* b, Direction dir, u8 meta, u8 out[]) {
+	if (!b)
+		return;
+
+	u32 color = b->vptr->getItemColor(dir, meta);
+
+	out[0] = colR(color);
+	out[1] = colG(color);
+	out[2] = colB(color);
+}
+
+void Block_GetTexture(Block* b, Direction dir, int x, int y, int z, u8 meta, s16 out_uv[]) {
 	if (!b)
 		return;
 

@@ -5,17 +5,6 @@
 #include "client/player/Player.h"
 #include "client/renderer/SpriteBatch.h"
 
-void renderExpBar();
-void renderHealth();
-
-void IngameGui_RenderGameOverlay() {
-	SpriteBatch_BindGuiTexture(GuiTexture_Icons);
-	SpriteBatch_PushQuad(200 / 2 - 16 / 2, 120 / 2 - 16 / 2, 0, 16, 16, 0, 0, 16, 16);
-
-	renderExpBar();
-	renderHealth();
-}
-
 // this is actual minecraft ported code
 
 void renderHealth() {
@@ -89,4 +78,18 @@ void renderExpBar() {
 		SpriteBatch_PushText(200 / 2 - textWidth / 2, 120 - textY - 1, 2, SHADER_RGB(0, 0, 0), false, INT_MAX, 0, experienceStr);
 		SpriteBatch_PushText(200 / 2 - textWidth / 2, 120 - textY, 3, SHADER_RGB(100, 255, 32), false, INT_MAX, 0, experienceStr);
 	}
+}
+
+void IngameGui_RenderTop() {
+	SpriteBatch_BindGuiTexture(GuiTexture_Icons);
+	SpriteBatch_PushQuad(200 / 2 - 16 / 2, 120 / 2 - 16 / 2, 0, 16, 16, 0, 0, 16, 16);
+
+	renderExpBar();
+	renderHealth();
+}
+
+void IngameGui_RenderBottom() {
+	// SpriteBatch_BindGuiTexture(GuiTexture_Widgets);
+
+	// SpriteBatch_PushQuad(0, 0, 0, 320, )
 }

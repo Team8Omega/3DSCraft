@@ -122,13 +122,13 @@ void SpriteBatch_PushIcon(BlockId block, u8 metadata, int x, int y, int z) {
 			continue;
 
 		s16 iconUV[2];
-		Block_GetBlockTexture(BLOCKS[block], i, 0, 0, 0, metadata, iconUV);
+		Block_GetTexture(BLOCKS[block], i, 0, 0, 0, metadata, iconUV);
 
 #define oneDivIconsPerRow (32768 / 8)
 #define halfTexel (6)
 
 		u8 color[3];
-		Block_GetBlockColor(BLOCKS[block], i, metadata, 0, 0, 0, color);
+		Block_GetItemColor(BLOCKS[block], i, metadata, color);
 
 		for (int j = 0; j < 5; j++) {
 			int k	   = i * 6 + j;
@@ -220,17 +220,6 @@ int SpriteBatch_CalcTextWidth(const char* text, ...) {
 	va_end(args);
 
 	return length;
-}
-
-u16 SpriteBatch_CalcTextWidthSingle(char* text) {
-	char* it = text;
-
-	u16 len = 0;
-	while (*it != '\0') {
-		len += font->fontWidth[(u16)(*(it++))];
-	}
-
-	return len;
 }
 
 int SpriteBatch_CalcTextWidthVargs(const char* text, va_list args) {

@@ -117,7 +117,6 @@ void GameRenderer_Render() {
 		C3D_TexEnvInit(env);
 		C3D_TexEnvSrc(env, C3D_Both, GPU_TEXTURE0, GPU_PRIMARY_COLOR, 0);
 		C3D_TexEnvFunc(env, C3D_Both, GPU_MODULATE);
-
 		Shader_Bind(&shaderWorld);
 
 		SpriteBatch_SetScreen(true);
@@ -127,7 +126,7 @@ void GameRenderer_Render() {
 
 			WorldRenderer_Render();
 
-			IngameGui_RenderGameOverlay();
+			IngameGui_RenderTop();
 		} else {
 			CubeMap_Render();
 			TitleScreen_DrawUp();
@@ -156,6 +155,10 @@ void GameRenderer_Render() {
 								  &gPlayer->quickSelectBarSlot);
 		gPlayer->inventorySite =
 			Inventory_Draw(16, 0, 160, gPlayer->inventory, sizeof(gPlayer->inventory) / sizeof(ItemStack), gPlayer->inventorySite);
+	}
+
+	if (gWorld && gWorld->active) {
+		IngameGui_RenderBottom();
 	}
 
 	if (currentScreen) {
