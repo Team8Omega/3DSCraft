@@ -13,8 +13,7 @@ void SpriteBatch_Init(int projUniform_);
 void SpriteBatch_Deinit();
 
 typedef u8 GuiTexture;
-enum
-{
+enum {
 	GuiTexture_Blank,
 	GuiTexture_Font,
 	GuiTexture_Icons,
@@ -35,6 +34,7 @@ int SpriteBatch_PushTextVargs(int x, int y, int z, s16 color, bool shadow, int w
 int SpriteBatch_PushText(int x, int y, int z, s16 color, bool shadow, int wrap, int* ySize, const char* fmt, ...);
 
 int SpriteBatch_CalcTextWidthVargs(const char* text, va_list args);
+u16 SpriteBatch_CalcTextWidthSingle(char* text);
 int SpriteBatch_CalcTextWidth(const char* text, ...);
 
 char* SpriteBatch_TextTruncate(const char* text, size_t length);

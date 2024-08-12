@@ -7,6 +7,7 @@
 #include "client/player/InputData.h"
 
 #include "Globals.h"
+#include "client/Minecraft.h"
 #include "util/math/NumberUtils.h"
 
 #include "client/Crash.h"
@@ -42,8 +43,7 @@ typedef struct {
 } DebugUI_Menu;
 
 typedef u8 DebugUI_State;
-enum
-{
+enum {
 	MENUSTATE_NONE,
 	MENUSTATE_LOG,
 	MENUSTATE_MENUROOT,
@@ -59,13 +59,17 @@ static DebugUI_State menuState	   = MENUSTATE_NONE;
 static DebugUI_State menuStateLast = MENUSTATE_NONE;
 static u8 debugMenuOptionNum	   = 0;
 
+static void menu_showDebug() {
+	gGetShowDebug() ? gSetShowDebug(false) : gSetShowDebug(true);
+}
+
 static const DebugUI_Menu debugMenus[MENUSTATE_COUNT - 2] = { { {
 																	{ 3, NULL, "Debug Common" },  // to sub menu
 																	{ 4, NULL, "Debug Ingame" }	  // to log
 																},
 																"Root" },
 															  { {
-																	{ 0xFF, NULL, "(didnt work)" }	// delete sdmc
+																	{ 2, menu_showDebug, "Show debug info" }  // delete sdmc
 																},
 																"Debug Common" },
 															  { {

@@ -233,7 +233,7 @@ ADDR2LINE   ?= $(DEVKITARM)/bin/arm-none-eabi-addr2line.exe
 endif
 
 addr:
-	@ADDR2LINE -e $(TARGET).elf -i -r -p -f -s $(A)
+	@$(ADDR2LINE) -e $(TARGET).elf -i -r -p -f -s $(A)
 
 clean-cia:
 	@rm -f $(TARGET).cia $(TARGET).cxi $(TARGET).cfa

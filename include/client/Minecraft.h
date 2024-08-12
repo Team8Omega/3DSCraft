@@ -16,3 +16,5 @@ void gLoadWorld(char* path, char* name, WorldGenType worldType, bool newWorld);
 void gReleaseWorld();
 
 float gGet3dSlider();
+void gSetShowDebug(bool b);
+bool gGetShowDebug();

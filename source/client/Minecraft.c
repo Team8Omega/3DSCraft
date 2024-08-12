@@ -65,6 +65,7 @@ static char* sUsername;
 static bool sIsNew3ds;
 static bool sIsDemo;
 static float s3dSlider;
+static bool sShowDebug;
 
 void gInit(const char* name, bool isNew, bool demo) {
 	sUsername = (char*)malloc(strlen(name) + 1);
@@ -183,6 +184,12 @@ static void init() {
 	sLastTime = svcGetSystemTick();
 
 	Screen_SetScreen(SCREEN_TITLE);
+
+#ifdef _DEBUG
+	gSetShowDebug(true);
+#else
+	gSetShowDebug(false);
+#endif
 }
 
 static void fetchInput() {
@@ -215,19 +222,22 @@ static void runTick(float tickDt) {
 }
 
 static void runGameLoop() {
-	// Display debugging information
-	DebugUI_Text("%d FPS %d TPS | CPU %5.2f%% GPU %5.2f%% Buf %5.2f%% Lin %d", sFps, sTps, C3D_GetProcessingTime() * 6.f,
-				 C3D_GetDrawingTime() * 6.f, C3D_GetCmdBufUsage() * 100.f, linearSpaceFree());
+#ifdef _DEBUG
+	if (sShowDebug) {
+		DebugUI_Text("%d FPS %d TPS | CPU %5.2f%% GPU %5.2f%% Buf %5.2f%% Lin %d", sFps, sTps, C3D_GetProcessingTime() * 6.f,
+					 C3D_GetDrawingTime() * 6.f, C3D_GetCmdBufUsage() * 100.f, linearSpaceFree());
 
-	if (gWorld && !currentScreen) {
-		DebugUI_Text("X: %f, Y: %f, Z: %f", f3_unpack(gPlayer->position));
-		DebugUI_Text("HP: %i", gPlayer->hp);
-		// DebugUI_Text("velocity: %f rndy: %f",gPlayer->velocity.y,gPlayer->rndy);
-		// DebugUI_Text("Damage Time: %i Cause: %c",dmg->time,dmg->cause);
-		// DebugUI_Text("Spawn X: %f Y: %f Z: %f",gPlayer->spawnPos.x,gPlayer->spawnPos.y,gPlayer->spawnPos.z);
-		DebugUI_Text("Hunger: %i Hungertimer: %i", gPlayer->hunger, gPlayer->hungertimer);
-		// DebugUI_Text("Gamemode: %i", gPlayer->gamemode);
+		if (gWorld && !currentScreen) {
+			DebugUI_Text("X: %f, Y: %f, Z: %f", f3_unpack(gPlayer->position));
+			DebugUI_Text("HP: %i", gPlayer->hp);
+			// DebugUI_Text("velocity: %f rndy: %f",gPlayer->velocity.y,gPlayer->rndy);
+			// DebugUI_Text("Damage Time: %i Cause: %c",dmg->time,dmg->cause);
+			// DebugUI_Text("Spawn X: %f Y: %f Z: %f",gPlayer->spawnPos.x,gPlayer->spawnPos.y,gPlayer->spawnPos.z);
+			DebugUI_Text("Hunger: %i Hungertimer: %i", gPlayer->hunger, gPlayer->hungertimer);
+			// DebugUI_Text("Gamemode: %i", gPlayer->gamemode);
+		}
 	}
+#endif
 
 	sCurrentTime = svcGetSystemTick();
 	sDt			 = ((float)(sCurrentTime / (float)CPU_TICKS_PER_MSEC) - (float)(sLastTime / (float)CPU_TICKS_PER_MSEC)) / 1000.f;
@@ -363,4 +373,11 @@ void gDisplayPauseMenu() {
 
 float gGet3dSlider() {
 	return s3dSlider;
+}
+
+void gSetShowDebug(bool b) {
+	sShowDebug = b;
+}
+bool gGetShowDebug() {
+	return sShowDebug;
 }

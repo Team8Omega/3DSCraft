@@ -10,7 +10,7 @@ void SuperFlatGen_Generate(WorkerItem item, void* this) {
 		BlockId block = BLOCK_AIR;
 		switch (y) {  // TODO: Mit einem Lookup Table ersetzen, Superflach Gen konfigurierbar machen
 			case 0:
-				block = BLOCK_STONE;  // Block_Bedrock;
+				block = BLOCK_BEDROCK;
 				break;
 			case 1 ... 10:
 				block = BLOCK_STONE;

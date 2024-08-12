@@ -222,6 +222,17 @@ int SpriteBatch_CalcTextWidth(const char* text, ...) {
 	return length;
 }
 
+u16 SpriteBatch_CalcTextWidthSingle(char* text) {
+	char* it = text;
+
+	u16 len = 0;
+	while (*it != '\0') {
+		len += font->fontWidth[(u16)(*(it++))];
+	}
+
+	return len;
+}
+
 int SpriteBatch_CalcTextWidthVargs(const char* text, va_list args) {
 	char fmtedText[256];
 	vsprintf(fmtedText, text, args);
