@@ -20,7 +20,7 @@ static u32 getBlockColor(Block* b, Direction dir, int x, int y, int z, u8 meta) 
 	if (dir == Direction_Top) {
 		/*BiomeGen* b = World_GetBiomeGenAt(x, y, z);
 		u32 color	= BiomeGen_GetGrassColor(b);*/
-		return 11983713;  // hardcoded grass for now
+		return 0x7cbd6b;  // hardcoded grass for now
 	} else
 		return COLOR_WHITE;
 }
@@ -28,7 +28,7 @@ static u32 getItemColor(Direction dir, u8 meta) {
 	if (dir == Direction_Top) {
 		/*BiomeGen* b = World_GetBiomeGenAt(x, y, z);
 		u32 color	= BiomeGen_GetGrassColor(b);*/
-		return 11983713;  // hardcoded grass for now
+		return 0x7cbd6b;  // hardcoded grass for now
 	} else
 		return COLOR_WHITE;
 }

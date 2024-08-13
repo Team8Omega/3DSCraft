@@ -96,7 +96,7 @@ void Block_GetBlockColor(Block* b, Direction dir, int x, int y, int z, u8 meta, 
 	out[1] = (colG(color) * brightness + brightness) / 255;
 	out[2] = (colB(color) * brightness + brightness) / 255;
 
-#define GRASS_ADD 31
+#define GRASS_ADD 63
 	if (b->id == BLOCK_GRASS && dir == Direction_Top) {
 		out[0] += GRASS_ADD;
 		out[1] += GRASS_ADD;
