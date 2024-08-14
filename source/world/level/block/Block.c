@@ -54,6 +54,7 @@ Block* Block_InitWithBounds(const char* name, BlockId id, float resistance, floa
 	b->renderType = 0;	// hardcoded for now, 0 = normal block
 	b->mapColor	  = mapColor;
 	b->opaque	  = true;
+	b->hasOverlay = false;
 	memcpy(&b->bounds, &bounds, sizeof(Box));
 	strcpy(b->name, name);
 
@@ -75,6 +76,9 @@ void Block_SetBounds(Block* b, float3 from, float3 to) {
 }
 void Block_SetLightness(Block* b, u8 v) {
 	b->lightness = v;
+}
+void Block_SetHasOverlay(Block* b) {
+	b->hasOverlay = true;
 }
 
 #define colR(c) ((c >> 16) & 0xff)
@@ -115,7 +119,7 @@ void Block_GetItemColor(Block* b, Direction dir, u8 meta, u8 out[]) {
 	out[2] = colB(color);
 }
 
-void Block_GetTexture(Block* b, Direction dir, int x, int y, int z, u8 meta, s16 out_uv[]) {
+void Block_GetBlockTexture(Block* b, Direction dir, int x, int y, int z, u8 meta, s16 out_uv[]) {
 	if (!b)
 		return;
 

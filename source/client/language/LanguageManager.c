@@ -1,9 +1,9 @@
 //
 // Created by Elias on 27.07.2024.
 //
+#include "client/language/LanguageManager.h"
 #include "client/Crash.h"
 #include "client/gui/DebugUI.h"
-#include "client/language/LanguageManager.h"
 #include "util/StringUtils.h"
 #include <mpack/mpack.h>
 

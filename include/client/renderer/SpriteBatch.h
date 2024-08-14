@@ -24,10 +24,10 @@ enum {
 void SpriteBatch_BindGuiTexture(GuiTexture texture);
 void SpriteBatch_BindTexture(C3D_Tex* texture);
 
-void SpriteBatch_PushSingleColorQuad(int x, int y, int z, int w, int h, s16 color);
-void SpriteBatch_PushQuadColor(int x, int y, int z, int w, int h, int rx, int ry, int rw, int rh, s16 color);
-void SpriteBatch_PushQuad(int x, int y, int z, int w, int h, int rx, int ry, int rw, int rh);
-void SpriteBatch_PushIcon(BlockId block, u8 metadata, int x, int y, int z);
+void SpriteBatch_PushSingleColorQuad(s16 x, s16 y, s16 z, s16 w, s16 h, s16 color);
+void SpriteBatch_PushQuadColor(s16 x, s16 y, s16 z, s16 w, s16 h, s16 rx, s16 ry, s16 rw, s16 rh, s16 color);
+void SpriteBatch_PushQuad(s16 x, s16 y, s16 z, s16 w, s16 h, s16 rx, s16 ry, s16 rw, s16 rh);
+void SpriteBatch_PushIcon(BlockId block, u8 metadata, s16 x, s16 y, s16 z);
 
 #define CHAR_HEIGHT 8
 int SpriteBatch_PushTextVargs(int x, int y, int z, s16 color, bool shadow, int wrap, int* ySize, const char* fmt, va_list arg);

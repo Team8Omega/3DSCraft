@@ -110,6 +110,7 @@ static void renderWorld() {
 	float3 playerPos = gPlayer->position;
 
 	C3D_TexBind(0, &gTexMapBlock.texture);
+
 	C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, projectionUniform, &gCamera.vp);
 	C3D_FogColor(0xffd990);
 

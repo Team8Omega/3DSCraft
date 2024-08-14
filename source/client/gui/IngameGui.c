@@ -2,6 +2,8 @@
 
 #include <string.h>
 
+#include "client/Minecraft.h"
+#include "client/gui/Gui.h"
 #include "client/player/Player.h"
 #include "client/renderer/SpriteBatch.h"
 
@@ -51,8 +53,8 @@ void renderExpBar() {
 	SpriteBatch_BindGuiTexture(GuiTexture_Icons);
 
 	if (barCap > 0) {
-		u8 barLength = 182;
-		u16 xpFill	 = (int)(gPlayer->experience * (float)(barLength + 1));
+#define barLength 182
+		u16 xpFill = (int)(gPlayer->experience * (float)(barLength + 1));
 
 		u8 y = 120 - 9;
 		SpriteBatch_PushQuad(200 / 2 - 182 / 2, y, 0, barLength, 5, 0, 64, barLength, 5);
@@ -87,9 +89,50 @@ void IngameGui_RenderTop() {
 	renderExpBar();
 	renderHealth();
 }
+enum {
+	CLICKACTION_SCREENINVENTORY = 0,
+	CLICKACTION_SCREENITEMS,
+	CLICKACTION_SCREENDEBUG
+};
+
+typedef u8 IngameClickAction;
+
+static void callAction(IngameClickAction a) {
+	switch (a) {
+		case CLICKACTION_SCREENINVENTORY:
+			break;
+
+		case CLICKACTION_SCREENITEMS:
+			break;
+	}
+}
 
 void IngameGui_RenderBottom() {
-	// SpriteBatch_BindGuiTexture(GuiTexture_Widgets);
+	SpriteBatch_SetScale(1);
+	SpriteBatch_BindGuiTexture(GuiTexture_Widgets);
 
-	// SpriteBatch_PushQuad(0, 0, 0, 320, )
+	// quick items
+	SpriteBatch_PushQuad(0, 0, 0, 320, 41, 0, 0, 182, 23);
+
+#define SELBOX_WIDTH 37
+	u8 selNow = gPlayer->quickSelectBarSlot;
+	SpriteBatch_PushQuad(1 + selNow * SELBOX_WIDTH, 1, 0, SELBOX_WIDTH, 41, 3, 24, 20, 22);
+
+	// bg
+	Gui_DrawBackgroundFull(0, -1);
+
+	// bar below
+	SpriteBatch_PushSingleColorQuad(0, 210, 0, 320, 30, SHADER_RGB(8, 8, 8));
+	SpriteBatch_PushSingleColorQuad(0, 210, 1, 320, 1, SHADER_RGB(14, 14, 14));
+
+	SpriteBatch_SetScale(2);
+
+	// buttons
+	if (Gui_Button(true, 130, 30, 30, 2, "INV"))
+		callAction(CLICKACTION_SCREENINVENTORY);
+	if (Gui_Button(true, 130, 50, 30, 2, "ITM"))
+		callAction(CLICKACTION_SCREENITEMS);
+
+	// held item text
+	SpriteBatch_PushText(2, 110, 1, SHADER_RGB(18, 18, 18), false, INT_MAX, 0, "Helditemname");
 }

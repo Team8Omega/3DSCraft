@@ -319,8 +319,16 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 				int offsetZ = face.z + item.chunk->z * CHUNK_SIZE;
 				int offsetY = face.y + i * CHUNK_SIZE;
 
-				s16 iconUV[2];
-				Block_GetTexture(BLOCKS[face.block], face.direction, face.x, face.y, face.z, face.metadata, iconUV);
+				s16 tex0[2];
+				// s16 tex1[2];
+				/*bool canOverlay = BLOCKS[face.block]->hasOverlay && face.direction != Direction_Top && face.direction != Direction_Bottom;
+				if (canOverlay) {
+					Block_GetBlockTexture(BLOCKS[face.block], face.direction, face.x, face.y, face.z, face.metadata, tex1);
+					Block_GetBlockTexture(BLOCKS[face.block], Direction_None, face.x, face.y, face.z, face.metadata, tex0);
+				} else {
+				*/
+				Block_GetBlockTexture(BLOCKS[face.block], face.direction, face.x, face.y, face.z, face.metadata, tex0);
+				//}
 
 				WorldVertex* data = face.transparent ? transparentData : opaqueData;
 				memcpy(data, &block_sides_lut[face.direction * 6], sizeof(WorldVertex) * 6);
@@ -335,8 +343,10 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 					data[k].pos[0] += offsetX;
 					data[k].pos[1] += offsetY;
 					data[k].pos[2] += offsetZ;
-					data[k].uv0[0] = (data[k].uv0[0] == 1 ? (oneDivIconsPerRow - 1) : 1) + iconUV[0];
-					data[k].uv0[1] = (data[k].uv0[1] == 1 ? (oneDivIconsPerRow - 1) : 1) + iconUV[1];
+					data[k].uv0[0] = (data[k].uv0[0] == 1 ? (oneDivIconsPerRow - 1) : 1) + tex0[0];
+					data[k].uv0[1] = (data[k].uv0[1] == 1 ? (oneDivIconsPerRow - 1) : 1) + tex0[1];
+					// data[k].uv1[0] = (data[k].uv1[0] == 1 ? (oneDivIconsPerRow - 1) : 1) + tex1[0];
+					// data[k].uv1[1] = (data[k].uv1[1] == 1 ? (oneDivIconsPerRow - 1) : 1) + tex1[1];
 
 					data[k].rgb[0] = color[0];
 					data[k].rgb[1] = color[1];

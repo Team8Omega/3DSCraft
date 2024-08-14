@@ -105,7 +105,9 @@ extern float sDt;
 void GameRenderer_Render() {
 	C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 
-	CubeMap_Tick(&gCamera.projection, f3_new(0.f, 0.1f * sDt, 0.f));
+	if (!gWorld) {
+		CubeMap_Tick(&gCamera.projection, f3_new(0.f, 0.1f * sDt, 0.f));
+	}
 
 	float iod = gGet3dSlider();
 	for (int i = 0; i < 2; i++) {
@@ -117,6 +119,13 @@ void GameRenderer_Render() {
 		C3D_TexEnvInit(env);
 		C3D_TexEnvSrc(env, C3D_Both, GPU_TEXTURE0, GPU_PRIMARY_COLOR, 0);
 		C3D_TexEnvFunc(env, C3D_Both, GPU_MODULATE);
+
+		/*env = C3D_GetTexEnv(1);
+		C3D_TexEnvInit(env);
+		C3D_TexEnvSrc(env, C3D_RGB, GPU_PREVIOUS, GPU_PREVIOUS, GPU_PREVIOUS);
+		C3D_TexEnvOpRgb(env, GPU_TEVOP_RGB_SRC_COLOR, GPU_TEVOP_RGB_SRC_COLOR, GPU_TEVOP_RGB_SRC_ALPHA);
+		C3D_TexEnvFunc(env, C3D_Both, GPU_INTERPOLATE);
+*/
 		Shader_Bind(&shaderWorld);
 
 		SpriteBatch_SetScreen(true);
@@ -148,14 +157,14 @@ void GameRenderer_Render() {
 	C3D_FrameDrawOn(lowerScreen);
 	SpriteBatch_SetScreen(false);
 
-	if (!currentScreen && gWorld) {
+	/*if (!currentScreen && gWorld) {
 		SpriteBatch_SetScale(2);
 		Inventory_DrawQuickSelect(160 / 2 - Inventory_QuickSelectCalcWidth(INVENTORY_QUICKSELECT_MAXSLOTS) / 2,
 								  120 - INVENTORY_QUICKSELECT_HEIGHT, gPlayer->quickSelectBar, INVENTORY_QUICKSELECT_MAXSLOTS,
 								  &gPlayer->quickSelectBarSlot);
 		gPlayer->inventorySite =
 			Inventory_Draw(16, 0, 160, gPlayer->inventory, sizeof(gPlayer->inventory) / sizeof(ItemStack), gPlayer->inventorySite);
-	}
+	}*/
 
 	if (gWorld && gWorld->active) {
 		IngameGui_RenderBottom();

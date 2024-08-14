@@ -9,6 +9,8 @@
 #define STRING_GETBASE(x) #x
 #define STRING_GET(x) STRING_GETBASE(x)
 
+#define PATH_SIZE 256
+
 static inline const char* String_ParsePackName(const char* packname, const char* subpath, const char* name) {
 	size_t len = strlen(PATH_PACKS) + strlen(packname) + strlen(subpath) + strlen(name) + 3;
 

@@ -99,7 +99,7 @@ void Player_Load() {
 void Player_Tick(Sound* sound) {
 	gPlayer->view = f3_new(-sinf(gPlayer->yaw) * cosf(gPlayer->pitch), sinf(gPlayer->pitch), -cosf(gPlayer->yaw) * cosf(gPlayer->pitch));
 	gPlayer->blockInSight		= Raycast_Cast(f3_new(gPlayer->position.x, gPlayer->position.y + PLAYER_EYEHEIGHT, gPlayer->position.z),
-										   gPlayer->view, &gPlayer->viewRayCast);
+											   gPlayer->view, &gPlayer->viewRayCast);
 	gPlayer->blockInActionRange = gPlayer->blockInSight && gPlayer->viewRayCast.distSqr < 3.5f * 3.5f * 3.5f;
 	// if (gPlayer->gamemode!=1){
 	// Fall damage

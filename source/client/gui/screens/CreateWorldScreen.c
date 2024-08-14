@@ -87,9 +87,10 @@ void CreateWorldScreen_Tick() {
 		swkbdSetValidation(&swkbd, SWKBD_NOTEMPTY_NOTBLANK, 0, WORLD_NAME_SIZE);
 		swkbdSetHintText(&swkbd, "Enter the world name");
 
-		int button = swkbdInputText(&swkbd, name, 256);
+		int button = swkbdInputText(&swkbd, name, WORLD_NAME_SIZE);
 #else
-		strcpy(name, "testworld");
+
+		strcpy(name, "tobefixed");
 		int button = 2;
 #endif
 		char worldpath[256];

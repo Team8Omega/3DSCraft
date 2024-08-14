@@ -4,13 +4,16 @@
 
 #ifdef _DEBUG
 
-#define DEBUG_BLOCKPLACE 1
-#define DEBUG_INFO 1
-#define DEBUG_LOG 1
-#define DEBUG_UI 1
-#define DEBUG_WORLDNAME
+#define DEBUG_BLOCKPLACE
+#define DEBUG_INFO
+#define DEBUG_LOG
+#define DEBUG_UI
 
 #endif
+
+#define DEBUG_WORLDNAME
+
+#define TEST_UNCRASH
 
 // GET VERSION FROM MAKEFILE
 #ifdef _DEBUG

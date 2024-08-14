@@ -52,7 +52,7 @@ void Hand_Draw(int projUniform, C3D_Mtx* projection, ItemStack stack) {
 
 			s16 iconUV[2];
 			u8 color[3];
-			Block_GetTexture(BLOCKS[stack.block], i, 0, 0, 0, stack.meta, iconUV);
+			Block_GetBlockTexture(BLOCKS[stack.block], i, 0, 0, 0, stack.meta, iconUV);
 			Block_GetItemColor(BLOCKS[stack.block], i, stack.meta, color);
 
 #define oneDivIconsPerRow (32768 / 8)

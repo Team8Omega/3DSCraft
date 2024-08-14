@@ -47,7 +47,7 @@ bool gSkipWorldRender;
 static ChunkWorker sChunkWorker;
 static SuperFlatGen sFlatGen;
 static SmeaGen smeaGen;
-static Sound sBackgroundSound;
+// static Sound sBackgroundSound;
 static Sound sPlayerSound;
 static PlayerController sPlayerCtrl;
 static SaveManager sSavemgr;
@@ -88,7 +88,7 @@ static void deinit() {
 
 	Region_DeinitPools();
 
-	Sound_Quit(0);
+	/*Sound_Quit(0);
 	threadJoin(sBackgroundSound.threaid, 50000);
 	threadFree(sBackgroundSound.threaid);
 	if (sBackgroundSound.opusFile) {
@@ -103,7 +103,7 @@ static void deinit() {
 		op_free(sPlayerSound.opusFile);
 	}
 	Sound_Deinit(1);
-
+*/
 	DebugUI_Deinit();
 
 	ChunkWorker_Deinit(&sChunkWorker);
@@ -175,10 +175,10 @@ static void init() {
 	ChunkWorker_AddHandler(&sChunkWorker, WorkerItemType_Save, (WorkerFuncObj){ &SaveManager_SaveChunk, &sSavemgr, true });
 
 	// ndspInit();
-	sBackgroundSound.background = true;
+	/*sBackgroundSound.background = true;
 	sBackgroundSound.path		= String_ParsePackName(PACK_VANILLA, PATH_PACK_SOUNDS, "music/1.opus");
 	Sound_PlayOpus(&sBackgroundSound);
-
+*/
 	Cube_InitVBOs();  // needs to be called AFTER all cubes have been built.
 
 	sLastTime = svcGetSystemTick();

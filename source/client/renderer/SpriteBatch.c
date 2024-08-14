@@ -99,14 +99,14 @@ void SpriteBatch_BindGuiTexture(GuiTexture texture) {
 	}
 }
 
-void SpriteBatch_PushSingleColorQuad(int x, int y, int z, int w, int h, s16 color) {
+void SpriteBatch_PushSingleColorQuad(s16 x, s16 y, s16 z, s16 w, s16 h, s16 color) {
 	SpriteBatch_BindTexture(&whiteTex);
 	SpriteBatch_PushQuadColor(x, y, z, w, h, 0, 0, 4, 4, color);
 }
-void SpriteBatch_PushQuad(int x, int y, int z, int w, int h, int rx, int ry, int rw, int rh) {
+void SpriteBatch_PushQuad(s16 x, s16 y, s16 z, s16 w, s16 h, s16 rx, s16 ry, s16 rw, s16 rh) {
 	SpriteBatch_PushQuadColor(x, y, z, w, h, rx, ry, rw, rh, INT16_MAX);
 }
-void SpriteBatch_PushQuadColor(int x, int y, int z, int w, int h, int rx, int ry, int rw, int rh, s16 color) {
+void SpriteBatch_PushQuadColor(s16 x, s16 y, s16 z, s16 w, s16 h, s16 rx, s16 ry, s16 rw, s16 rh, s16 color) {
 	vec_push(&cmdList, ((Sprite){ z, currentTexture, x * guiScale, y * guiScale, (x + w) * guiScale, y * guiScale, x * guiScale,
 								  (y + h) * guiScale, (x + w) * guiScale, (y + h) * guiScale, rx, ry, rx + rw, ry + rh, color }));
 }
@@ -114,7 +114,7 @@ void SpriteBatch_PushQuadColor(int x, int y, int z, int w, int h, int rx, int ry
 static float rot = 0.f;
 extern const WorldVertex block_sides_lut[6 * 6];
 // TODO: Größe konfigurierbar machen
-void SpriteBatch_PushIcon(BlockId block, u8 metadata, int x, int y, int z) {
+void SpriteBatch_PushIcon(BlockId block, u8 metadata, s16 x, s16 y, s16 z) {
 	WorldVertex vertices[6 * 6];
 	memcpy(vertices, block_sides_lut, sizeof(block_sides_lut));
 	for (int i = 0; i < 6; i++) {
@@ -122,7 +122,7 @@ void SpriteBatch_PushIcon(BlockId block, u8 metadata, int x, int y, int z) {
 			continue;
 
 		s16 iconUV[2];
-		Block_GetTexture(BLOCKS[block], i, 0, 0, 0, metadata, iconUV);
+		Block_GetBlockTexture(BLOCKS[block], i, 0, 0, 0, metadata, iconUV);
 
 #define oneDivIconsPerRow (32768 / 8)
 #define halfTexel (6)
@@ -309,6 +309,8 @@ void SpriteBatch_Render() {
 	C3D_TexEnvInit(env);
 	C3D_TexEnvSrc(env, C3D_Both, GPU_TEXTURE0, GPU_PRIMARY_COLOR, 0);
 	C3D_TexEnvFunc(env, C3D_Both, GPU_MODULATE);
+
+	*C3D_GetTexEnv(1) = *C3D_GetTexEnv(2);
 
 	GuiVertex* usedVertexList = vertexList[screenIdx];
 

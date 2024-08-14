@@ -5,6 +5,7 @@
 #include <3ds.h>
 #include <citro3d.h>
 
+#include "Globals.h"
 #include "client/Crash.h"
 #include "util/Paths.h"
 
@@ -25,7 +26,7 @@ void Crash(const char* reason, ...) {
 	va_end(vl);
 
 	printf("\n\nFatal error, press start to exit\n");
-#ifdef _DEBUG
+#ifdef TEST_UNCRASH
 	printf("Running with debug, may press select to continue");
 #endif
 	while (true) {
@@ -36,7 +37,7 @@ void Crash(const char* reason, ...) {
 		if (hidKeysDown() & KEY_START)
 			exit(EXIT_FAILURE);
 
-#ifdef _DEBUG
+#ifdef TEST_UNCRASH
 		if (hidKeysDown() & KEY_SELECT)
 			break;
 #endif
