@@ -13,7 +13,7 @@
 #include <string.h>
 
 #define CHUNK_SIZE (16)
-#define CHUNK_HEIGHT (128)
+#define CHUNK_HEIGHT (256)
 #define CLUSTER_PER_CHUNK (CHUNK_HEIGHT / CHUNK_SIZE)
 
 typedef struct {
@@ -35,8 +35,7 @@ typedef struct {
 } Cluster;
 
 typedef u8 ChunkGenProgress;
-enum
-{
+enum {
 	ChunkGen_Empty,	 //
 	ChunkGen_Terrain,
 	ChunkGen_Finished  // Terrain | Decoration

@@ -4,7 +4,7 @@
 
 #include <vec/vec.h>
 
-#define REGION_SIZE 4
+#define REGION_SIZE 8
 #define REGION_BLOCKSIZE (REGION_SIZE * CHUNK_SIZE)
 
 typedef struct {
@@ -20,6 +20,7 @@ typedef struct {
 	FILE* dataFile;
 	ChunkInfo grid[REGION_SIZE][REGION_SIZE];
 	vec_t(u8) sectors;
+	bool wasUpdated;
 } Region;
 
 static inline int ChunkToRegionCoord(int x) {
