@@ -16,7 +16,7 @@ The game itsself it shipped without assets, read how to extract them below:
 
 > [!WARNING]
 > **You are banned from sharing the assets around**, as we dont want to support cracking the game and getting it without pay.
- 
+
 You'll need a hacked system that can load homebrew for this to run
 ### Check out the [Resource Packer](https://github.com/Team8Omega/3DSCraft-ResourcePacker).
 
