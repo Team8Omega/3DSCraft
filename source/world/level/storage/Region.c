@@ -12,10 +12,10 @@
 #include "util/Paths.h"
 #include "world/World.h"
 
-static const int sectorSize			   = 4096;
+static const int sectorSize			   = 1024;
 static const int headerSize			   = sizeof(ChunkInfo) * REGION_SIZE * REGION_SIZE;
 static mpack_node_data_t* nodeDataPool = NULL;
-static const int nodeDataPoolSize	   = 4096;
+static const int nodeDataPoolSize	   = 1024;
 const int decompressBufferSize		   = sizeof(Chunk) * 4 + headerSize;
 static char* decompressBuffer;
 static const int fileBufferSize = sizeof(Chunk) * 4 + headerSize;
@@ -89,6 +89,9 @@ void Region_Deinit(Region* region) {
 }
 
 void Region_SaveIndex(Region* region) {
+	if (!region->wasUpdated)
+		return;
+
 	char buffer[256];
 	sprintf(buffer, "%s/regions/r.%d.%d.dat", gWorld->path, region->x, region->z);
 
@@ -138,78 +141,81 @@ void Region_SaveChunk(Region* region, Chunk* chunk) {
 	int x = ChunkToLocalRegionCoord(chunk->x);
 	int z = ChunkToLocalRegionCoord(chunk->z);
 
-	if (region->grid[x][z].revision != chunk->revision) {
-		// Initialize MPack writer for chunk data
-		mpack_writer_t writer;
-		mpack_writer_init(&writer, decompressBuffer, decompressBufferSize);
+	if (region->grid[x][z].revision == chunk->revision)
+		return;
 
-		// Write chunk data to MPack
-		mpack_start_map(&writer, 4);
+	region->wasUpdated = true;
 
-		mpack_write_cstr(&writer, "clusters");
-		mpack_start_array(&writer, CLUSTER_PER_CHUNK);
-		for (int i = 0; i < CLUSTER_PER_CHUNK; i++) {
-			bool empty = Cluster_IsEmpty(&chunk->clusters[i]);
+	// Initialize MPack writer for chunk data
+	mpack_writer_t writer;
+	mpack_writer_init(&writer, decompressBuffer, decompressBufferSize);
 
-			mpack_start_map(&writer, empty ? 2 : 4);
+	// Write chunk data to MPack
+	mpack_start_map(&writer, 4);
 
-			if (!empty) {
-				mpack_write_cstr(&writer, "blocks");
-				mpack_write_bin(&writer, (char*)chunk->clusters[i].blocks, sizeof(chunk->clusters[i].blocks));
-				mpack_write_cstr(&writer, "metadataLight");
-				mpack_write_bin(&writer, (char*)chunk->clusters[i].metadataLight, sizeof(chunk->clusters[i].metadataLight));
-			}
+	mpack_write_cstr(&writer, "clusters");
+	mpack_start_array(&writer, CLUSTER_PER_CHUNK);
+	for (int i = 0; i < CLUSTER_PER_CHUNK; i++) {
+		bool empty = Cluster_IsEmpty(&chunk->clusters[i]);
 
-			mpack_write_cstr(&writer, "revision");
-			mpack_write_u32(&writer, chunk->clusters[i].revision);
+		mpack_start_map(&writer, empty ? 2 : 4);
 
-			mpack_write_cstr(&writer, "empty");
-			mpack_write_bool(&writer, empty);
-
-			mpack_finish_map(&writer);
+		if (!empty) {
+			mpack_write_cstr(&writer, "blocks");
+			mpack_write_bin(&writer, (char*)chunk->clusters[i].blocks, sizeof(chunk->clusters[i].blocks));
+			mpack_write_cstr(&writer, "metadataLight");
+			mpack_write_bin(&writer, (char*)chunk->clusters[i].metadataLight, sizeof(chunk->clusters[i].metadataLight));
 		}
-		mpack_finish_array(&writer);
 
-		mpack_write_cstr(&writer, "genProgress");
-		mpack_write_u8(&writer, chunk->genProgress);
+		mpack_write_cstr(&writer, "revision");
+		mpack_write_u32(&writer, chunk->clusters[i].revision);
 
-		mpack_write_cstr(&writer, "heightmap");
-		mpack_write_bin(&writer, (char*)chunk->heightmap, sizeof(chunk->heightmap));
-
-		mpack_write_cstr(&writer, "biome");
-		mpack_write_u8(&writer, chunk->biome);
+		mpack_write_cstr(&writer, "empty");
+		mpack_write_bool(&writer, empty);
 
 		mpack_finish_map(&writer);
-
-		// Finish MPack writer
-		mpack_error_t err = mpack_writer_destroy(&writer);
-		if (err != mpack_ok) {
-			Crash("MPack error %d while saving chunk %d.%d.%d\nPath: %s", err, x, z, chunk->x, region->dataFile);
-		}
-
-		// Compress the MPack buffer
-		mz_ulong compressedSize = fileBufferSize;
-		if (compress((u8*)fileBuffer, &compressedSize, (u8*)decompressBuffer, mpack_writer_buffer_used(&writer)) != Z_OK) {
-			DebugUI_Log("Error while compressing chunk %d.%d.%d", chunk->x, chunk->z);
-			return;
-		}
-
-		if (region->grid[x][z].actualSize > 0) {
-			freeSectors(region, region->grid[x][z].position, region->grid[x][z].blockSize);
-		}
-
-		// Reserve sectors and write compressed chunk data
-		u32 startPosition = reserveSectors(region, compressedSize);
-		fseek(region->dataFile, headerSize + startPosition * sectorSize, SEEK_SET);
-		fwrite(fileBuffer, compressedSize, 1, region->dataFile);
-		fflush(region->dataFile);
-
-		// Update region info
-		region->grid[x][z].position		  = startPosition;
-		region->grid[x][z].compressedSize = compressedSize;
-		region->grid[x][z].actualSize	  = mpack_writer_buffer_used(&writer);
-		region->grid[x][z].revision		  = chunk->revision;
 	}
+	mpack_finish_array(&writer);
+
+	mpack_write_cstr(&writer, "genProgress");
+	mpack_write_u8(&writer, chunk->genProgress);
+
+	mpack_write_cstr(&writer, "heightmap");
+	mpack_write_bin(&writer, (char*)chunk->heightmap, sizeof(chunk->heightmap));
+
+	mpack_write_cstr(&writer, "biome");
+	mpack_write_u8(&writer, chunk->biome);
+
+	mpack_finish_map(&writer);
+
+	// Finish MPack writer
+	mpack_error_t err = mpack_writer_destroy(&writer);
+	if (err != mpack_ok) {
+		Crash("MPack error %d while saving chunk %d.%d.%d\nPath: %s", err, x, z, chunk->x, region->dataFile);
+	}
+
+	// Compress the MPack buffer
+	mz_ulong compressedSize = fileBufferSize;
+	if (compress((u8*)fileBuffer, &compressedSize, (u8*)decompressBuffer, mpack_writer_buffer_used(&writer)) != Z_OK) {
+		DebugUI_Log("Error while compressing chunk %d.%d.%d", chunk->x, chunk->z);
+		return;
+	}
+
+	if (region->grid[x][z].actualSize > 0) {
+		freeSectors(region, region->grid[x][z].position, region->grid[x][z].blockSize);
+	}
+
+	// Reserve sectors and write compressed chunk data
+	u32 startPosition = reserveSectors(region, compressedSize);
+	fseek(region->dataFile, headerSize + startPosition * sectorSize, SEEK_SET);
+	fwrite(fileBuffer, compressedSize, 1, region->dataFile);
+	fflush(region->dataFile);
+
+	// Update region info
+	region->grid[x][z].position		  = startPosition;
+	region->grid[x][z].compressedSize = compressedSize;
+	region->grid[x][z].actualSize	  = mpack_writer_buffer_used(&writer);
+	region->grid[x][z].revision		  = chunk->revision;
 }
 
 void Region_LoadChunk(Region* region, Chunk* chunk) {

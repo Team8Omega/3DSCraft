@@ -20,6 +20,7 @@ typedef struct {
 	FILE* dataFile;
 	ChunkInfo grid[REGION_SIZE][REGION_SIZE];
 	vec_t(u8) sectors;
+	bool wasUpdated;
 } Region;
 
 static inline int ChunkToRegionCoord(int x) {
