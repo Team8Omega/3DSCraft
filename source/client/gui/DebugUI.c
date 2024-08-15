@@ -150,13 +150,15 @@ void DebugUI_Log(const char* text, ...) {
 #ifdef DEBUG_INFO
 void DebugUI_DrawInfo() {
 	u8 infoNum;
-	u8 yOffset = 0;
+	u8 yOffset = gWorld && gWorld->active && currentScreen == NULL ? 44
+
+																   : 0;
 	for (infoNum = 0; infoNum < STATUS_LINES; infoNum++) {
 		if (strcmp(statusLines[infoNum], "") == 0)
 			break;
 
 		int step = 0;
-		SpriteBatch_PushText(0, yOffset, 98, INT16_MAX, false, 320, &step, "%s", statusLines[infoNum]);
+		SpriteBatch_PushText(1, yOffset, 98, INT16_MAX, false, 320, &step, "%s", statusLines[infoNum]);
 		yOffset += step;
 
 		memset(statusLines[infoNum], 0x0, STATUS_LINE_LENGTH);
@@ -242,11 +244,12 @@ void DebugUI_Draw() {
 			isShowButton = isShowButton ? false : true;
 
 	if (isShowButton) {
-		if (Gui_Button(true, 320 - 32, 0, 32, 100, "LOG"))
+		u8 y = gWorld && gWorld->active && !currentScreen ? 140 : 0;
+		if (Gui_Button(true, 320 - 32, y, 32, 100, "LOG"))
 			menuState == MENUSTATE_LOG ? DebugUI_MenuSet(MENUSTATE_NONE) : DebugUI_MenuSet(MENUSTATE_LOG);
-		if (Gui_Button(true, 320 - 32, 20, 32, 100, "DBG"))
+		if (Gui_Button(true, 320 - 32, y + 20, 32, 100, "DBG"))
 			menuState > 1 ? DebugUI_MenuSet(MENUSTATE_NONE) : DebugUI_MenuSet(MENUSTATE_MENUROOT);
-		if (Gui_Button(true, 320 - 32, 38, 32, 100, "INFO"))
+		if (Gui_Button(true, 320 - 32, y + 40, 32, 100, "INFO"))
 			isInfoBG = isInfoBG ? false : true;
 	}
 #endif

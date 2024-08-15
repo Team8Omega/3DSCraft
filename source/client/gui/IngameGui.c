@@ -112,11 +112,11 @@ void IngameGui_RenderBottom() {
 	SpriteBatch_BindGuiTexture(GuiTexture_Widgets);
 
 	// quick items
-	SpriteBatch_PushQuad(0, 0, 0, 320, 41, 0, 0, 182, 23);
+	SpriteBatch_PushQuad(-4, 2, 0, 328, 42, 0, 0, 182, 23);
 
-#define SELBOX_WIDTH 37
+#define SELBOX_WIDTH 36
 	u8 selNow = gPlayer->quickSelectBarSlot;
-	SpriteBatch_PushQuad(1 + selNow * SELBOX_WIDTH, 1, 0, SELBOX_WIDTH, 41, 3, 24, 20, 22);
+	SpriteBatch_PushQuad(selNow * SELBOX_WIDTH - 2, 1, 0, SELBOX_WIDTH, 41, 2, 24, 20, 22);
 
 	// bg
 	Gui_DrawBackgroundFull(0, -1);
