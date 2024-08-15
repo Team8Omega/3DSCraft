@@ -35,8 +35,7 @@ typedef struct {
 } Cluster;
 
 typedef u8 ChunkGenProgress;
-enum
-{
+enum {
 	ChunkGen_Empty,	 //
 	ChunkGen_Terrain,
 	ChunkGen_Finished  // Terrain | Decoration

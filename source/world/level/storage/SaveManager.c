@@ -33,6 +33,9 @@ void SaveManager_Load(SaveManager* mgr) {
 	// char buffer[256];
 	// sprintf(buffer, "%s", gWorld->path);
 
+	if (access(PATH_SAVES, F_OK))
+		mkdir(PATH_SAVES, mkdirFlags);
+
 	mkdir(gWorld->path, mkdirFlags);
 	if (access(gWorld->path, F_OK))
 		Crash("World path invalid, internal error. Cannot create world folder.\n\nPath: %s", gWorld->path);

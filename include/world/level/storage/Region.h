@@ -4,7 +4,7 @@
 
 #include <vec/vec.h>
 
-#define REGION_SIZE 4
+#define REGION_SIZE 8
 #define REGION_BLOCKSIZE (REGION_SIZE * CHUNK_SIZE)
 
 typedef struct {
