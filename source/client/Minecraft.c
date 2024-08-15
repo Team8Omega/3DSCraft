@@ -60,7 +60,8 @@ static int sFrameCounter = 0, sFps = 0, sTickCounter = 0, sTps = 0;
 static aptHookCookie sAptHook;
 
 static bool sRunning;
-static bool sExiting;
+static bool sHasInited;
+static bool sHasExited;
 static char* sUsername;
 static bool sIsNew3ds;
 static bool sIsDemo;
@@ -78,7 +79,10 @@ void gInit(const char* name, bool isNew, bool demo) {
 }
 
 static void deinit() {
-	sExiting = true;
+	if (sHasExited)
+		return;
+
+	sHasExited = true;
 
 	if (gWorld) {
 		gReleaseWorld();
@@ -129,8 +133,6 @@ static void onApt(APT_HookType hook, void* param) {
 			if (gWorld)
 				gDisplayPauseMenu();
 			break;
-		case APTHOOK_ONRESTORE:
-			aptHook(&sAptHook, onApt, (void*)NULL);
 			break;
 		case APTHOOK_ONEXIT:
 			deinit();
@@ -142,6 +144,11 @@ static void onApt(APT_HookType hook, void* param) {
 }
 
 static void init() {
+	if (sHasInited)
+		return;
+
+	sHasInited = true;
+
 	gfxInitDefault();
 	osSetSpeedupEnable(true);  // Enable N3DS 804MHz operation, where available
 	gfxSet3D(true);
@@ -190,6 +197,8 @@ static void init() {
 #else
 	gSetShowDebug(false);
 #endif
+
+	aptSetHomeAllowed(true);
 }
 
 static void fetchInput() {

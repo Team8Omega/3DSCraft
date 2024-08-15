@@ -2,6 +2,7 @@
 
 #include "client/Camera.h"
 #include "client/Crash.h"
+#include "client/Minecraft.h"
 #include "client/gui/Gui.h"
 #include "client/gui/screens/SelectWorldScreen.h"
 #include "client/model/VertexFmt.h"
@@ -51,7 +52,7 @@ void TitleScreen_DrawDown() {
 		Screen_SetScreen(SCREEN_SELECTWORLD);
 	}
 	if (clicked_quit) {
-		exit(0);
+		gStop();
 	}
 }
 

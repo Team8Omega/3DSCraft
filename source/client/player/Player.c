@@ -138,12 +138,13 @@ void Player_Tick(Sound* sound) {
 	// Respawning stuff
 	if (gPlayer->hp <= 0 /*&&gPlayer->totem==false*/) {
 		if (gPlayer->difficulty != 4) {
-			if (gPlayer->dmg.cause == DAMAGECAUSE_NONE) {
+			/*if (gPlayer->dmg.cause == DAMAGECAUSE_NONE) {
 				DebugUI_Log("Player died");
-			} else {
-				DebugUI_Log("Died by %s", gPlayer->dmg.cause);
-			}
+			}  else {
+				 DebugUI_Log("Died by %d", gPlayer->dmg.cause);
+			 }*/
 			int spawnY = FastFloor(gPlayer->spawnPos.y);
+			svcSleepThread(1000);
 			if (World_GetBlock(gPlayer->spawnPos.x, spawnY, gPlayer->spawnPos.z) != BLOCK_AIR) {
 				while (World_GetBlock(gPlayer->spawnPos.x, spawnY, gPlayer->spawnPos.z) != BLOCK_AIR)
 					spawnY++;
@@ -156,6 +157,7 @@ void Player_Tick(Sound* sound) {
 			gPlayer->hp		   = 20;
 			gPlayer->hunger	   = 20;
 			gPlayer->dmg.cause = DAMAGECAUSE_NONE;
+
 		} else {
 			DebugUI_Log("lol ur world is gone");
 			/*char buffer[512];
