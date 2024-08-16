@@ -10,6 +10,8 @@
 void checkValid();
 
 int main() {
+	aptSetHomeAllowed(false);
+
 	checkValid();
 
 	ptmuInit();
@@ -49,6 +51,5 @@ void checkValid() {
 	if (access("romfs:/licenses.txt", F_OK))
 		Crash(
 			"This build is shipped without license information for third parties, and is therefore not legit.\nPlease build with "
-			"\'licenses.txt\' in "
-			"romfs, and retry. Big thanks to all the people who openly provide their code for people to share.");
+			"\'licenses.txt\', and try again.\nBig thanks to all the people who openly\nprovide their code for people to share.");
 }
