@@ -1,4 +1,4 @@
-#include "client/Minecraft.h"
+#include "client/3DSCraft.h"
 
 #include <3ds.h>
 #include <string.h>

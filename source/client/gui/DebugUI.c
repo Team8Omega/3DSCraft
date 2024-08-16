@@ -7,7 +7,7 @@
 #include "client/player/InputData.h"
 
 #include "Globals.h"
-#include "client/Minecraft.h"
+#include "client/3DSCraft.h"
 #include "util/math/NumberUtils.h"
 
 #include "client/Crash.h"

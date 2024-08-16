@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "client/Minecraft.h"
+#include "client/3DSCraft.h"
 #include "client/gui/Gui.h"
 #include "client/player/Player.h"
 #include "client/renderer/SpriteBatch.h"

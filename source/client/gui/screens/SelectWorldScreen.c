@@ -1,7 +1,7 @@
 #include "client/gui/screens/SelectWorldScreen.h"
 
 #include "client/Crash.h"
-#include "client/Minecraft.h"
+#include "client/3DSCraft.h"
 #include "client/gui/DebugUI.h"
 #include "client/gui/Gui.h"
 #include "client/gui/screens/ConfirmDeletionScreen.h"

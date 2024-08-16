@@ -1,4 +1,4 @@
-#include "client/Minecraft.h"
+#include "client/3DSCraft.h"
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -11,7 +11,7 @@
 
 #include <3ds.h>
 
-#include "client/Minecraft.h"
+#include "client/3DSCraft.h"
 
 #include "client/Crash.h"
 #include "client/gui/DebugUI.h"
