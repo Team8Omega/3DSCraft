@@ -48,14 +48,9 @@ static void inline save_float(mpack_writer_t* writer, const char* cstr, float v)
 	mpack_save_float(writer, v);
 }
 
-static int inline testing(const char* name) {
-	Crash("Not found: %s", name);
-	return 1;
-}
-
 #define save_getMap(node, name) mpack_node_map_cstr(root, name);
 #define save_getMapArray(node, name, index) mpack_node_array_at(mpack_node_map_cstr(node, name), index);
 #define save_get(node, typ, key, default_)                                                                                                 \
 	((mpack_node_type(mpack_node_map_cstr_optional((node), (key))) != mpack_type_nil)                                                      \
 		 ? mpack_node_##typ(mpack_node_map_cstr_optional((node), (key)))                                                                   \
-		 : testing(key))
+		 : (default_))
