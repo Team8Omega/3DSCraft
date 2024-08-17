@@ -1,7 +1,7 @@
 #include "client/gui/screens/PauseScreen.h"
 
 #include "Globals.h"
-#include "client/3DSCraft.h"
+#include "client/Game.h"
 #include "client/gui/DebugUI.h"
 #include "client/gui/Gui.h"
 #include "client/gui/screens/SelectWorldScreen.h"

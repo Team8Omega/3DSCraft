@@ -1,4 +1,4 @@
-#include "client/3DSCraft.h"
+#include "client/Game.h"
 
 #include <3ds.h>
 #include <string.h>
@@ -44,8 +44,7 @@ void checkValid() {
 			   F_OK))
 		Crash(
 			"Please provide assets, check\n \'github.com/Team8Omega/3DSCraft-ResourcePacker\'\nfor infos.\nYou have to validly provide "
-			"your own assets of the game you purchased, as we do not support piracy.\n\nFILENOTFOUND: "
-			"block/stone.png");
+			"your own assets of the game you purchased, as we do not support piracy.\n");
 
 	// Check for valid license
 	if (access("romfs:/licenses.txt", F_OK))

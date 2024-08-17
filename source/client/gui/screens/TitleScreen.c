@@ -2,7 +2,7 @@
 
 #include "client/Camera.h"
 #include "client/Crash.h"
-#include "client/3DSCraft.h"
+#include "client/Game.h"
 #include "client/gui/Gui.h"
 #include "client/gui/screens/SelectWorldScreen.h"
 #include "client/model/VertexFmt.h"

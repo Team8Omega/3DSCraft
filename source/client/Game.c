@@ -1,4 +1,4 @@
-#include "client/3DSCraft.h"
+#include "client/Game.h"
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -11,8 +11,6 @@
 
 #include <3ds.h>
 
-#include "client/3DSCraft.h"
-
 #include "client/Crash.h"
 #include "client/gui/DebugUI.h"
 #include "client/gui/Gui.h"
@@ -20,6 +18,7 @@
 #include "client/gui/Screen.h"
 #include "client/gui/screens/PauseScreen.h"
 #include "client/gui/screens/TitleScreen.h"
+#include "resources/locale/LanguageManager.h"
 #include "client/model/Cube.h"
 #include "client/player/Damage.h"
 #include "client/player/Player.h"
@@ -34,8 +33,6 @@
 #include "world/level/levelgen/SmeaGen.h"
 #include "world/level/levelgen/SuperFlatGen.h"
 #include "world/level/storage/Region.h"
-
-#include "client/language/LanguageManager.h"
 
 #include "Globals.h"
 
@@ -92,6 +89,8 @@ static void deinit() {
 
 	Region_DeinitPools();
 
+	Cube_DeinitVBOs();
+
 	/*Sound_Quit(0);
 	threadJoin(sBackgroundSound.threaid, 50000);
 	threadFree(sBackgroundSound.threaid);
@@ -114,7 +113,7 @@ static void deinit() {
 
 	GameRenderer_Deinit();
 
-	Cube_DeinitVBOs();
+	LanguageManager_Deinit();
 
 	aptUnhook(&sAptHook);
 
@@ -166,6 +165,8 @@ static void init() {
 
 	sino_init();
 
+	LanguageManager_Init();
+
 	PlayerController_Init(&sPlayerCtrl);
 
 	SuperFlatGen_Init(&sFlatGen);
@@ -174,8 +175,6 @@ static void init() {
 	GameRenderer_Init();
 
 	DebugUI_Init();
-
-	test();
 
 	SaveManager_Init(&sSavemgr);
 	ChunkWorker_AddHandler(&sChunkWorker, WorkerItemType_Load, (WorkerFuncObj){ &SaveManager_LoadChunk, &sSavemgr, true });
