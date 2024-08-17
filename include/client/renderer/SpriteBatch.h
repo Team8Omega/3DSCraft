@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include "client/player/InputData.h"
+#include "resources/Locale.h"
 #include "world/World.h"
 
 #include <citro3d.h>
@@ -32,9 +33,11 @@ void SpriteBatch_PushIcon(BlockId block, u8 metadata, s16 x, s16 y, s16 z);
 #define CHAR_HEIGHT 8
 int SpriteBatch_PushTextVargs(int x, int y, int z, s16 color, bool shadow, int wrap, int* ySize, const char* fmt, va_list arg);
 int SpriteBatch_PushText(int x, int y, int z, s16 color, bool shadow, int wrap, int* ySize, const char* fmt, ...);
+int SpriteBatch_PushTextSingle(int x, int y, int z, s16 color, bool shadow, int wrap, int* ySize, const char* single);
 
 int SpriteBatch_CalcTextWidthVargs(const char* text, va_list args);
 int SpriteBatch_CalcTextWidth(const char* text, ...);
+int SpriteBatch_CalcTextWidthSingle(const char* text);
 
 char* SpriteBatch_TextTruncate(const char* text, size_t length);
 

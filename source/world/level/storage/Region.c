@@ -42,10 +42,10 @@ void Region_Init(Region* region, int x, int z) {
 	char buffer[256];
 	sprintf(buffer, "%s/regions/r.%d.%d.dat", gWorld->path, x, z);
 
-	// Open the .dat file
+	chdir(gWorld->path);
+
 	region->dataFile = fopen(buffer, "r+b");
 	if (region->dataFile == NULL) {
-		// Create a new .dat file if it doesn't exist
 		region->dataFile = fopen(buffer, "w+b");
 	}
 
@@ -80,6 +80,7 @@ void Region_Init(Region* region, int x, int z) {
 		// No metadata, initialize
 		memset(region->grid, 0x0, sizeof(region->grid));
 	}
+	region->wasUpdated = false;
 }
 
 void Region_Deinit(Region* region) {
@@ -96,6 +97,8 @@ void Region_SaveIndex(Region* region) {
 	sprintf(buffer, "%s/regions/r.%d.%d.dat", gWorld->path, region->x, region->z);
 
 	memcpy(fileBuffer, region->grid, sizeof(region->grid));
+
+	chdir(gWorld->path);
 
 	FILE* file = fopen(buffer, "r+b");
 	if (file == NULL) {
@@ -146,11 +149,9 @@ void Region_SaveChunk(Region* region, Chunk* chunk) {
 
 	region->wasUpdated = true;
 
-	// Initialize MPack writer for chunk data
 	mpack_writer_t writer;
 	mpack_writer_init(&writer, decompressBuffer, decompressBufferSize);
 
-	// Write chunk data to MPack
 	mpack_start_map(&writer, 4);
 
 	mpack_write_cstr(&writer, "clusters");
@@ -188,13 +189,11 @@ void Region_SaveChunk(Region* region, Chunk* chunk) {
 
 	mpack_finish_map(&writer);
 
-	// Finish MPack writer
 	mpack_error_t err = mpack_writer_destroy(&writer);
 	if (err != mpack_ok) {
 		Crash("MPack error %d while saving chunk %d.%d.%d\nPath: %s", err, x, z, chunk->x, region->dataFile);
 	}
 
-	// Compress the MPack buffer
 	mz_ulong compressedSize = fileBufferSize;
 	if (compress((u8*)fileBuffer, &compressedSize, (u8*)decompressBuffer, mpack_writer_buffer_used(&writer)) != Z_OK) {
 		DebugUI_Log("Error while compressing chunk %d.%d.%d", chunk->x, chunk->z);
@@ -205,13 +204,11 @@ void Region_SaveChunk(Region* region, Chunk* chunk) {
 		freeSectors(region, region->grid[x][z].position, region->grid[x][z].blockSize);
 	}
 
-	// Reserve sectors and write compressed chunk data
 	u32 startPosition = reserveSectors(region, compressedSize);
 	fseek(region->dataFile, headerSize + startPosition * sectorSize, SEEK_SET);
 	fwrite(fileBuffer, compressedSize, 1, region->dataFile);
 	fflush(region->dataFile);
 
-	// Update region info
 	region->grid[x][z].position		  = startPosition;
 	region->grid[x][z].compressedSize = compressedSize;
 	region->grid[x][z].actualSize	  = mpack_writer_buffer_used(&writer);
@@ -224,30 +221,25 @@ void Region_LoadChunk(Region* region, Chunk* chunk) {
 	ChunkInfo chunkInfo = region->grid[x][z];
 
 	if (chunkInfo.actualSize <= 0) {
-		// If the chunk is not present or has no data, return early.
 		return;
 	}
-	// Set the file position to read chunk data, accounting for header and sector offset.
+	// Set the file position to read chunk data
 	fseek(region->dataFile, headerSize + chunkInfo.position * sectorSize, SEEK_SET);
 
-	// Read the compressed chunk data into fileBuffer.
 	if (fread(fileBuffer, 1, chunkInfo.compressedSize, region->dataFile) != chunkInfo.compressedSize) {
 		Crash("Read chunk data size isn't equal to the expected size for chunk %d.%d.%d", chunk->x, chunk->z, x);
 	}
 
-	// Decompress the chunk data.
 	mz_ulong uncompressedSize = decompressBufferSize;
 	if (uncompress((u8*)decompressBuffer, &uncompressedSize, (u8*)fileBuffer, chunkInfo.compressedSize) != Z_OK) {
 		DebugUI_Log("Error while decompressing chunk data for World at Region %d.%d Chunk %d.%d", region->x, region->z, chunk->x, chunk->z);
 		return;
 	}
 
-	// Initialize MPack tree for reading decompressed data.
 	mpack_tree_t tree;
 	mpack_tree_init_pool(&tree, decompressBuffer, uncompressedSize, nodeDataPool, nodeDataPoolSize);
 	mpack_node_t root = mpack_tree_root(&tree);
 
-	// Load chunk data from MPack.
 	mpack_node_t clusters = mpack_node_map_cstr(root, "clusters");
 	for (int i = 0; i < CLUSTER_PER_CHUNK; i++) {
 		mpack_node_t cluster = mpack_node_array_at(clusters, i);
@@ -273,7 +265,6 @@ void Region_LoadChunk(Region* region, Chunk* chunk) {
 		}
 	}
 
-	// Read additional chunk data.
 	chunk->genProgress = mpack_node_u8(mpack_node_map_cstr(root, "genProgress"));
 	chunk->biome	   = mpack_node_u8(mpack_node_map_cstr(root, "biome"));
 
@@ -285,12 +276,10 @@ void Region_LoadChunk(Region* region, Chunk* chunk) {
 		chunk->heightmapRevision = 0;
 	}
 
-	// Clean up MPack tree.
 	mpack_error_t err = mpack_tree_destroy(&tree);
 	if (err != mpack_ok) {
 		Crash("MPack error %d while loading chunk %d.%d from region", err, chunk->x, chunk->z);
 	}
 
-	// Update chunk revision.
 	chunk->revision = chunkInfo.revision;
 }

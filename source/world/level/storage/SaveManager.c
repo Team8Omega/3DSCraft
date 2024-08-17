@@ -106,6 +106,8 @@ static void inline write_float(mpack_writer_t* writer, const char* cstr, float v
 
 #define PARAM_NUM_PER_PLAYER 14
 void SaveManager_Unload(SaveManager* mgr) {
+	chdir(gWorld->path);
+
 	mpack_writer_t writer;
 	mpack_writer_init_file(&writer, "level.mp");
 	mpack_start_map(&writer, 3);

@@ -168,41 +168,38 @@ int SpriteBatch_PushText(int x, int y, int z, s16 color, bool shadow, int wrap, 
 	return length;
 }
 
-int SpriteBatch_PushTextVargs(int x, int y, int z, s16 color, bool shadow, int wrap, int* ySize, const char* fmt, va_list arg) {
+int SpriteBatch_PushTextSingle(int x, int y, int z, s16 color, bool shadow, int wrap, int* ySize, const char* text) {
 	SpriteBatch_BindTexture(&font->texture);
 #define CHAR_WIDTH 8
 #define TAB_SIZE 4
-
-	char buffer[256];
-	vsprintf(buffer, fmt, arg);
 
 	int offsetX = 0;
 	int offsetY = 0;
 
 	int maxWidth = 0;
 
-	char* text = buffer;
+	u8 i = 0;
 
-	while (*text != '\0') {
-		bool implicitBreak = offsetX + font->fontWidth[(int)*text] >= wrap;
-		if (*text == '\n' || implicitBreak) {
+	while (text[i] != '\0') {
+		bool implicitBreak = offsetX + font->fontWidth[(u8)text[i]] >= wrap;
+		if (text[i] == '\n' || implicitBreak) {
 			offsetY += CHAR_HEIGHT;
 			maxWidth = MAX(maxWidth, offsetX);
 			offsetX	 = 0;
 			if (implicitBreak)
-				--text;
-		} else if (*text == '\t') {
+				--i;
+		} else if (text[i] == '\t') {
 			offsetX = ((offsetX / CHAR_WIDTH) / TAB_SIZE + 1) * TAB_SIZE * CHAR_WIDTH;
 		} else {
-			if (*text != ' ') {
-				int texX = *text % 16 * 8, texY = *text / 16 * 8;
+			if (text[i] != ' ') {
+				int texX = text[i] % 16 * 8, texY = text[i] / 16 * 8;
 				SpriteBatch_PushQuadColor(x + offsetX, y + offsetY, z, 8, 8, texX, texY, 8, 8, color);
 				if (shadow)
 					SpriteBatch_PushQuadColor(x + offsetX + 1, y + offsetY + 1, z - 1, 8, 8, texX, texY, 8, 8, SHADER_RGB(10, 10, 10));
 			}
-			offsetX += font->fontWidth[(int)*text];
+			offsetX += font->fontWidth[(u8)text[i]];
 		}
-		++text;
+		++i;
 	}
 
 	maxWidth = MAX(maxWidth, offsetX);
@@ -213,6 +210,12 @@ int SpriteBatch_PushTextVargs(int x, int y, int z, s16 color, bool shadow, int w
 	return maxWidth;
 }
 
+int SpriteBatch_PushTextVargs(int x, int y, int z, s16 color, bool shadow, int wrap, int* ySize, const char* fmt, va_list arg) {
+	char buffer[256];
+	vsprintf(buffer, fmt, arg);
+	return SpriteBatch_PushTextSingle(x, y, z, color, shadow, wrap, ySize, buffer);
+}
+
 int SpriteBatch_CalcTextWidth(const char* text, ...) {
 	va_list args;
 	va_start(args, text);
@@ -221,26 +224,28 @@ int SpriteBatch_CalcTextWidth(const char* text, ...) {
 
 	return length;
 }
-
-int SpriteBatch_CalcTextWidthVargs(const char* text, va_list args) {
-	char fmtedText[256];
-	vsprintf(fmtedText, text, args);
-
-	char* it = fmtedText;
+int SpriteBatch_CalcTextWidthSingle(const char* text) {
+	u8 i = 0;
 
 	int length	  = 0;
 	int maxLength = 0;
-	while (*it != '\0') {
-		if (*it == '\n') {
+	while (text[i] != '\0') {
+		if (text[i] == '\n') {
 			maxLength = MAX(maxLength, length);
 			length	  = 0;
 		} else
-			length += font->fontWidth[(int)*(it++)];
+			length += font->fontWidth[(u8)text[i++]];
 	}
 
 	maxLength = MAX(maxLength, length);
 
 	return maxLength;
+}
+
+int SpriteBatch_CalcTextWidthVargs(const char* text, va_list args) {
+	char fmtedText[256];
+	vsprintf(fmtedText, text, args);
+	return SpriteBatch_CalcTextWidthSingle(fmtedText);
 }
 
 char* SpriteBatch_TextTruncate(const char* text, size_t length) {

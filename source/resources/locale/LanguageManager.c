@@ -6,15 +6,12 @@
 #include <unistd.h>
 
 #include "client/Crash.h"
-#include "resources/locale/Locale.h"
+#include "resources/Locale.h"
 #include "util/Paths.h"
 
-char* localeStrings[LOC_COUNT];
+char* localeGet[LOC_COUNT];
 
-static const char* localeKeys[LOC_COUNT] = {
-	[LOC_LANGUAGE_NAME] = "language.name",
-	[LOC_LANGUAGE_CODE] = "language.code",
-};
+extern const char* localeKeys[LOC_COUNT];
 
 #define defaultLang "en_us"
 
@@ -25,11 +22,11 @@ void LanguageManager_Init() {
 }
 void LanguageManager_Deinit() {
 	for (u16 i = 0; i < LOC_COUNT; ++i) {
-		if (localeStrings[i] == NULL)
+		if (localeGet[i] == NULL)
 			continue;
 
-		free((void*)localeStrings[0]);
-		localeStrings[0] = NULL;
+		free((void*)localeGet[0]);
+		localeGet[0] = NULL;
 	}
 }
 
@@ -56,7 +53,7 @@ void LanguageManager_Load(const char* langCode) {
 		return;
 	}
 
-	Crash("LANG: %s", filename);
+	LanguageManager_Deinit();
 
 	mpack_tree_t levelTree;
 	mpack_tree_init_file(&levelTree, filename, 0);
@@ -65,11 +62,9 @@ void LanguageManager_Load(const char* langCode) {
 	char buffer[512];
 	for (u16 i = 0; i < LOC_COUNT; ++i) {
 		mpack_get(root, localeKeys[i], buffer);
-		localeStrings[i] = malloc((strlen(buffer) + 1) * sizeof(char));
-		strcpy(localeStrings[i], buffer);
+		localeGet[i] = malloc((strlen(buffer) + 1) * sizeof(char));
+		strcpy(localeGet[i], buffer);
 	}
-
-	Crash("LANG: %s LEN: %d", localeStrings[0], strlen(localeStrings[0]));
 
 	mpack_error_t err = mpack_tree_destroy(&levelTree);
 	if (err != mpack_ok) {

@@ -3,9 +3,11 @@
 enum {
 	LOC_LANGUAGE_NAME,
 	LOC_LANGUAGE_CODE,
+	LOC_MENU_SINGLEPLAYER,
+	LOC_MENU_QUIT,
 	LOC_COUNT
 };
 
 typedef u16 LocaleString;
 
-const char* Locale_Get(LocaleString id);
+extern char* localeGet[LOC_COUNT];

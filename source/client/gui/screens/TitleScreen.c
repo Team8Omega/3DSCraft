@@ -44,8 +44,8 @@ void TitleScreen_Deinit() {
 void TitleScreen_DrawDown() {
 	Gui_DrawBackgroundFull(0, -4);
 
-	clicked_play = Gui_IconButton(0, 45, 160, 20, 0, true, SHADER_RGB(20, 20, 20), "Singleplayer");
-	clicked_quit = Gui_IconButton(0, 65, 160, 20, 0, true, SHADER_RGB(20, 20, 20), "Quit");
+	clicked_play = Gui_IconButton(0, 45, 160, 20, 0, true, SHADER_RGB(20, 20, 20), localeGet[LOC_MENU_SINGLEPLAYER]);
+	clicked_quit = Gui_IconButton(0, 65, 160, 20, 0, true, SHADER_RGB(20, 20, 20), localeGet[LOC_MENU_QUIT]);
 
 	if (clicked_play) {
 		clicked_play = false;
