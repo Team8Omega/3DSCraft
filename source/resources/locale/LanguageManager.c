@@ -30,7 +30,7 @@ void LanguageManager_Deinit() {
 	}
 }
 
-#define mpack_get(root, key, charPtr) mpack_node_copy_utf8_cstr(mpack_node_map_cstr(root, key), charPtr, 512);
+#define save_get(root, key, charPtr) mpack_node_copy_utf8_cstr(mpack_node_map_cstr(root, key), charPtr, 512);
 
 static void getLangFilename(char* buffer, const char* langCode) {
 	strcpy(buffer, langCode);
@@ -61,7 +61,7 @@ void LanguageManager_Load(const char* langCode) {
 
 	char buffer[512];
 	for (u16 i = 0; i < LOC_COUNT; ++i) {
-		mpack_get(root, localeKeys[i], buffer);
+		save_get(root, localeKeys[i], buffer);
 		localeGet[i] = malloc((strlen(buffer) + 1) * sizeof(char));
 		strcpy(localeGet[i], buffer);
 	}

@@ -5,6 +5,7 @@
 
 #include "util/math/NumberUtils.h"
 #include "util/math/Xorshift.h"
+#include "world/storage/WorldInfo.h"
 #include <vec/vec.h>
 
 #define CHUNKCACHE_SIZE (9)
@@ -17,15 +18,13 @@ typedef struct Block Block;
 typedef struct BiomeGen BiomeGen;
 
 typedef u8 WorldGenType;
-enum
-{
+enum {
 	WorldGen_Default,
 	WorldGen_SuperFlat,
 	WorldGenTypes_Count
 };
 typedef u8 Gamemode;
-enum
-{
+enum {
 	Gamemode_Survival,
 	Gamemode_Hardcore,
 	Gamemode_Creative,
@@ -34,8 +33,7 @@ enum
 	Gamemode_Count
 };
 typedef u8 Difficulty;
-enum
-{
+enum {
 	Difficulty_Normal,
 	Difficulty_Peaceful,
 	Difficulty_Easy,
@@ -43,7 +41,6 @@ enum
 	Difficulty_Count
 };
 typedef struct {
-	u64 seed;
 	WorldGenType type;
 	// gamemode type;
 	union {
@@ -53,15 +50,12 @@ typedef struct {
 	} settings;
 } GeneratorSettings;
 
-#define WORLD_NAME_SIZE 128
 typedef struct {
 	bool active;
 
+	WorldInfo worldInfo;
+
 	int HighestBlock;
-
-	char name[WORLD_NAME_SIZE];
-
-	char path[WORLD_NAME_SIZE];
 
 	GeneratorSettings genSettings;
 

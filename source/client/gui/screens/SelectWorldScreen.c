@@ -49,9 +49,8 @@ static void SelectWorldScreen_ScanWorlds() {
 				continue;
 			}
 
-			WorldInfo info;
+			WorldSummary info;
 			strcpy(info.name, name);
-			info.lastPlayed = 0;
 			strcpy(info.path, entry->d_name);
 
 			vec_push(&worlds.list, info);
@@ -118,7 +117,7 @@ void SelectWorldScreen_DrawDown() {
 	if (ABS(velocity) < 0.001f)
 		velocity = 0.f;
 
-	WorldInfo info;
+	WorldSummary info;
 
 	clicked_back = Gui_IconButton(0, 0, 15, 15, 0, true, SHADER_RGB(20, 20, 20), "<");
 
@@ -194,8 +193,8 @@ void SelectWorldScreen_Tick() {
 	}
 
 	if (clicked_play && selectedWorld != -1) {
-		clicked_play	= false;
-		WorldInfo* info = &worlds.list.data[selectedWorld];
+		clicked_play	   = false;
+		WorldSummary* info = &worlds.list.data[selectedWorld];
 		gLoadWorld(info->path, info->name, 0, false);
 	}
 	if (clicked_delete_world && selectedWorld != -1) {

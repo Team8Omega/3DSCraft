@@ -20,9 +20,6 @@ void World_Init() {
 
 	gWorld->randomTickGen = Xorshift32_New();
 
-	gWorld->genSettings.seed = 28112000;
-	gWorld->genSettings.type = WorldGen_SuperFlat;
-
 	vec_init(&gWorld->freeChunks);
 
 	for (size_t i = 0; i < CHUNKPOOL_SIZE; i++) {
