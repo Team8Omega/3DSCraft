@@ -2,14 +2,9 @@
 
 #include "client/gui/Screen.h"
 #include "world/World.h"
+#include "world/storage/WorldSummary.h"
 
 #include <vec/vec.h>
-
-typedef struct {
-	u32 lastPlayed;
-	char name[256];
-	char path[256];
-} WorldInfo;
 
 extern WorldGenType worldGenType;
 extern Gamemode gamemode;
@@ -19,7 +14,7 @@ extern const char* gamemodeTypesStr[];
 extern const char* difficultyTypesStr[];
 
 typedef struct {
-	vec_t(WorldInfo) list;
+	vec_t(WorldSummary) list;
 } WorldList;
 extern WorldList worlds;
 

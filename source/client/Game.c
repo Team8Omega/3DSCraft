@@ -18,7 +18,6 @@
 #include "client/gui/Screen.h"
 #include "client/gui/screens/PauseScreen.h"
 #include "client/gui/screens/TitleScreen.h"
-#include "resources/locale/LanguageManager.h"
 #include "client/model/Cube.h"
 #include "client/player/Damage.h"
 #include "client/player/Player.h"
@@ -27,12 +26,14 @@
 #include "client/renderer/PolyGen.h"
 #include "client/renderer/SpriteBatch.h"
 #include "client/renderer/WorldRenderer.h"
+#include "resources/locale/LanguageManager.h"
 #include "sounds/Sound.h"
 #include "util/Paths.h"
 #include "util/StringUtils.h"
+#include "world/GameRules.h"
 #include "world/level/levelgen/SmeaGen.h"
 #include "world/level/levelgen/SuperFlatGen.h"
-#include "world/level/storage/Region.h"
+#include "world/storage/Region.h"
 
 #include "Globals.h"
 
@@ -328,10 +329,13 @@ void gLoadWorld(char* path, char* name, WorldGenType worldType, bool newWorld) {
 
 	World_Init();
 
-	strcpy(gWorld->name, name);
-	strcpy(gWorld->path, worldPath);
+	strcpy(gWorld->worldInfo.name, name);
+	strcpy(gWorld->worldInfo.path, worldPath);
+	gWorld->worldInfo.seed	 = 28112000;
 	gWorld->genSettings.type = worldType;
 	gWorld->active			 = true;
+
+	GameRules_Reset(&gWorld->worldInfo.gamerules);
 
 	SaveManager_Load(&sSavemgr);
 

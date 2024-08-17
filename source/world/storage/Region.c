@@ -1,4 +1,4 @@
-#include "world/level/storage/Region.h"
+#include "world/storage/Region.h"
 
 #include <miniz/miniz.h>
 #include <mpack/mpack.h>
@@ -40,9 +40,9 @@ void Region_Init(Region* region, int x, int z) {
 	vec_init(&region->sectors);
 
 	char buffer[256];
-	sprintf(buffer, "%s/regions/r.%d.%d.dat", gWorld->path, x, z);
+	sprintf(buffer, "%s/regions/r.%d.%d.dat", gWorld->worldInfo.path, x, z);
 
-	chdir(gWorld->path);
+	chdir(gWorld->worldInfo.path);
 
 	region->dataFile = fopen(buffer, "r+b");
 	if (region->dataFile == NULL) {
@@ -51,7 +51,7 @@ void Region_Init(Region* region, int x, int z) {
 
 	if (region->dataFile == NULL) {
 		Crash("World Path invalid, internal error. Unable to load Region %d.%d.\n\nPath name: %s\nBuffer String: %s\nBuffer Address: 0x%x",
-			  x, z, gWorld->path, buffer, buffer);
+			  x, z, gWorld->worldInfo.path, buffer, buffer);
 	}
 
 	// Check if the .dat file already has metadata
@@ -94,11 +94,11 @@ void Region_SaveIndex(Region* region) {
 		return;
 
 	char buffer[256];
-	sprintf(buffer, "%s/regions/r.%d.%d.dat", gWorld->path, region->x, region->z);
+	sprintf(buffer, "%s/regions/r.%d.%d.dat", gWorld->worldInfo.path, region->x, region->z);
 
 	memcpy(fileBuffer, region->grid, sizeof(region->grid));
 
-	chdir(gWorld->path);
+	chdir(gWorld->worldInfo.path);
 
 	FILE* file = fopen(buffer, "r+b");
 	if (file == NULL) {
@@ -172,20 +172,20 @@ void Region_SaveChunk(Region* region, Chunk* chunk) {
 		mpack_write_u32(&writer, chunk->clusters[i].revision);
 
 		mpack_write_cstr(&writer, "empty");
-		mpack_write_bool(&writer, empty);
+		mpack_save_bool(&writer, empty);
 
 		mpack_finish_map(&writer);
 	}
 	mpack_finish_array(&writer);
 
 	mpack_write_cstr(&writer, "genProgress");
-	mpack_write_u8(&writer, chunk->genProgress);
+	mpack_save_u8(&writer, chunk->genProgress);
 
 	mpack_write_cstr(&writer, "heightmap");
 	mpack_write_bin(&writer, (char*)chunk->heightmap, sizeof(chunk->heightmap));
 
 	mpack_write_cstr(&writer, "biome");
-	mpack_write_u8(&writer, chunk->biome);
+	mpack_save_u8(&writer, chunk->biome);
 
 	mpack_finish_map(&writer);
 

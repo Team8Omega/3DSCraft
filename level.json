@@ -1,0 +1,43 @@
+{
+    "name": "tobefixed",
+    "players": [
+        {
+            "x": 0.0,
+            "y": 66.0,
+            "z": 0.0,
+            "sx": 0.0,
+            "sy": 66.19999694824219,
+            "sz": 0.0,
+            "pitch": 0.0,
+            "yaw": 0.0,
+            "hp": 20,
+            "hunger": 20,
+            "gamemode": 0,
+            "cheats": true,
+            "flying": false,
+            "crouching": false
+        }
+    ],
+    "gamerules": {
+        "doFireTick": true,
+        "keepInventory": false,
+        "naturalRegeneration": true,
+        "doDaylightCycle": true,
+        "showDeathMessages": true,
+        "randomTickSpeed": 3,
+        "reducedDebugInfo": false,
+        "showCoordinates": false,
+        "spawnRadius": 10,
+        "doWeatherCycle": true,
+        "announceAdvancements": true,
+        "doImmediateRespawn": false,
+        "drawningDamage": true,
+        "fallDamage": true,
+        "fireDamage": true,
+        "freezeDamage": true
+    },
+    "worldgensettings": {
+        "seed": 28112000,
+        "worldType": 0
+    }
+}

@@ -107,7 +107,7 @@ void CreateWorldScreen_Tick() {
 
 			while (true) {
 				int i;
-				WorldInfo* info;
+				WorldSummary* info;
 				bool alreadyExisting = false;
 				vec_foreach_ptr(&worlds.list, info, i) if (!strcmp(worldpath, info->path)) {
 					alreadyExisting = true;
