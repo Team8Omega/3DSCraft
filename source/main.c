@@ -35,16 +35,22 @@ int main() {
 	return 0;
 }
 
+#define PATHPACK_SHORT PATH_PACKS PACK_VANILLA "/"
+
 void checkValid() {
 	romfsInit();
 
 	// Check for block asset
-	if (access(PATH_PACKS PACK_VANILLA "/" PATH_PACK_TEXTURES "/"
-									   "block/stone.png",
-			   F_OK))
+	if (access(PATHPACK_SHORT PATH_PACK_TEXTURES "/block/stone.png", F_OK)	//
+		|| access(PATHPACK_SHORT PATH_PACK_LANG "/en_us.mp", F_OK)			//
+																			//|| access(PATHPACK_SHORT PATH_PACK_LANG "/en_us.mp", F_OK)
+	)
 		Crash(
-			"Please provide assets, check\n \'github.com/Team8Omega/3DSCraft-ResourcePacker\'\nfor infos.\nYou have to validly provide "
-			"your own assets of the game you purchased, as we do not support piracy.\n");
+			"Hello there! Cannot find the vanilla game assets.\n\n\nPlease follow this link for instructions:\n"
+			"\'github.com/Team8Omega/3DSCraft-ResourcePacker\'\n\n\nYou have to "
+			"validly provide your own assets of thegame you purchased, as we do not support piracy.\n\nYou are not allowed to ask for\n"
+			"another persons dump, as we expect every player\nto have bought the original game.\nYou provide the assets, we provide the "
+			"code.\n\n\n\n\n\n\n3DSCraft by Team Omega, Minecraft by Mojang.\n\n\n\n");
 
 	// Check for valid license
 	if (access("romfs:/licenses.txt", F_OK))

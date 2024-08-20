@@ -186,6 +186,9 @@ static u16 floodFill(Cluster* cluster, int x, int y, int z, Direction entrySide0
 			if (x < 0 || y < 0 || z < 0 || x >= CHUNK_SIZE || y >= CHUNK_SIZE || z >= CHUNK_SIZE) {
 				exitPoints[i] = true;
 			} else {
+				if (!BLOCKS[cluster->blocks[x][y][z]])
+					World_SetBlock(x, y, z, BLOCK_AIR);
+
 				if (!(BLOCKS[cluster->blocks[x][y][z]]->opaque) && !(floodfill_visited[x][y][z] & 1)) {
 					floodfill_visited[x][y][z] |= 1;
 					vec_push(&floodfill_queue, ((QueueElement){ x, y, z }));

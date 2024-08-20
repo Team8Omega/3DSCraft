@@ -303,10 +303,6 @@ void gRun() {
 	deinit();
 }
 
-void gStop() {
-	sRunning = false;
-}
-
 void gReleaseWorld() {
 	gWorld->active = false;
 
@@ -375,6 +371,11 @@ void gLoadWorld(char* path, char* name, WorldGenType worldType, bool newWorld) {
 	Screen_SetScreen(SCREEN_NONE);
 	sLastTime = svcGetSystemTick();	 // fix timing
 }
+
+void gStop() {
+	sRunning = false;
+}
+
 void gSetScreen(u8 idx) {
 	Screen_SetScreen(idx);
 }
@@ -392,4 +393,8 @@ void gSetShowDebug(bool b) {
 }
 bool gGetShowDebug() {
 	return sShowDebug;
+}
+
+bool gIsRunning() {
+	return sRunning;
 }

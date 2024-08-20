@@ -21,7 +21,7 @@ void Camera_Init() {
 	Mtx_Identity(&gCamera.view);
 
 	gCamera.fov	 = C3D_AngleFromDegrees(60.f);
-	gCamera.near = 0.1f, gCamera.far = (VIEW_DISTANCE * CHUNK_SIZE * CAM_SCALE);  // TODO: fix far ...
+	gCamera.near = 0.1f, gCamera.far = (VIEW_DISTANCE * CHUNK_REAL_SIZE);
 
 	gCamera.mode = CameraMode_First;
 
@@ -81,7 +81,7 @@ void Camera_Update(float iod) {
 	gCamera.frustumPlanes[Frustum_Bottom] = FVec4_Normalize(FVec4_Subtract(rowW, rowY));
 	gCamera.frustumPlanes[Frustum_Far]	  = FVec4_Normalize(FVec4_Add(rowW, rowZ));
 
-	float ar		  = 400.f / 240.f;
+	float ar		  = VIEW_ASPECT;
 	float tan2halffov = 2.f * tanf(gCamera.fov / 2.f);
 
 	float hNear = tan2halffov * gCamera.near;
