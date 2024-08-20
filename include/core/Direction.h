@@ -1,8 +1,7 @@
 #pragma once
 
 typedef u8 Direction;
-enum
-{
+enum {
 	Direction_West,
 	Direction_East,
 	Direction_Bottom,
@@ -13,8 +12,7 @@ enum
 };
 
 typedef u8 Axis;
-enum
-{
+enum {
 	Axis_X,
 	Axis_Y,
 	Axis_Z

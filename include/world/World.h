@@ -76,9 +76,11 @@ static inline int WorldToChunkCoord(int x) {
 	return (x + (int)(x < 0)) / CHUNK_SIZE - (int)(x < 0);
 }
 static inline int WorldToLocalCoord(int x) {
-	return x - WorldToChunkCoord(x) * CHUNK_SIZE;
+	return x - (WorldToChunkCoord(x) << 4);
 }
-
+static inline int WorldHeightToCluster(int y) {
+	return (y >> 4);
+}
 void World_Init();
 
 void World_Deinit();
@@ -92,8 +94,8 @@ Chunk* World_GetChunk(int x, int z);
 
 BlockId World_GetBlock(int x, int y, int z);
 void World_SetBlock(int x, int y, int z, BlockId block);
-u8 World_GetMetadata(int x, int y, int z);
-void World_SetMetadata(int x, int y, int z, u8 metadata);
+u8 World_GetBlockMetadata(int x, int y, int z);
+void World_SetBlockMetadata(int x, int y, int z, u8 metadata);
 
 void World_SetBlockAndMeta(int x, int y, int z, BlockId block, u8 metadata);
 
@@ -101,8 +103,10 @@ void World_UpdateChunkCache(int orginX, int orginZ);
 
 void World_UpdateChunkGen();
 
-int World_GetHeight(int x, int z);
+int World_GetChunkHeight(int x, int z);
 
-const Material* World_GetMaterial(int x, int y, int z);
+void World_MarkBlocksForUpdate(int x, int y, int z);
+
+const Material* World_GetBlockMaterial(int x, int y, int z);
 
 BiomeGen* World_GetBiomeGenAt(int x, int y, int z);

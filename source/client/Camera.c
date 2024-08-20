@@ -11,19 +11,25 @@ Camera gCamera;
 
 #define CAM_Y_OFFSET 0.3f
 
+#define CAM_SCALE (float)(BLOCK_SIZE)
+
+#define VIEW_DISTANCE 8
+
+#define VIEW_ASPECT (400.f / 240.f)
+
 void Camera_Init() {
 	Mtx_Identity(&gCamera.view);
 
 	gCamera.fov	 = C3D_AngleFromDegrees(60.f);
-	gCamera.near = 0.2f, gCamera.far = 8.f * CHUNK_SIZE;
+	gCamera.near = 0.1f, gCamera.far = (VIEW_DISTANCE * CHUNK_SIZE * CAM_SCALE);  // TODO: fix far ...
 
 	gCamera.mode = CameraMode_First;
 
-	Mtx_PerspTilt(&gCamera.projection, gCamera.fov, ((400.f) / (240.f)), gCamera.near, gCamera.far, false);
+	Mtx_PerspTilt(&gCamera.projection, gCamera.fov, VIEW_ASPECT, gCamera.near, gCamera.far, false);
 }
 
 void Camera_Update(float iod) {
-	float fov = gCamera.fov + C3D_AngleFromDegrees(12.f) * gPlayer->fovAdd;
+	float fov = gCamera.fov;  // + C3D_AngleFromDegrees(12.f) * gPlayer->fovAdd;
 
 	float3 playerHead =
 		f3_new(gPlayer->position.x, gPlayer->position.y + PLAYER_EYEHEIGHT + sinf(gPlayer->bobbing) * 0.1f + gPlayer->crouchAdd,
@@ -40,31 +46,27 @@ void Camera_Update(float iod) {
 
 	switch (gCamera.mode) {
 		case CameraMode_First:
+		case CameraMode_Second:
 			Mtx_Translate(&gCamera.view, -playerHead.x, -playerHead.y, -playerHead.z, true);
 			break;
 
-		case CameraMode_Second: {
-			float3 cameraPosition = f3_sub(playerHead, f3_scl(forward, -CAM_Z_OFFSET));
-			cameraPosition.y -= CAM_Y_OFFSET;
-
-			Mtx_Translate(&gCamera.view, -cameraPosition.x, -cameraPosition.y, -cameraPosition.z, true);
-			Mtx_RotateY(&gCamera.view, M_PI, true);
-		} break;
-
-		case CameraMode_Third: {
+		case CameraMode_Third:
 			float3 cameraPosition = f3_sub(playerHead, f3_scl(forward, CAM_Z_OFFSET));
 			cameraPosition.y -= CAM_Y_OFFSET;
 
 			Mtx_Translate(&gCamera.view, -cameraPosition.x, -cameraPosition.y, -cameraPosition.z, true);
-		} break;
+			break;
+
 		default:
 			break;
 	}
+	Mtx_Scale(&gCamera.projection, CAM_SCALE, CAM_SCALE, CAM_SCALE);
 
-	Mtx_PerspStereoTilt(&gCamera.projection, fov, ((400.f) / (240.f)), gCamera.near, gCamera.far, iod, 1.f, false);
+	Mtx_PerspStereoTilt(&gCamera.projection, fov, VIEW_ASPECT, gCamera.near, gCamera.far, iod, 1.f, false);
 
 	C3D_Mtx vp;
 	Mtx_Multiply(&vp, &gCamera.projection, &gCamera.view);
+	Mtx_Scale(&vp, 1 / CAM_SCALE, 1 / CAM_SCALE, 1 / CAM_SCALE);
 	Mtx_Copy(&gCamera.vp, &vp);
 
 	C3D_FVec rowX = vp.r[0];

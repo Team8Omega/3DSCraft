@@ -236,11 +236,11 @@ static void runGameLoop() {
 
 		if (gWorld && !currentScreen) {
 			DebugUI_Text("X: %f, Y: %f, Z: %f", f3_unpack(gPlayer->position));
-			DebugUI_Text("HP: %i", gPlayer->hp);
+			DebugUI_Text("P:%f Y:%f", gPlayer->pitch * RAD_TO_DEG, gPlayer->yaw * RAD_TO_DEG);
 			// DebugUI_Text("velocity: %f rndy: %f",gPlayer->velocity.y,gPlayer->rndy);
 			// DebugUI_Text("Damage Time: %i Cause: %c",dmg->time,dmg->cause);
 			// DebugUI_Text("Spawn X: %f Y: %f Z: %f",gPlayer->spawnPos.x,gPlayer->spawnPos.y,gPlayer->spawnPos.z);
-			DebugUI_Text("Hunger: %i Hungertimer: %i", gPlayer->hunger, gPlayer->hungertimer);
+			DebugUI_Text("HP: %i Hunger: %i Hungertimer: %i", gPlayer->hp, gPlayer->hunger, gPlayer->hungertimer);
 			// DebugUI_Text("Gamemode: %i", gPlayer->gamemode);
 		}
 	}
@@ -362,7 +362,7 @@ void gLoadWorld(char* path, char* name, WorldGenType worldType, bool newWorld) {
 		int highestblock = 0;
 		for (int x = -1; x < 1; ++x) {
 			for (int z = -1; z < 1; ++z) {
-				int height = World_GetHeight(x, z);
+				int height = World_GetChunkHeight(x, z);
 				if (height > highestblock)
 					highestblock = height;
 			}

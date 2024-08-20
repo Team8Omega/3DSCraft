@@ -47,7 +47,7 @@ static u16 getBlockTexture(Block* block, Direction dir, int x, int y, int z, u8 
 			return iconGrassOverlay;
 
 		default:
-			const Material* mat = World_GetMaterial(x, y + 1, z);
+			const Material* mat = World_GetBlockMaterial(x, y + 1, z);
 			return mat->id != MATERIAL_SNOW && mat->id != MATERIAL_CRAFTED_SNOW ? block->icon : iconSnowSide;
 	}
 }
