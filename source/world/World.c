@@ -92,22 +92,23 @@ BlockId World_GetBlock(int x, int y, int z) {
 	return BLOCK_AIR;
 }
 
-#define NOTIFY_NEIGHTBOR(axis, comp, xDiff, zDiff)                                                                                         \
+#define NOTIFY_NEIGHBOR(axis, comp, xDiff, zDiff)                                                                                          \
 	if (axis == comp) {                                                                                                                    \
-		Chunk* neightborChunk = World_GetChunk(cX + xDiff, cZ + zDiff);                                                                    \
-		if (neightborChunk)                                                                                                                \
-			Chunk_RequestGraphicsUpdate(neightborChunk, y / CHUNK_SIZE);                                                                   \
+		Chunk* neighborChunk = World_GetChunk(cX + xDiff, cZ + zDiff);                                                                     \
+		if (neighborChunk)                                                                                                                 \
+			Chunk_RequestGraphicsUpdate(neighborChunk, cluster);                                                                           \
 	}
 
-#define NOTIFY_ALL_NEIGHTBORS                                                                                                              \
-	NOTIFY_NEIGHTBOR(lX, 0, -1, 0)                                                                                                         \
-	NOTIFY_NEIGHTBOR(lX, 15, 1, 0)                                                                                                         \
-	NOTIFY_NEIGHTBOR(lZ, 0, 0, -1)                                                                                                         \
-	NOTIFY_NEIGHTBOR(lZ, 15, 0, 1)                                                                                                         \
-	if (WorldToLocalCoord(y) == 0 && y / CHUNK_SIZE - 1 >= 0)                                                                              \
-		Chunk_RequestGraphicsUpdate(chunk, y / CHUNK_SIZE - 1);                                                                            \
-	if (WorldToLocalCoord(y) == 15 && y / CHUNK_SIZE + 1 < CLUSTER_PER_CHUNK)                                                              \
-		Chunk_RequestGraphicsUpdate(chunk, y / CHUNK_SIZE + 1);
+#define NOTIFY_ALL_NEIGHBORS                                                                                                               \
+	u8 cluster = WorldHeightToCluster(y);                                                                                                  \
+	NOTIFY_NEIGHBOR(lX, 0, -1, 0);                                                                                                         \
+	NOTIFY_NEIGHBOR(lX, 15, 1, 0);                                                                                                         \
+	NOTIFY_NEIGHBOR(lZ, 0, 0, -1);                                                                                                         \
+	NOTIFY_NEIGHBOR(lZ, 15, 0, 1);                                                                                                         \
+	if (WorldToLocalCoord(y) == 0 && cluster != 0)                                                                                         \
+		Chunk_RequestGraphicsUpdate(chunk, cluster - 1);                                                                                   \
+	if (WorldToLocalCoord(y) == 15 && cluster != CLUSTER_PER_CHUNK)                                                                        \
+		Chunk_RequestGraphicsUpdate(chunk, cluster + 1);
 
 void World_SetBlock(int x, int y, int z, BlockId block) {
 	if (y < 0 || y >= CHUNK_HEIGHT)
@@ -120,7 +121,7 @@ void World_SetBlock(int x, int y, int z, BlockId block) {
 		int lZ = WorldToLocalCoord(z);
 		Chunk_SetBlock(chunk, lX, y, lZ, block);
 
-		NOTIFY_ALL_NEIGHTBORS
+		NOTIFY_ALL_NEIGHBORS
 	}
 }
 
@@ -135,11 +136,11 @@ void World_SetBlockAndMeta(int x, int y, int z, BlockId block, u8 metadata) {
 		int lZ = WorldToLocalCoord(z);
 		Chunk_SetBlockAndMeta(chunk, lX, y, lZ, block, metadata);
 
-		NOTIFY_ALL_NEIGHTBORS
+		NOTIFY_ALL_NEIGHBORS
 	}
 }
 
-u8 World_GetMetadata(int x, int y, int z) {
+u8 World_GetBlockMetadata(int x, int y, int z) {
 	if (y < 0 || y >= CHUNK_HEIGHT)
 		return 0;
 	Chunk* chunk = World_GetChunk(WorldToChunkCoord(x), WorldToChunkCoord(z));
@@ -148,7 +149,7 @@ u8 World_GetMetadata(int x, int y, int z) {
 	return 0;
 }
 
-void World_SetMetadata(int x, int y, int z, u8 metadata) {
+void World_SetBlockMetadata(int x, int y, int z, u8 metadata) {
 	if (y < 0 || y >= CHUNK_HEIGHT)
 		return;
 	int cX		 = WorldToChunkCoord(x);
@@ -159,11 +160,11 @@ void World_SetMetadata(int x, int y, int z, u8 metadata) {
 		int lZ = WorldToLocalCoord(z);
 		Chunk_SetMetadata(chunk, lX, y, lZ, metadata);
 
-		NOTIFY_ALL_NEIGHTBORS
+		NOTIFY_ALL_NEIGHBORS
 	}
 }
 
-int World_GetHeight(int x, int z) {
+int World_GetChunkHeight(int x, int z) {
 	int cX		 = WorldToChunkCoord(x);
 	int cZ		 = WorldToChunkCoord(z);
 	Chunk* chunk = World_GetChunk(cX, cZ);
@@ -249,7 +250,7 @@ void World_UpdateChunkGen() {
 			}
 		}
 }
-const Material* World_GetMaterial(int x, int y, int z) {
+const Material* World_GetBlockMaterial(int x, int y, int z) {
 	return &MATERIALS[BLOCKS[World_GetBlock(x, y, z)]->material];
 }
 BiomeGen* World_GetBiomeGenAt(int x, int y, int z) {

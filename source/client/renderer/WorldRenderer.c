@@ -146,10 +146,10 @@ static void renderWorld() {
 				newZ < gWorld->cacheTranslationZ - CHUNKCACHE_SIZE / 2 + 1 || newZ > gWorld->cacheTranslationZ + CHUNKCACHE_SIZE / 2 - 1 ||
 				newY < 0 || newY >= CLUSTER_PER_CHUNK)
 				continue;
-			float3 dist =
-				f3_sub(f3_new(newX * CHUNK_SIZE + CHUNK_SIZE / 2, newY * CHUNK_SIZE + CHUNK_SIZE / 2, newZ * CHUNK_SIZE + CHUNK_SIZE / 2),
-					   playerPos);
-			if (f3_dot(dist, dist) > (3.f * CHUNK_SIZE) * (3.f * CHUNK_SIZE)) {
+			float3 dist = f3_sub(f3_new(newX * CHUNK_REAL_SIZE + CHUNK_REAL_SIZE / 2, newY * CHUNK_REAL_SIZE + CHUNK_REAL_SIZE / 2,
+										newZ * CHUNK_REAL_SIZE + CHUNK_REAL_SIZE / 2),
+								 playerPos);
+			if (f3_dot(dist, dist) > (3.f * CHUNK_REAL_SIZE) * (3.f * CHUNK_REAL_SIZE)) {
 				continue;
 			}
 
@@ -159,8 +159,8 @@ static void renderWorld() {
 			if (!ChunkCanBeSeenThrough(cluster->seeThrough, step.enteredFrom, i) && step.enteredFrom != Direction_None)
 				continue;
 
-			C3D_FVec chunkPosition = FVec3_New(newX * CHUNK_SIZE, newY * CHUNK_SIZE, newZ * CHUNK_SIZE);
-			if (!Camera_IsAABBVisible(chunkPosition, FVec3_New(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE)))
+			C3D_FVec chunkPosition = FVec3_New(newX * CHUNK_REAL_SIZE, newY * CHUNK_REAL_SIZE, newZ * CHUNK_REAL_SIZE);
+			if (!Camera_IsAABBVisible(chunkPosition, FVec3_New(CHUNK_REAL_SIZE, CHUNK_REAL_SIZE, CHUNK_REAL_SIZE)))
 				continue;
 
 			clusterWasRendered(newX, newY, newZ) |= 1;

@@ -153,6 +153,8 @@ void Player_Tick(Sound* sound) {
 			gPlayer->position.y = spawnY;
 			gPlayer->position.x = gPlayer->spawnPos.x;
 			gPlayer->position.z = gPlayer->spawnPos.z;
+			gPlayer->pitch		= 0;
+			gPlayer->yaw		= 0;
 
 			gPlayer->hp		   = 20;
 			gPlayer->hunger	   = 20;
