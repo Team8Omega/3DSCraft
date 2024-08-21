@@ -340,14 +340,14 @@ void gLoadWorld(char* path, char* name, WorldGenType worldType, bool newWorld) {
 
 	gWorld->cacheTranslationX = WorldToChunkCoord(FastFloor(gPlayer->position.x));
 	gWorld->cacheTranslationZ = WorldToChunkCoord(FastFloor(gPlayer->position.z));
-	for (int i = 0; i < CHUNKCACHE_SIZE; i++) {
-		for (int j = 0; j < CHUNKCACHE_SIZE; j++) {
-			gWorld->chunkCache[i][j] =
-				World_LoadChunk(i - CHUNKCACHE_SIZE / 2 + gWorld->cacheTranslationX, j - CHUNKCACHE_SIZE / 2 + gWorld->cacheTranslationZ);
+	for (int i = 0; i < CHUNKCACHE_SIZE; ++i) {
+		for (int j = 0; j < CHUNKCACHE_SIZE; ++j) {
+			gWorld->chunkCache[i][j] = World_LoadChunk(i - (CHUNKCACHE_SIZE >> 1) + gWorld->cacheTranslationX,
+													   j - (CHUNKCACHE_SIZE >> 1) + gWorld->cacheTranslationZ);
 		}
 	}
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; ++i) {
 		while (sChunkWorker.working || gWorkqueue.queue.length > 0) {
 			svcSleepThread(50000000);  // 1 Tick
 		}
@@ -360,13 +360,13 @@ void gLoadWorld(char* path, char* name, WorldGenType worldType, bool newWorld) {
 			for (int z = -1; z < 1; ++z) {
 				int height = World_GetChunkHeight(x, z);
 				if (height > highestblock)
-					highestblock = height;
+					highestblock = height + 1;
 			}
 		}
-		gPlayer->position.y = (float)highestblock + 0.2f;
-		gPlayer->spawnPos	= gPlayer->position;
-		gPlayer->hunger		= 20;
-		gPlayer->hp			= 20;
+		Player_SetPosBlock(0, highestblock, 0);
+		gPlayer->spawnPos = gPlayer->position;
+		gPlayer->hunger	  = 20;
+		gPlayer->hp		  = 20;
 	}
 	Screen_SetScreen(SCREEN_NONE);
 	sLastTime = svcGetSystemTick();	 // fix timing

@@ -26,9 +26,7 @@ void CommandLine_Execute(const char* text) {
 		if (length >= 9) {
 			float x, y, z;
 			if (sscanf(&text[1], "tp %f %f %f", &x, &y, &z) == 3) {
-				gPlayer->position.x = x;
-				gPlayer->position.y = y + 1;
-				gPlayer->position.z = z;
+				Player_SetPosWorld(f3_new(x, y + 1, z));
 				DebugUI_Log("Teleported to %f, %f %f", x, y, z);
 			}
 		}

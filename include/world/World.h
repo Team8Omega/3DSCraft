@@ -75,11 +75,17 @@ extern World* gWorld;
 static inline int WorldToChunkCoord(int x) {
 	return (x + (int)(x < 0)) / CHUNK_SIZE - (int)(x < 0);
 }
+static inline int ChunkToWorldCoord(int x) {
+	return (x << 4);
+}
 static inline int WorldToLocalCoord(int x) {
 	return x - (WorldToChunkCoord(x) << 4);
 }
 static inline int WorldHeightToCluster(int y) {
 	return (y >> 4);
+}
+static inline int ClusterToWorldHeight(int y) {
+	return (y << 4);
 }
 void World_Init();
 

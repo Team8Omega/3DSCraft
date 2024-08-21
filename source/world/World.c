@@ -188,8 +188,8 @@ void World_UpdateChunkCache(int orginX, int orginZ) {
 		int diffX = orginX - gWorld->cacheTranslationX;
 		int diffZ = orginZ - gWorld->cacheTranslationZ;
 
-		for (int i = 0; i < CHUNKCACHE_SIZE; i++) {
-			for (int j = 0; j < CHUNKCACHE_SIZE; j++) {
+		for (int i = 0; i < CHUNKCACHE_SIZE; ++i) {
+			for (int j = 0; j < CHUNKCACHE_SIZE; ++j) {
 				int wx = orginX + (i - CHUNKCACHE_SIZE / 2);
 				int wz = orginZ + (j - CHUNKCACHE_SIZE / 2);
 				if (wx >= oldBufferStartX && wx < oldBufferStartX + CHUNKCACHE_SIZE && wz >= oldBufferStartZ &&

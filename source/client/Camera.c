@@ -21,7 +21,7 @@ void Camera_Init() {
 	Mtx_Identity(&gCamera.view);
 
 	gCamera.fov	 = C3D_AngleFromDegrees(60.f);
-	gCamera.near = 0.1f, gCamera.far = (VIEW_DISTANCE * CHUNK_REAL_SIZE);
+	gCamera.near = 0.1f, gCamera.far = (VIEW_DISTANCE * CHUNK_SIZE);
 
 	gCamera.mode = CameraMode_First;
 

@@ -150,11 +150,9 @@ void Player_Tick(Sound* sound) {
 					spawnY++;
 			}
 
-			gPlayer->position.y = spawnY;
-			gPlayer->position.x = gPlayer->spawnPos.x;
-			gPlayer->position.z = gPlayer->spawnPos.z;
-			gPlayer->pitch		= 0;
-			gPlayer->yaw		= 0;
+			Player_SetPosBlock(gPlayer->spawnPos.x, spawnY, gPlayer->spawnPos.z);
+			gPlayer->pitch = 0;
+			gPlayer->yaw   = 0;
 
 			gPlayer->hp		   = 20;
 			gPlayer->hunger	   = 20;
@@ -308,7 +306,7 @@ void Player_Move(float dt, float3 accl) {
 			gPlayer->velocity.y = 0.f;
 		}
 
-		gPlayer->position = finalPos;
+		Player_SetPosWorld(finalPos);
 		gPlayer->velocity = f3_new(gPlayer->velocity.x * 0.95f, gPlayer->velocity.y, gPlayer->velocity.z * 0.95f);
 		if (ABS(gPlayer->velocity.x) < 0.1f)
 			gPlayer->velocity.x = 0.f;
@@ -347,4 +345,13 @@ void Player_BreakBlock() {
 	}
 	if (gPlayer->breakPlaceTimeout < 0.f)
 		gPlayer->breakPlaceTimeout = PLAYER_PLACE_REPLACE_TIMEOUT;
+}
+
+void Player_SetPosWorld(float3 pos) {
+	gPlayer->position	   = pos;
+	gPlayer->positionBlock = ToBlockPos(pos);
+}
+void Player_SetPosBlock(int x, int y, int z) {
+	gPlayer->position	   = FromBlockPos(x, y, z);
+	gPlayer->positionBlock = (BlockPos){ x, y, z };
 }

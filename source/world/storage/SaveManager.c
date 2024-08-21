@@ -47,9 +47,10 @@ void SaveManager_Load(SaveManager* mgr) {
 
 		mpack_node_t player = save_getMapArray(root, "players", 0);
 
-		gPlayer->position.x = save_get(player, float, "x", 0);
-		gPlayer->position.y = save_get(player, float, "y", 0) + 0.1f;
-		gPlayer->position.z = save_get(player, float, "z", 0);
+		float x = save_get(player, float, "x", 0);
+		float y = save_get(player, float, "y", 0) + 0.1f;
+		float z = save_get(player, float, "z", 0);
+		Player_SetPosWorld(f3_new(x, y, z));
 
 		gPlayer->spawnPos.x = save_get(player, float, "sx", 0);
 		gPlayer->spawnPos.y = save_get(player, float, "sy", 0);
