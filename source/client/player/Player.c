@@ -2,6 +2,7 @@
 
 #include "client/Camera.h"
 #include "client/Crash.h"
+#include "client/Game.h"
 #include "client/gui/DebugUI.h"
 #include "client/player/Damage.h"
 #include "client/renderer/texture/TextureMap.h"
@@ -27,6 +28,18 @@ void Player_Init() {
 }
 
 void Player_Draw() {
+	DebugUI_Text(" ");
+	DebugUI_Text("XYZ: %d/%d/%d", gPlayer->positionBlock.x, gPlayer->positionBlock.y, gPlayer->positionBlock.z);
+	DebugUI_Text("Facing <direction> (Towards <axis>) (%.1f/%.1f)", gPlayer->pitch * RAD_TO_DEG, gPlayer->yaw * RAD_TO_DEG);
+	// DebugUI_Text("velocity: %f rndy: %f",gPlayer->velocity.y,gPlayer->rndy);
+	// DebugUI_Text("Damage Time: %i Cause: %c",dmg->time,dmg->cause);
+	// DebugUI_Text("Spawn X: %f Y: %f Z: %f",gPlayer->spawnPos.x,gPlayer->spawnPos.y,gPlayer->spawnPos.z);
+	DebugUI_Text("HP: %i Hunger: %i Hungertimer: %i", gPlayer->hp, gPlayer->hunger, gPlayer->hungertimer);
+	// DebugUI_Text("Gamemode: %i", gPlayer->gamemode);
+
+	if (gCamera.mode == CameraMode_First)
+		return;
+
 	playerEntity.position = gPlayer->position;
 	++playerEntity.position.y;
 	playerEntity.yaw = gPlayer->yaw - DEG_TO_RAD * 180;

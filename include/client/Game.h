@@ -19,3 +19,4 @@ float gGet3dSlider();
 void gSetShowDebug(bool b);
 bool gGetShowDebug();
 bool gIsRunning();
+bool gIngame();

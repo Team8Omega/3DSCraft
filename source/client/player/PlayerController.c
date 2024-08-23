@@ -20,8 +20,7 @@ const char* platform_key_names[PLATFORM_BUTTONS] = { "Not Set",	   "A",			 "B",	
 													 "R",		   "Start",		 "Select",		"DUp",		"DDown",	 "DLeft",
 													 "DRight",	   "CircUp",	 "CircDown",	"CircLeft", "CircRight", "CStickUp",
 													 "CStickDown", "CStickLeft", "CStickRight", "ZL",		"ZR" };
-enum
-{
+enum {
 	K3DS_NONE = 0,
 	K3DS_A,
 	K3DS_B,
@@ -337,10 +336,10 @@ void PlayerController_Tick(PlayerController* ctrl, Sound* sound, float dt) {
 		ctrl->openedCmd = true;
 	}
 
-	bool camMode = WasKeyPressed(ctrl->controlScheme.camMode, &agnosticInput);
+	/*bool camMode = WasKeyPressed(ctrl->controlScheme.camMode, &agnosticInput);
 	if (camMode) {
 		gCamera.mode = (gCamera.mode + 1) % CameraMode_Count;
-	}
+	}*/
 
 	Player_Move(dt, movement);
 	Player_Tick(sound);
