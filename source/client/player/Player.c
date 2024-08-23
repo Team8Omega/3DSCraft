@@ -18,7 +18,7 @@ Player* gPlayer;
 
 static C3D_Tex textureSkin;
 static CubeModel* cubeTMP;
-static Entity playerEntity;	 // TODO: rework entity
+static Entity playerEntity;	 // TODO: implement entity (split Player code as Entity & PlayerEntity, and some Client specific stuff)
 
 void Player_Init() {
 	Texture_Load(&textureSkin, "entity/player/wide/steve.png");
@@ -30,7 +30,7 @@ void Player_Init() {
 void Player_Draw() {
 	DebugUI_Text(" ");
 	DebugUI_Text("XYZ: %d/%d/%d", gPlayer->positionBlock.x, gPlayer->positionBlock.y, gPlayer->positionBlock.z);
-	DebugUI_Text("Facing <direction> (Towards <axis>) (%.1f/%.1f)", gPlayer->pitch * RAD_TO_DEG, gPlayer->yaw * RAD_TO_DEG);
+	DebugUI_Text("Facing <dir> (Towards <axis>) (%.1f/%.1f)", gPlayer->pitch * RAD_TO_DEG, gPlayer->yaw * RAD_TO_DEG);
 	// DebugUI_Text("velocity: %f rndy: %f",gPlayer->velocity.y,gPlayer->rndy);
 	// DebugUI_Text("Damage Time: %i Cause: %c",dmg->time,dmg->cause);
 	// DebugUI_Text("Spawn X: %f Y: %f Z: %f",gPlayer->spawnPos.x,gPlayer->spawnPos.y,gPlayer->spawnPos.z);

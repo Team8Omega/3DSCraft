@@ -252,6 +252,9 @@ void PlayerController_Init(PlayerController* ctrl) {
 	ctrl->flyTimer = -1.f;
 }
 
+#define YAW_MIN (-180.f * DEG_TO_RAD)
+#define YAW_MAX (180.f * DEG_TO_RAD)
+
 void PlayerController_Tick(PlayerController* ctrl, Sound* sound, float dt) {
 	if (!gPlayer || !gWorld)
 		return;
@@ -291,6 +294,11 @@ void PlayerController_Tick(PlayerController* ctrl, Sound* sound, float dt) {
 	float lookDown	= IsKeyDown(ctrl->controlScheme.lookDown, &agnosticInput);
 
 	gPlayer->yaw += (lookLeft + -lookRight) * 160.f * DEG_TO_RAD * dt;
+	if (gPlayer->yaw > YAW_MAX)
+		gPlayer->yaw = YAW_MIN + (gPlayer->yaw - YAW_MAX);
+	else if (gPlayer->yaw < YAW_MIN)
+		gPlayer->yaw = YAW_MAX + (gPlayer->yaw - YAW_MIN);
+
 	gPlayer->pitch += (-lookDown + lookUp) * 160.f * DEG_TO_RAD * dt;
 	gPlayer->pitch = CLAMP(gPlayer->pitch, -DEG_TO_RAD * 89.9f, DEG_TO_RAD * 89.9f);
 
