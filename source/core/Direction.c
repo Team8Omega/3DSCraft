@@ -1,7 +1,5 @@
 #include "core/Direction.h"
 
-// West, East, Bottom, Top, North, South
-
 s8 DirectionToOffset[7][3] = {
 	{ -1, 0, 0 }, { 1, 0, 0 }, { 0, -1, 0 }, { 0, 1, 0 }, { 0, 0, -1 }, { 0, 0, 1 }, { 0, 0, 0 },
 };

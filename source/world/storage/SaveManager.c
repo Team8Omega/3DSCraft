@@ -46,7 +46,7 @@ void SaveManager_Load(SaveManager* mgr) {
 		serial_get_cstr(root, "name", gWorld->worldInfo.name, 128);
 
 		mpack_node_t players = serial_get_node(root, "players");
-		mpack_node_t player	 = serial_get_mapArrayAt(players, 0);
+		mpack_node_t player	 = serial_get_arrayNodeAt(players, 0);
 
 		float x = serial_get(player, float, "x", 0);
 		float y = serial_get(player, float, "y", 0) + 0.1f;

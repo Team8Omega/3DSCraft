@@ -18,7 +18,7 @@ static void getUVs(mpack_node_t face) {
 	}
 
 	for (u8 i = 0; i < 4; ++i) {
-		sBuffer_UV[i] = (u16)serial_get_arrayAt(uvNode, int, i);
+		sBuffer_UV[i] = (u16)serial_get_at(uvNode, int, i);
 	}
 }
 static int getRotation(mpack_node_t face) {

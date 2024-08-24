@@ -61,13 +61,12 @@ static void inline serial_save_arraydone(mpack_writer_t* writer) {
 }
 
 #define serial_get_node(node, key) mpack_node_map_cstr_optional(node, key)
-#define serial_get_nodeAt(node, idx) mpack_node_map_int_optional(node, idx)
-#define serial_get_arrayAt(node, typ, idx) mpack_node_##typ(serial_get_nodeAt(node, idx))
-#define serial_get_mapArrayAt(node, index) mpack_node_array_at(node, index)
+#define serial_get_arrayNodeAt(node, index) mpack_node_array_at(node, index)
 #define serial_get_type(node, key) mpack_node_type(serial_get_node(node, key))
-#define serial_get_typeAt(node, idx) mpack_node_type(serial_get_nodeAt(node, idx))
-#define serial_is(node, key, type) (serial_get_type(node, key) == mpack_type_##type)
+#define serial_get_typeAt(node, idx) mpack_node_type(serial_get_arrayNodeAt(node, idx))
 #define serial_has(node, key) (serial_get_type(node, key) != mpack_type_nil)
+#define serial_is(node, key, type) (serial_get_type(node, key) == mpack_type_##type)
+#define serial_get_at(node, typ, idx) mpack_node_##typ(mpack_node_array_at(node, idx))
 #define serial_get(node, typ, key, default_) (serial_has(node, key) ? mpack_node_##typ(serial_get_node(node, key)) : (default_))
 
 static mpack_tree_t inline serial_get_start(const char* filename) {
@@ -94,4 +93,16 @@ static size_t inline serial_get_arrayLength(mpack_node_t node) {
 }
 static size_t inline serial_get_mapLength(mpack_node_t node) {
 	return mpack_node_map_count(node);
+}
+static void inline serial_get_error(mpack_node_t node, const char* context) {
+	mpack_error_t err = node.tree->error;
+	if (err != mpack_ok) {
+		Crash("MPERR: Deserialization error of type \n%s\nat %s", mpack_error_to_string(err), context);
+	}
+}
+static void inline serial_save_error(mpack_writer_t* writer) {
+	mpack_error_t err = writer->error;
+	if (err != mpack_ok) {
+		Crash("MPERR: Serialization error of type %s", mpack_error_to_string(err));
+	}
 }
