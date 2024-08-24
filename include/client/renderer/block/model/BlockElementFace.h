@@ -6,7 +6,7 @@
 typedef struct {
 	Direction cullDir;
 	s8 tintIndex;
-	const char* texture;
+	char texture[32];
 	BlockFaceUV uv;
 } BlockElementFace;
 

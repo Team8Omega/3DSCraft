@@ -5,7 +5,7 @@
 #include "util/math/VecMath.h"
 
 typedef struct {
-	float3 from, to;
+	int3 from, to;
 	BlockElementFace faces[6];
 	bool shade;
 

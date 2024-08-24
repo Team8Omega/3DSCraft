@@ -1,4 +1,4 @@
-#include "client/model/BlockFaceUV.h"
+#include "client/renderer/block/model/BlockFaceUV.h"
 
 #include "util/SerialUtils.h"
 

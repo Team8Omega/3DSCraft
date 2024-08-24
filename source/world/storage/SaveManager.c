@@ -43,7 +43,7 @@ void SaveManager_Load(SaveManager* mgr) {
 		mpack_tree_t levelTree = serial_get_start("level.mp");
 		mpack_node_t root	   = serial_get_root(&levelTree);
 
-		serial_get_cstr(root, "name", gWorld->worldInfo.name);
+		serial_get_cstr(root, "name", gWorld->worldInfo.name, 128);
 
 		mpack_node_t players = serial_get_node(root, "players");
 		mpack_node_t player	 = serial_get_mapArrayAt(players, 0);

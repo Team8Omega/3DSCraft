@@ -34,32 +34,32 @@ static u32 getItemColor(Direction dir, u8 meta) {
 	} else
 		return COLOR_WHITE;
 }
-static u16 getBlockTexture(Block* block, Direction dir, int x, int y, int z, u8 metadata) {
-	switch (dir) {
-		case Direction_Top:
-			return iconGrassTop;
-			break;
+/*
+ static u16 getBlockTexture(Block* block, Direction dir, int x, int y, int z, u8 metadata) {
+	 switch (dir) {
+		 case Direction_Top:
+			 return iconGrassTop;
+			 break;
 
-		case Direction_Bottom:
-			return Block_GetIcon(BLOCKS[BLOCK_DIRT], Direction_North, 0);
+		 case Direction_Bottom:
+			 return Block_GetIcon(BLOCKS[BLOCK_DIRT], Direction_North, 0);
 
-		case Direction_None:
-			return iconGrassOverlay;
+		 case Direction_None:
+			 return iconGrassOverlay;
 
-		default:
-			const Material* mat = World_GetBlockMaterial(x, y + 1, z);
-			return mat->id != MATERIAL_SNOW && mat->id != MATERIAL_CRAFTED_SNOW ? block->icon : iconSnowSide;
-	}
-}
-
+		 default:
+			 const Material* mat = World_GetBlockMaterial(x, y + 1, z);
+			 return mat->id != MATERIAL_SNOW && mat->id != MATERIAL_CRAFTED_SNOW ? block->icon : iconSnowSide;
+	 }
+ }
+ */
 Block* BlockGrass_Init(BlockId id) {
 	Block* b = Block_Init("grass_block", id, 0.6f, 0.6f, MATERIAL_GRASS, MAPCOLOR_GRASS);
-	Block_SetHasOverlay(b);
+	// Block_SetHasOverlay(b);
 
-	b->vptr->registerIcons	 = registerIcons;
-	b->vptr->getBlockColor	 = getBlockColor;
-	b->vptr->getBlockTexture = getBlockTexture;
-	b->vptr->getItemColor	 = getItemColor;
+	b->vptr->registerIcons = registerIcons;
+	b->vptr->getBlockColor = getBlockColor;
+	b->vptr->getItemColor  = getItemColor;
 
 	return b;
 }

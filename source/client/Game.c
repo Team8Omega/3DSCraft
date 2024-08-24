@@ -26,6 +26,7 @@
 #include "client/renderer/PolyGen.h"
 #include "client/renderer/SpriteBatch.h"
 #include "client/renderer/WorldRenderer.h"
+#include "client/renderer/block/model/BlockModel.h"
 #include "resources/locale/LanguageManager.h"
 #include "sounds/Sound.h"
 #include "util/Paths.h"
@@ -66,6 +67,14 @@ static bool sIsDemo;
 static float s3dSlider;
 static bool sShowDebug;
 static bool sIsIngame;
+
+#include "util/SerialUtils.h"
+
+void testFunction() {
+	mpack_tree_t tree = serial_get_start("romfs:/test.mp");
+	mpack_node_t root = serial_get_root(&tree);
+	BlockModel_Deserialize(root);
+}
 
 void gInit(const char* name, bool isNew, bool demo) {
 	sUsername = (char*)malloc(strlen(name) + 1);
@@ -155,6 +164,8 @@ static void init() {
 	gfxSet3D(true);
 
 	aptHook(&sAptHook, onApt, (void*)NULL);
+
+	testFunction();
 
 	Region_InitPools();
 

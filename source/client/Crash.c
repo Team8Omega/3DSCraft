@@ -14,6 +14,8 @@ void Crash(const char* reason, ...) {
 	if (gfxGetFramebuffer(0, 0, 0, 0) == NULL)
 		gfxInitDefault();
 
+	gfxSet3D(false);
+
 	consoleInit(GFX_TOP, NULL);
 
 	va_list vl;

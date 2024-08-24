@@ -10,6 +10,12 @@ typedef union {
 		float x, y, z;
 	};
 } float3;
+typedef union {
+	int v[3];
+	struct {
+		int x, y, z;
+	};
+} int3;
 
 static inline float3 f3_new(float x, float y, float z) {
 	return (float3){ { x, y, z } };
