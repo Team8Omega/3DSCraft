@@ -18,6 +18,8 @@ enum {
 	Axis_Z
 };
 
+extern const char* DirectionNames[7];
 extern s8 DirectionToOffset[7][3];
 extern Direction DirectionOpposite[7];
 extern Axis DirectionToAxis[7];
+Direction DirectionByName(const char* name);
