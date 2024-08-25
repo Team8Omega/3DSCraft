@@ -20,16 +20,12 @@ static u32 getBlockColor(Block* b, Direction dir, int x, int y, int z, u8 meta) 
 static u32 getItemColor(Direction dir, u8 meta) {
 	return COLOR_WHITE;
 }
-static u16 getBlockTexture(Block* block, Direction dir, int x, int y, int z, u8 metadata) {
-	return block->icon;
-}
 
 static BlockVtable vtable_default = {
-	.getRenderType	 = getRenderType,
-	.registerIcons	 = registerIcons,
-	.getBlockColor	 = getBlockColor,
-	.getBlockTexture = getBlockTexture,
-	.getItemColor	 = getItemColor,
+	.getRenderType = getRenderType,
+	.registerIcons = registerIcons,
+	.getBlockColor = getBlockColor,
+	.getItemColor  = getItemColor,
 };
 
 static const Box boxDefault = { { { 0.0F, 0.0F, 0.0F } }, { { 1.0F, 1.0F, 1.0F } } };
@@ -54,7 +50,7 @@ Block* Block_InitWithBounds(const char* name, BlockId id, float resistance, floa
 	b->renderType = 0;	// hardcoded for now, 0 = normal block
 	b->mapColor	  = mapColor;
 	b->opaque	  = true;
-	b->hasOverlay = false;
+	b->solidBlock = true;
 	memcpy(&b->bounds, &bounds, sizeof(Box));
 	strcpy(b->name, name);
 
@@ -77,8 +73,8 @@ void Block_SetBounds(Block* b, float3 from, float3 to) {
 void Block_SetLightness(Block* b, u8 v) {
 	b->lightness = v;
 }
-void Block_SetHasOverlay(Block* b) {
-	b->hasOverlay = true;
+void Block_SetNotSolidBlock(Block* b) {
+	b->solidBlock = false;
 }
 
 #define colR(c) ((c >> 16) & 0xff)
@@ -117,15 +113,4 @@ void Block_GetItemColor(Block* b, Direction dir, u8 meta, u8 out[]) {
 	out[0] = colR(color);
 	out[1] = colG(color);
 	out[2] = colB(color);
-}
-
-void Block_GetBlockTexture(Block* b, Direction dir, int x, int y, int z, u8 meta, s16 out_uv[]) {
-	if (!b)
-		return;
-
-	u16 tex			= b->vptr->getBlockTexture(b, dir, x, y, z, meta);
-	const Icon icon = gTexMapBlock.icons[tex];
-
-	out_uv[0] = icon.u;
-	out_uv[1] = icon.v;
 }

@@ -20,14 +20,14 @@
 #include <unistd.h>
 
 #ifdef DEBUG_UI
-#define STATUS_LINES (240 / 8 / 2)
+#define STATUS_LINES (240 / 8)
 #define LOG_LINES 30
 #define LOG_LINE_LENGTH 128
 #define STATUS_LINE_LENGTH 128
 
 static char* statusLines[STATUS_LINES];
 static char* logLines[LOG_LINES];
-static int currentStatusLine = 0;
+static u8 currentStatusLine = 0;
 
 typedef void (*Function)();
 
@@ -116,6 +116,17 @@ void DebugUI_Text(const char* text, ...) {
 #endif
 }
 
+void DebugUI_TextAt(u8 line, const char* text, ...) {
+#ifdef DEBUG_INFO
+	va_list args;
+	va_start(args, text);
+
+	vsprintf(statusLines[line], text, args);
+
+	va_end(args);
+#endif
+}
+
 void DebugUI_Log(const char* text, ...) {
 #ifdef DEBUG_LOG
 	if (isLogPaused)
@@ -150,12 +161,13 @@ void DebugUI_Log(const char* text, ...) {
 #ifdef DEBUG_INFO
 void DebugUI_DrawInfo() {
 	u8 infoNum;
-	u8 yOffset = gWorld && gWorld->active && currentScreen == NULL ? 44
+	u8 yOffset = gIngame() ? 40 : 0;
 
-																   : 0;
 	for (infoNum = 0; infoNum < STATUS_LINES; infoNum++) {
-		if (strcmp(statusLines[infoNum], "") == 0)
-			break;
+		if (strcmp(statusLines[infoNum], "") == 0) {
+			yOffset += 8;
+			continue;
+		}
 
 		int step = 0;
 		SpriteBatch_PushText(1, yOffset, 98, INT16_MAX, false, 320, &step, "%s", statusLines[infoNum]);

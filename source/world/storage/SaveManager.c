@@ -7,6 +7,7 @@
 #include "client/Crash.h"
 #include "client/gui/DebugUI.h"
 #include "util/Paths.h"
+#include "util/SerialUtils.h"
 #include "world/GameRules.h"
 
 #define mkdirFlags S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH
@@ -39,44 +40,42 @@ void SaveManager_Load(SaveManager* mgr) {
 	mkdir("regions", mkdirFlags);
 
 	if (access("level.mp", F_OK) != -1) {
-		mpack_tree_t levelTree;
-		mpack_tree_init_file(&levelTree, "level.mp", 0);
-		mpack_node_t root = mpack_tree_root(&levelTree);
+		mpack_tree_t levelTree = serial_get_start("level.mp");
+		mpack_node_t root	   = serial_get_root(&levelTree);
 
-		mpack_node_copy_utf8_cstr(mpack_node_map_cstr(root, "name"), gWorld->worldInfo.name, sizeof(gWorld->worldInfo.name));
+		serial_get_cstr(root, "name", gWorld->worldInfo.name, 128);
 
-		mpack_node_t player = save_getMapArray(root, "players", 0);
+		mpack_node_t players = serial_get_node(root, "players");
+		mpack_node_t player	 = serial_get_arrayNodeAt(players, 0);
 
-		gPlayer->position.x = save_get(player, float, "x", 0);
-		gPlayer->position.y = save_get(player, float, "y", 0) + 0.1f;
-		gPlayer->position.z = save_get(player, float, "z", 0);
+		float x = serial_get(player, float, "x", 0);
+		float y = serial_get(player, float, "y", 0) + 0.1f;
+		float z = serial_get(player, float, "z", 0);
+		Player_SetPosWorld(f3_new(x, y, z));
 
-		gPlayer->spawnPos.x = save_get(player, float, "sx", 0);
-		gPlayer->spawnPos.y = save_get(player, float, "sy", 0);
-		gPlayer->spawnPos.z = save_get(player, float, "sz", 0);
+		gPlayer->spawnPos.x = serial_get(player, float, "sx", 0);
+		gPlayer->spawnPos.y = serial_get(player, float, "sy", 0);
+		gPlayer->spawnPos.z = serial_get(player, float, "sz", 0);
 
-		gPlayer->pitch = save_get(player, float, "pitch", 0.f);
-		gPlayer->yaw   = save_get(player, float, "yaw", 0.f);
+		gPlayer->pitch = serial_get(player, float, "pitch", 0.f);
+		gPlayer->yaw   = serial_get(player, float, "yaw", 0.f);
 
-		gPlayer->hp		  = save_get(player, u8, "hp", 20);
-		gPlayer->hunger	  = save_get(player, u8, "hunger", 20);
-		gPlayer->gamemode = save_get(player, u8, "gamemode", Gamemode_Survival);
+		gPlayer->hp		  = serial_get(player, u8, "hp", 20);
+		gPlayer->hunger	  = serial_get(player, u8, "hunger", 20);
+		gPlayer->gamemode = serial_get(player, u8, "gamemode", Gamemode_Survival);
 
-		gPlayer->flying	   = save_get(player, bool, "flying", false);
-		gPlayer->crouching = save_get(player, bool, "crouching", false);
-		gPlayer->cheats	   = save_get(player, bool, "cheats", true);
+		gPlayer->flying	   = serial_get(player, bool, "flying", false);
+		gPlayer->crouching = serial_get(player, bool, "crouching", false);
+		gPlayer->cheats	   = serial_get(player, bool, "cheats", true);
 
 		GameRules_Deserialize(&gWorld->worldInfo.gamerules, root);
 
-		mpack_node_t worldgen = save_getMap(root, "worldgensettings");
+		mpack_node_t worldgen = serial_get_node(root, "worldgensettings");
 
-		gWorld->worldInfo.seed	 = save_get(worldgen, u64, "seed", 0);
-		gWorld->genSettings.type = save_get(worldgen, u8, "worldType", WorldGen_Default);
+		gWorld->worldInfo.seed	 = serial_get(worldgen, u64, "seed", 0);
+		gWorld->genSettings.type = serial_get(worldgen, u8, "worldType", WorldGen_Default);
 
-		mpack_error_t err = mpack_tree_destroy(&levelTree);
-		if (err != mpack_ok) {
-			Crash("Mpack error %d while loading world manifest\nPath: %s", err, gWorld->worldInfo.path);
-		}
+		serial_get_end(&levelTree, "loading world manifest");
 	}
 }
 
@@ -84,65 +83,57 @@ void SaveManager_Load(SaveManager* mgr) {
 void SaveManager_Unload(SaveManager* mgr) {
 	chdir(gWorld->worldInfo.path);
 
-	mpack_writer_t writer;
-	mpack_writer_init_file(&writer, "level.mp");
-	mpack_start_map(&writer, 4);
+	mpack_writer_t writer = serial_save_start("level.mp", 4);
 
-	save_cstr(&writer, "name", gWorld->worldInfo.name);
+	serial_save_cstr(&writer, "name", gWorld->worldInfo.name);
 
 	// start player
-	mpack_write_cstr(&writer, "players");
-	mpack_start_array(&writer, 1);
+	serial_save_array(&writer, "players", PARAM_NUM_PER_PLAYER);
 	mpack_start_map(&writer, PARAM_NUM_PER_PLAYER);
 
-	save_float(&writer, "x", gPlayer->position.x);
-	save_float(&writer, "y", gPlayer->position.y);
-	save_float(&writer, "z", gPlayer->position.z);
+	serial_save_float(&writer, "x", gPlayer->position.x);
+	serial_save_float(&writer, "y", gPlayer->position.y);
+	serial_save_float(&writer, "z", gPlayer->position.z);
 
-	save_float(&writer, "sx", gPlayer->spawnPos.x);
-	save_float(&writer, "sy", gPlayer->spawnPos.y);
-	save_float(&writer, "sz", gPlayer->spawnPos.z);
+	serial_save_float(&writer, "sx", gPlayer->spawnPos.x);
+	serial_save_float(&writer, "sy", gPlayer->spawnPos.y);
+	serial_save_float(&writer, "sz", gPlayer->spawnPos.z);
 
-	save_float(&writer, "pitch", gPlayer->pitch);
-	save_float(&writer, "yaw", gPlayer->yaw);
+	serial_save_float(&writer, "pitch", gPlayer->pitch);
+	serial_save_float(&writer, "yaw", gPlayer->yaw);
 
-	save_u8(&writer, "hp", gPlayer->hp);
-	save_u8(&writer, "hunger", gPlayer->hunger);
-	save_u8(&writer, "gamemode", gPlayer->gamemode);
+	serial_save_u8(&writer, "hp", gPlayer->hp);
+	serial_save_u8(&writer, "hunger", gPlayer->hunger);
+	serial_save_u8(&writer, "gamemode", gPlayer->gamemode);
 
-	save_bool(&writer, "cheats", gPlayer->cheats);
-	save_bool(&writer, "flying", gPlayer->flying);
-	save_bool(&writer, "crouching", gPlayer->crouching);
+	serial_save_bool(&writer, "cheats", gPlayer->cheats);
+	serial_save_bool(&writer, "flying", gPlayer->flying);
+	serial_save_bool(&writer, "crouching", gPlayer->crouching);
 
-	mpack_finish_map(&writer);
+	serial_save_mapdone(&writer);
 	mpack_finish_array(&writer);
 	// finish player
 
 	// start gamerules
-	mpack_write_cstr(&writer, "gamerules");
-	mpack_start_map(&writer, GAMERULES_NUM);
+	serial_save_map(&writer, "gamerules", GAMERULES_NUM);
 
 	GameRules_Serialize(&gWorld->worldInfo.gamerules, &writer);
 
-	mpack_finish_map(&writer);
+	serial_save_mapdone(&writer);
 	// finish gamerules
 
 	// start worldgen
-	mpack_write_cstr(&writer, "worldgensettings");
-	mpack_start_map(&writer, 2);
+	serial_save_map(&writer, "worldgensettings", 2);
 
-	save_u64(&writer, "seed", gWorld->worldInfo.seed);
-	save_u8(&writer, "worldType", gWorld->genSettings.type);
+	serial_save_u64(&writer, "seed", gWorld->worldInfo.seed);
+	serial_save_u8(&writer, "worldType", gWorld->genSettings.type);
 
-	mpack_finish_map(&writer);
+	serial_save_mapdone(&writer);
 	// finish worldgen
 
-	mpack_finish_map(&writer);
+	serial_save_mapdone(&writer);
 
-	mpack_error_t err = mpack_writer_destroy(&writer);
-	if (err != mpack_ok) {
-		Crash("Mpack error %d while saving world manifest", err);
-	}
+	serial_save_end(&writer, "saving world manifest");
 
 	for (int i = 0; i < mgr->regions.length; i++) {
 		Region_Deinit(mgr->regions.data[i]);

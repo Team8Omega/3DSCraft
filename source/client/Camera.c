@@ -21,7 +21,7 @@ void Camera_Init() {
 	Mtx_Identity(&gCamera.view);
 
 	gCamera.fov	 = C3D_AngleFromDegrees(60.f);
-	gCamera.near = 0.1f, gCamera.far = (VIEW_DISTANCE * CHUNK_REAL_SIZE);
+	gCamera.near = 0.1f, gCamera.far = (VIEW_DISTANCE * CHUNK_SIZE);
 
 	gCamera.mode = CameraMode_First;
 
@@ -31,9 +31,7 @@ void Camera_Init() {
 void Camera_Update(float iod) {
 	float fov = gCamera.fov;  // + C3D_AngleFromDegrees(12.f) * gPlayer->fovAdd;
 
-	float3 playerHead =
-		f3_new(gPlayer->position.x, gPlayer->position.y + PLAYER_EYEHEIGHT + sinf(gPlayer->bobbing) * 0.1f + gPlayer->crouchAdd,
-			   gPlayer->position.z);
+	float3 playerHead = f3_new(gPlayer->position.x, gPlayer->position.y + PLAYER_EYEHEIGHT, gPlayer->position.z);
 
 	Mtx_Identity(&gCamera.view);
 
@@ -44,11 +42,12 @@ void Camera_Update(float iod) {
 	Mtx_RotateX(&gCamera.view, -gPlayer->pitch, true);
 	Mtx_RotateY(&gCamera.view, -gPlayer->yaw, true);
 
-	switch (gCamera.mode) {
+	/*switch (gCamera.mode) {
 		case CameraMode_First:
 		case CameraMode_Second:
-			Mtx_Translate(&gCamera.view, -playerHead.x, -playerHead.y, -playerHead.z, true);
-			break;
+	*/
+	Mtx_Translate(&gCamera.view, -playerHead.x, -playerHead.y, -playerHead.z, true);
+	/*		break;
 
 		case CameraMode_Third:
 			float3 cameraPosition = f3_sub(playerHead, f3_scl(forward, CAM_Z_OFFSET));
@@ -59,15 +58,12 @@ void Camera_Update(float iod) {
 
 		default:
 			break;
-	}
-	Mtx_Scale(&gCamera.projection, CAM_SCALE, CAM_SCALE, CAM_SCALE);
+	}*/
 
 	Mtx_PerspStereoTilt(&gCamera.projection, fov, VIEW_ASPECT, gCamera.near, gCamera.far, iod, 1.f, false);
 
 	C3D_Mtx vp;
 	Mtx_Multiply(&vp, &gCamera.projection, &gCamera.view);
-	Mtx_Scale(&vp, 1 / CAM_SCALE, 1 / CAM_SCALE, 1 / CAM_SCALE);
-	Mtx_Copy(&gCamera.vp, &vp);
 
 	C3D_FVec rowX = vp.r[0];
 	C3D_FVec rowY = vp.r[1];
@@ -101,6 +97,9 @@ void Camera_Update(float iod) {
 	gCamera.frustumCorners[Frustum_FarBottomRight]	= f3_add(f3_sub(cFar, f3_scl(up, hFar * 0.5f)), f3_scl(right, wFar * 0.5f));
 	gCamera.frustumCorners[Frustum_FarTopLeft]		= f3_sub(f3_add(cFar, f3_scl(up, hFar * 0.5f)), f3_scl(right, wFar * 0.5f));
 	gCamera.frustumCorners[Frustum_FarTopRight]		= f3_add(f3_add(cFar, f3_scl(up, hFar * 0.5f)), f3_scl(right, wFar * 0.5f));
+
+	Mtx_Scale(&vp, 1 / CAM_SCALE, 1 / CAM_SCALE, 1 / CAM_SCALE);
+	Mtx_Copy(&gCamera.vp, &vp);
 }
 
 bool Camera_IsPointVisible(C3D_FVec point) {

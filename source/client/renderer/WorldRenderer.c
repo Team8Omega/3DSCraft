@@ -1,22 +1,22 @@
 #include "client/renderer/WorldRenderer.h"
 
-#include "client/model/VertexFmt.h"
-
-#include "client/player/Player.h"
-#include "client/renderer/Cursor.h"
-#include "world/level/block/Block.h"
-
-#include "client/Crash.h"
-#include "client/gui/DebugUI.h"
-
 #include <citro3d.h>
-
-#include "client/renderer/Clouds.h"
-#include "client/renderer/Hand.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+
+#include "world/World.h"
+#include "world/level/block/Block.h"
+
+#include "client/model/VertexFmt.h"
+
+#include "client/player/Player.h"
+#include "client/renderer/Clouds.h"
+#include "client/renderer/Cursor.h"
+#include "client/renderer/Hand.h"
+
+#include "client/Crash.h"
+#include "client/gui/DebugUI.h"
 
 int sky_time = 0;
 
@@ -40,7 +40,7 @@ static vec_t(TransparentRender) transparentClusters;
 static C3D_FogLut fogLut;
 
 #define clusterWasRendered(x, y, z)                                                                                                        \
-	chunkRendered[x - (gWorld->cacheTranslationX - (CHUNKCACHE_SIZE / 2))][y][z - (gWorld->cacheTranslationZ - (CHUNKCACHE_SIZE / 2))]
+	chunkRendered[x - (gWorld->cacheTranslationX - (CHUNKCACHE_SIZE >> 1))][y][z - (gWorld->cacheTranslationZ - (CHUNKCACHE_SIZE >> 1))]
 
 void WorldRenderer_Init(int projectionUniform_) {
 	projectionUniform = projectionUniform_;
@@ -92,14 +92,14 @@ static void renderWorld() {
 	memset(chunkRendered, 0, sizeof(chunkRendered));
 
 	u64 polysTotal	  = 0;
-	u32 clustersDrawn = 0, steps = 0;
+	u32 clustersDrawn = 0;
 
 	vec_clear(&renderingQueue);
 	vec_clear(&transparentClusters);
 
-	int playerY = CLAMP(WorldToChunkCoord(FastFloor(gPlayer->position.y)), 0, CLUSTER_PER_CHUNK - 1);
-	int playerX = WorldToChunkCoord(FastFloor(gPlayer->position.x));
-	int playerZ = WorldToChunkCoord(FastFloor(gPlayer->position.z));
+	int playerY = CLAMP(WorldHeightToCluster(gPlayer->positionBlock.y), 0, CLUSTER_PER_CHUNK - 1);
+	int playerX = WorldToChunkCoord(gPlayer->positionBlock.x);
+	int playerZ = WorldToChunkCoord(gPlayer->positionBlock.z);
 
 	Chunk* pChunk = World_GetChunk(playerX, playerZ);
 
@@ -113,6 +113,8 @@ static void renderWorld() {
 
 	C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, projectionUniform, &gCamera.vp);
 	C3D_FogColor(0xffd990);
+
+	float renderDistance = 3.f;
 
 	while (renderingQueue.length > 0) {
 		RenderStep step	 = vec_pop(&renderingQueue);
@@ -137,19 +139,21 @@ static void renderWorld() {
 		}
 		// if (polysTotal >= 150000) break;
 
-		for (int i = 0; i < 6; i++) {
+		for (u8 i = 0; i < 6; ++i) {
 			Direction dir	 = i;
 			const s8* offset = DirectionToOffset[dir];
 
 			int newX = chunk->x + offset[0], newY = cluster->y + offset[1], newZ = chunk->z + offset[2];
-			if (newX < gWorld->cacheTranslationX - CHUNKCACHE_SIZE / 2 + 1 || newX > gWorld->cacheTranslationX + CHUNKCACHE_SIZE / 2 - 1 ||
-				newZ < gWorld->cacheTranslationZ - CHUNKCACHE_SIZE / 2 + 1 || newZ > gWorld->cacheTranslationZ + CHUNKCACHE_SIZE / 2 - 1 ||
-				newY < 0 || newY >= CLUSTER_PER_CHUNK)
+			if (newX < gWorld->cacheTranslationX - (CHUNKCACHE_SIZE >> 1) + 1 ||
+				newX > gWorld->cacheTranslationX + (CHUNKCACHE_SIZE >> 1) - 1 ||
+				newZ < gWorld->cacheTranslationZ - (CHUNKCACHE_SIZE >> 1) + 1 ||
+				newZ > gWorld->cacheTranslationZ + (CHUNKCACHE_SIZE >> 1) - 1 || newY < 0 || newY >= CLUSTER_PER_CHUNK)
 				continue;
-			float3 dist = f3_sub(f3_new(newX * CHUNK_REAL_SIZE + CHUNK_REAL_SIZE / 2, newY * CHUNK_REAL_SIZE + CHUNK_REAL_SIZE / 2,
-										newZ * CHUNK_REAL_SIZE + CHUNK_REAL_SIZE / 2),
+			float3 dist = f3_sub(f3_new(ChunkToWorldCoord(newX) + (CHUNK_SIZE >> 1), ClusterToWorldHeight(newY) + (CHUNK_SIZE >> 1),
+										ChunkToWorldCoord(newZ) + (CHUNK_SIZE >> 1)),
 								 playerPos);
-			if (f3_dot(dist, dist) > (3.f * CHUNK_REAL_SIZE) * (3.f * CHUNK_REAL_SIZE)) {
+
+			if (f3_dot(dist, dist) > ChunkToWorldCoord(renderDistance) * ChunkToWorldCoord(renderDistance)) {
 				continue;
 			}
 
@@ -159,8 +163,8 @@ static void renderWorld() {
 			if (!ChunkCanBeSeenThrough(cluster->seeThrough, step.enteredFrom, i) && step.enteredFrom != Direction_None)
 				continue;
 
-			C3D_FVec chunkPosition = FVec3_New(newX * CHUNK_REAL_SIZE, newY * CHUNK_REAL_SIZE, newZ * CHUNK_REAL_SIZE);
-			if (!Camera_IsAABBVisible(chunkPosition, FVec3_New(CHUNK_REAL_SIZE, CHUNK_REAL_SIZE, CHUNK_REAL_SIZE)))
+			C3D_FVec chunkPosition = FVec3_New(ChunkToWorldCoord(newX), ClusterToWorldHeight(newY), ChunkToWorldCoord(newZ));
+			if (!Camera_IsAABBVisible(chunkPosition, FVec3_New(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE)))
 				continue;
 
 			clusterWasRendered(newX, newY, newZ) |= 1;
@@ -172,14 +176,14 @@ static void renderWorld() {
 		}
 	}
 
-	for (int x = 1; x < CHUNKCACHE_SIZE - 1; x++) {
-		for (int z = 1; z < CHUNKCACHE_SIZE - 1; z++) {
+	for (int x = 1; x < CHUNKCACHE_SIZE - 1; ++x) {
+		for (int z = 1; z < CHUNKCACHE_SIZE - 1; ++z) {
 			Chunk* chunk = gWorld->chunkCache[x][z];
 
 			if ((chunk->revision != chunk->displayRevision || chunk->forceVBOUpdate) && !chunk->tasksRunning) {
 				bool clear = true;
-				for (int xOff = -1; xOff < 2 && clear; xOff++)
-					for (int zOff = -1; zOff < 2 && clear; zOff++)
+				for (int xOff = -1; xOff < 2 && clear; ++xOff)
+					for (int zOff = -1; zOff < 2 && clear; ++zOff)
 						if (gWorld->chunkCache[x + xOff][z + zOff]->genProgress == ChunkGen_Empty)
 							clear = false;
 
@@ -204,9 +208,8 @@ static void renderWorld() {
 	}
 	C3D_AlphaTest(false, GPU_GREATER, 0);
 
-	DebugUI_Text("Clusters drawn %d with %d steps. %d vertices", clustersDrawn, steps, polysTotal);
-	DebugUI_Text("T: %u P: %u %d", gWorld->chunkCache[CHUNKCACHE_SIZE / 2][CHUNKCACHE_SIZE / 2]->tasksRunning,
-				 gWorld->chunkCache[CHUNKCACHE_SIZE / 2][CHUNKCACHE_SIZE / 2]->genProgress, gWorkqueue.queue.length);
+	DebugUI_Text("C: %u V: %u D: %u pC: %u, pU: %d", clustersDrawn, polysTotal, (int)renderDistance,
+				 gWorld->chunkCache[CHUNKCACHE_SIZE / 2][CHUNKCACHE_SIZE / 2]->tasksRunning, gWorkqueue.queue.length);
 }
 
 void WorldRenderer_Tick() {
@@ -219,9 +222,8 @@ void WorldRenderer_Render() {
 
 	if (gCamera.mode == CameraMode_First) {
 		Hand_Draw(projectionUniform, &gCamera.projection, gPlayer->quickSelectBar[gPlayer->quickSelectBarSlot]);
-	} else {
-		Player_Draw();
 	}
+	Player_Draw();
 
 	Clouds_Render(projectionUniform, &gCamera.vp);
 

@@ -2,6 +2,7 @@
 
 #include "client/Camera.h"
 #include "client/Crash.h"
+#include "client/Game.h"
 #include "client/gui/DebugUI.h"
 #include "client/player/Damage.h"
 #include "client/renderer/texture/TextureMap.h"
@@ -17,7 +18,7 @@ Player* gPlayer;
 
 static C3D_Tex textureSkin;
 static CubeModel* cubeTMP;
-static Entity playerEntity;	 // TODO: rework entity
+static Entity playerEntity;	 // TODO: implement entity (split Player code as Entity & PlayerEntity, and some Client specific stuff)
 
 void Player_Init() {
 	Texture_Load(&textureSkin, "entity/player/wide/steve.png");
@@ -27,6 +28,19 @@ void Player_Init() {
 }
 
 void Player_Draw() {
+	DebugUI_Text(" ");
+	DebugUI_Text("XYZ: %.2f/%.3f/%.2f", gPlayer->position.x, gPlayer->position.y, gPlayer->position.z);
+	DebugUI_Text("Block: %d/%d/%d", gPlayer->positionBlock.x, gPlayer->positionBlock.y, gPlayer->positionBlock.z);
+	DebugUI_Text("Facing <dir> (Towards <axis>) (%.1f/%.1f)", gPlayer->pitch * RAD_TO_DEG, gPlayer->yaw * RAD_TO_DEG);
+	// DebugUI_Text("velocity: %f rndy: %f",gPlayer->velocity.y,gPlayer->rndy);
+	// DebugUI_Text("Damage Time: %i Cause: %c",dmg->time,dmg->cause);
+	// DebugUI_Text("Spawn X: %f Y: %f Z: %f",gPlayer->spawnPos.x,gPlayer->spawnPos.y,gPlayer->spawnPos.z);
+	DebugUI_Text("HP: %i Hunger: %i Hungertimer: %i", gPlayer->hp, gPlayer->hunger, gPlayer->hungertimer);
+	// DebugUI_Text("Gamemode: %i", gPlayer->gamemode);
+
+	if (gCamera.mode == CameraMode_First)
+		return;
+
 	playerEntity.position = gPlayer->position;
 	++playerEntity.position.y;
 	playerEntity.yaw = gPlayer->yaw - DEG_TO_RAD * 180;
@@ -150,11 +164,9 @@ void Player_Tick(Sound* sound) {
 					spawnY++;
 			}
 
-			gPlayer->position.y = spawnY;
-			gPlayer->position.x = gPlayer->spawnPos.x;
-			gPlayer->position.z = gPlayer->spawnPos.z;
-			gPlayer->pitch		= 0;
-			gPlayer->yaw		= 0;
+			Player_SetPosBlock(gPlayer->spawnPos.x, spawnY, gPlayer->spawnPos.z);
+			gPlayer->pitch = 0;
+			gPlayer->yaw   = 0;
 
 			gPlayer->hp		   = 20;
 			gPlayer->hunger	   = 20;
@@ -308,7 +320,7 @@ void Player_Move(float dt, float3 accl) {
 			gPlayer->velocity.y = 0.f;
 		}
 
-		gPlayer->position = finalPos;
+		Player_SetPosWorld(finalPos);
 		gPlayer->velocity = f3_new(gPlayer->velocity.x * 0.95f, gPlayer->velocity.y, gPlayer->velocity.z * 0.95f);
 		if (ABS(gPlayer->velocity.x) < 0.1f)
 			gPlayer->velocity.x = 0.f;
@@ -347,4 +359,13 @@ void Player_BreakBlock() {
 	}
 	if (gPlayer->breakPlaceTimeout < 0.f)
 		gPlayer->breakPlaceTimeout = PLAYER_PLACE_REPLACE_TIMEOUT;
+}
+
+void Player_SetPosWorld(float3 pos) {
+	gPlayer->position	   = pos;
+	gPlayer->positionBlock = ToBlockPos(pos);
+}
+void Player_SetPosBlock(int x, int y, int z) {
+	gPlayer->position	   = FromBlockPos(x, y, z);
+	gPlayer->positionBlock = (BlockPos){ x, y, z };
 }

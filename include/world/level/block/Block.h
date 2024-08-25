@@ -17,7 +17,6 @@ typedef struct {
 	u8 (*getRenderType)();
 	u32 (*getBlockColor)(Block *b, Direction dir, int x, int y, int z, u8 meta);
 	u32 (*getItemColor)(Direction dir, u8 meta);
-	u16 (*getBlockTexture)(Block *b, Direction dir, int x, int y, int z, u8 meta);
 	void (*registerIcons)(Block *b);
 } BlockVtable;
 
@@ -34,8 +33,8 @@ struct Block {
 	MapColor mapColor;
 	u16 icon;					 // index of texture icon
 	bool useNeighborBrightness;	 // set by code(see Blocks_Init)
-	bool opaque;
-	bool hasOverlay;
+	bool opaque;				 // if yes, dont allow light to pass thru
+	bool solidBlock;
 };
 
 extern Texture_Map gTexMapBlock;
@@ -49,11 +48,9 @@ void Block_SetHardness(Block *block, float v);
 void Block_SetBounds(Block *block, float3 from, float3 to);
 void Block_SetLightness(Block *block, u8 v);
 void Block_SetNotOpaque(Block *b);
-void Block_SetHasOverlay(Block *b);
+void Block_SetNotSolidBlock(Block *b);
 
-bool Block_ShouldSideBeRendered(Block *block, int x, int y, int z, Direction dir);
 void Block_GetBlockColor(Block *b, Direction dir, int x, int y, int z, u8 meta, u8 out[]);
-void Block_GetBlockTexture(Block *b, Direction dir, int x, int y, int z, u8 meta, s16 out_uv[]);
 void Block_GetItemColor(Block *b, Direction dir, u8 meta, u8 out[]);
 
 static inline u8 Block_GetRenderType(Block *block) {
@@ -61,13 +58,4 @@ static inline u8 Block_GetRenderType(Block *block) {
 }
 static inline const Material *Block_GetMaterial(Block *block) {
 	return &MATERIALS[block->material];
-}
-static inline u16 Block_GetIcon(Block *b, Direction dir, u8 meta) {
-	return b->vptr->getBlockTexture(b, dir, 0, 0, 0, meta);
-}
-static inline float Block_GetHardness(Block *block) {
-	return block->hardness;
-}
-static inline float Block_GetResistance(Block *block) {
-	return block->resistance;
 }
