@@ -67,7 +67,6 @@ ICON			:=	$(META)/icon.png
 BANNER_AUDIO	:=	$(META)/banner.wav
 BANNER_IMAGE	:=	$(META)/banner.cgfx
 RSF_PATH		:=	$(META)/app.rsf
-RSF_MANUAL_PATH	:=	$(META)/app_manual.rsf
 LOGO			:=	$(META)/logo.bcma.lz
 ICON_FLAGS		:=	nosavebackups,visible
 
@@ -244,7 +243,7 @@ $(TARGET).cxi:
 	@$(MAKEROM) -o $(TARGET).cxi $(MAKEROM_ARGS)
 	@echo "built ... $(TARGET).cxi (Code)"
 $(TARGET).cfa:
-	@$(MAKEROM) -o $(TARGET).cfa -rsf $(RSF_MANUAL_PATH) -target t
+	@$(MAKEROM) -o $(TARGET).cfa -rsf $(RSF_PATH) -target t
 	@echo "built ... $(TARGET).cfa (Manual)"
 
 $(TARGET).cia:
