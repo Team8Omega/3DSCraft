@@ -35,3 +35,11 @@ static inline const char* String_ParseTextureNamePrefix(const char* folder, cons
 	snprintf(path, len, "%s/%s%s.png", folder, name, prefix);
 	return path;
 }
+static inline u32 String_Hash(unsigned char* str) {
+	u32 hash = 5381;
+	int c;
+	while ((c = *str++))
+		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+	return hash;
+}

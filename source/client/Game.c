@@ -38,6 +38,8 @@
 
 #include "Globals.h"
 
+#define FPS 60
+
 InputData gInput, gInputOld;
 bool gIsNew3ds;
 
@@ -246,8 +248,9 @@ static void runGameLoop() {
 #ifdef _DEBUG
 	if (sShowDebug) {
 		DebugUI_Text("3DSCraft " APP_VERSION);
-		DebugUI_Text("%d FPS T: 60 CPU: %5.2f%% GPU: %5.2f%% Buf: %5.2f%% Lin: %d", sFps, sTps, C3D_GetProcessingTime() * 6.f,
-					 C3D_GetDrawingTime() * 6.f, C3D_GetCmdBufUsage() * 100.f, linearSpaceFree());
+		float frameMult = (FPS + (FPS - sFps)) * 0.1f;
+		DebugUI_Text("%d FPS T: 60 CPU: %.2f%% GPU: %.2f%% Buf: %.2f%% Lin: %loKB", sFps, C3D_GetProcessingTime() * frameMult,
+					 C3D_GetDrawingTime() * frameMult, C3D_GetCmdBufUsage() * 100.f, linearSpaceFree() >> 10);
 
 		DebugUI_TextAt(sIsIngame ? 24 : 29, "%u FPS\t\t\t\t\t\t\t         %u TPS", sFps, sTps);
 	}
