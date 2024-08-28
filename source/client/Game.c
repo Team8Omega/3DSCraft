@@ -70,12 +70,10 @@ static float s3dSlider;
 static bool sShowDebug;
 static bool sIsIngame;
 
-#include "util/SerialUtils.h"
+#include "resources/model/ModelBakery.h"
 
 void testFunction() {
-	mpack_tree_t tree = serial_get_start("romfs:/test.mp");
-	mpack_node_t root = serial_get_root(&tree);
-	BlockModel_Deserialize(root);
+	ModelBakery_GetModel("block/grass_block");
 }
 
 void gInit(const char* name, bool isNew, bool demo) {

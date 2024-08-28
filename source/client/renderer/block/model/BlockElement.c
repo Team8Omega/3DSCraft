@@ -52,18 +52,21 @@ static Direction getFacing(size_t idx) {
 static void getFaces(mpack_node_t e) {
 	mpack_node_t faceNodes = serial_get_node(e, "faces");
 
-	size_t size = serial_get_mapLength(faceNodes);
+	int num = 0;
+	for (size_t i = 0; i < 6; ++i) {
+		if (!serial_has(faceNodes, DirectionNames[i]))
+			continue;
+		mpack_node_t face = serial_get_node(faceNodes, DirectionNames[i]);
+		Direction dir	  = getFacing(i);
 
-	if (size > 0 || !serial_has(e, "faces")) {
-		for (size_t i = 0; i < size; ++i) {
-			mpack_node_t face = serial_get_node(faceNodes, DirectionNames[i]);
-			Direction dir	  = getFacing(i);
+		sBuffer_Faces[dir] = BlockElementFace_Deserialize(face);
+		if (sBuffer_Faces[dir].cullDir == Direction_None)
+			sBuffer_Faces[dir].cullDir = dir;
 
-			sBuffer_Faces[dir] = BlockElementFace_Deserialize(face);
-			if (sBuffer_Faces[dir].cullDir == Direction_None)
-				sBuffer_Faces[dir].cullDir = dir;
-		}
-	} else {
+		num++;
+	}
+
+	if (num < 1 || num > 6) {
 		Crash("Expected between 1 and 6 unique faces, got 0");
 	}
 }
@@ -76,6 +79,8 @@ BlockElement BlockElement_Deserialize(mpack_node_t element) {
 	if (serial_has(element, "shade") && !(serial_is(element, "shade", bool)))
 		Crash("Expected shade to be Boolean");
 	bool shade = serial_get(element, bool, "shade", true);
+
+	serial_get_error(element, "Element Deserialize");
 
 	BlockElement obj;
 	obj.from  = from;

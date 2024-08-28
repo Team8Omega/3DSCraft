@@ -35,11 +35,32 @@ static inline const char* String_ParseTextureNamePrefix(const char* folder, cons
 	snprintf(path, len, "%s/%s%s.png", folder, name, prefix);
 	return path;
 }
-static inline u32 String_Hash(unsigned char* str) {
+static inline const char* String_RemoveSuffix(const char* path, const char* type) {
+	size_t len = strlen(path) - strlen(type) + 1;
+
+	char* nPath = (char*)malloc(len);
+
+	strncpy(nPath, path, len);
+	nPath[len] = '\0';
+
+	return nPath;
+}
+static inline const char* String_AddSuffix(const char* path, const char* type) {
+	size_t len = strlen(path) + strlen(type) + 1;
+
+	char* nPath = (char*)malloc(len);
+
+	strcpy(nPath, path);
+	strcat(nPath, type);
+	nPath[len] = '\0';
+
+	return nPath;
+}
+static inline u32 String_Hash(const char* in) {
 	u32 hash = 5381;
-	int c;
-	while ((c = *str++))
-		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+	for (unsigned int i = 0; in[i]; ++i)
+		hash = ((hash << 5) + hash) + in[i]; /* hash * 33 + c */
 
 	return hash;
 }
