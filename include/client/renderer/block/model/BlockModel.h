@@ -15,6 +15,11 @@ enum {
 	AMBIENTOCC_FALSE
 };
 
+typedef struct {
+	char key[32];
+	char name[64];
+} ModelTextureEntry;
+
 typedef u8 GuiLight;
 typedef u8 AmbientOcc;
 
@@ -22,8 +27,15 @@ typedef struct {
 	u32 hash;
 	char name[64];
 	char parentName[64];
+
+	size_t faceNum;
+
 	BlockElement* elements;
-	u8 elementNum;
+	size_t elementNum;
+
+	ModelTextureEntry* textures;
+	size_t textureNum;
+
 	GuiLight guiLight;
 	AmbientOcc hasAmbientOcclusion;
 } BlockModel;

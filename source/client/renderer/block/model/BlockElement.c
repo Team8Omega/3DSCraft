@@ -11,6 +11,7 @@
 #define MAX_EXTENT 32.f
 
 static BlockElementFace sBuffer_Faces[6];
+static BlockElementFace FACE_EMPTY = { .exists = false };
 
 static int3 parseVector3(mpack_node_t e, const char* keyName) {
 	mpack_node_t array = serial_get_node(e, keyName);
@@ -54,14 +55,14 @@ static void getFaces(mpack_node_t e) {
 
 	int num = 0;
 	for (size_t i = 0; i < 6; ++i) {
-		if (!serial_has(faceNodes, DirectionNames[i]))
+		if (!serial_has(faceNodes, DirectionNames[i])) {
+			sBuffer_Faces[i] = FACE_EMPTY;
 			continue;
+		}
 		mpack_node_t face = serial_get_node(faceNodes, DirectionNames[i]);
 		Direction dir	  = getFacing(i);
 
 		sBuffer_Faces[dir] = BlockElementFace_Deserialize(face);
-		if (sBuffer_Faces[dir].cullDir == Direction_None)
-			sBuffer_Faces[dir].cullDir = dir;
 
 		num++;
 	}
@@ -76,9 +77,14 @@ BlockElement BlockElement_Deserialize(mpack_node_t element) {
 	int3 to	  = parseToPos(element);
 	getFaces(element);
 
-	if (serial_has(element, "shade") && !(serial_is(element, "shade", bool)))
+	if (serial_has(element, "shade") && !(serial_is(element, "shade", bool))) {
 		Crash("Expected shade to be Boolean");
+	}
 	bool shade = serial_get(element, bool, "shade", true);
+
+	if (serial_has(element, "rotation")) {
+		Crash("BlockElement Unsupported: found rotation value, which is not supported yet. Please contact developer!");
+	}
 
 	serial_get_error(element, "Element Deserialize");
 

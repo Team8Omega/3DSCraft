@@ -5,12 +5,10 @@
 #include "util/SerialUtils.h"
 #include "util/StringUtils.h"
 
-static u8 elementNum;
-static BlockElement* elements;
+static size_t elementNum	  = 0;
+static BlockElement* elements = NULL;
 
-#define TEXTURE_NUM_MAX 16
-static char textures[TEXTURE_NUM_MAX][64];
-static char textureKeys[TEXTURE_NUM_MAX][32];
+static ModelTextureEntry* textures	  = NULL;
 static size_t textureNum			  = 0;
 static AmbientOcc hasAmbientOcclusion = AMBIENTOCC_NONE;
 static GuiLight guiLight			  = GUILIGHT_NONE;
@@ -43,15 +41,18 @@ static void getParentName(mpack_node_t root) {
 }
 static void getTextures(mpack_node_t root) {
 	if (!serial_has(root, "textures")) {
-		strcpy(textures[0], "");
+		textureNum = 0;
 		return;
 	}
 	mpack_node_t textureNode = serial_get_node(root, "textures");
 
 	textureNum = serial_get_mapLength(textureNode);
+
+	textures = malloc(sizeof(ModelTextureEntry) * textureNum);
+
 	for (size_t i = 0; i < textureNum; ++i) {
-		serial_get_keyname(textureNode, i, textureKeys[i], 32);
-		serial_get_cstr(textureNode, textureKeys[i], textures[i], 64);
+		serial_get_keyname(textureNode, i, textures[i].key, 32);
+		serial_get_cstr(textureNode, textures[i].key, textures[i].name, 64);
 	}
 }
 static void getAmbientOcclusion(mpack_node_t root) {
@@ -71,6 +72,17 @@ static void getGuiLight(mpack_node_t root) {
 
 	guiLight = strcmp(str, "front") == 0 ? GUILIGHT_FRONT : GUILIGHT_SIDE;
 }
+static size_t getFaceNum() {
+	size_t faceNum = 0;
+	for (size_t i = 0; i < elementNum; ++i) {
+		BlockElement* element = &elements[i];
+		for (size_t i = 0; i < 6; ++i) {
+			if (element->faces[i].exists)
+				faceNum++;
+		}
+	}
+	return faceNum;
+}
 BlockModel BlockModel_Deserialize(mpack_node_t root, const char* name) {
 	getElements(root);
 	serial_get_error(root, "Elements");
@@ -88,7 +100,8 @@ BlockModel BlockModel_Deserialize(mpack_node_t root, const char* name) {
 	serial_get_error(root, "GuiLight");
 
 	BlockModel obj;
-	obj.hash = String_Hash(name);
+	obj.hash	= String_Hash(name);
+	obj.faceNum = getFaceNum();
 	strcpy(obj.name, name);
 	strcpy(obj.parentName, parentName);
 	obj.hasAmbientOcclusion = hasAmbientOcclusion;
@@ -96,6 +109,9 @@ BlockModel BlockModel_Deserialize(mpack_node_t root, const char* name) {
 	obj.elementNum			= elementNum;
 	if (elementNum)
 		obj.elements = elements;
+	obj.textureNum = textureNum;
+	if (textureNum)
+		obj.textures = textures;
 
 	return obj;
 }

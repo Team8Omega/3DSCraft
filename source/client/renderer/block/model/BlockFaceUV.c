@@ -23,7 +23,7 @@ static void getUVs(mpack_node_t face) {
 }
 static int getRotation(mpack_node_t face) {
 	int rot = serial_get(face, int, "rotation", 0);
-	if (rot < 0 || (rot % 90) != 0 || (rot / 90) > 3)
+	if (rot != 0 && (rot < 0 || (rot % 90) != 0 || (rot / 90) > 3))
 		Crash("Invalid rotation %d found, only 0/90/180/270 allowed");
 
 	return rot;

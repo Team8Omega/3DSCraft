@@ -143,15 +143,40 @@ void downscaleImage(u8* data, int size) {
 	}
 }
 
-char pathCollect[TEXTURE_MAPTILES * TEXTURE_MAPTILES][512];
-u16 pathNum = 0;
+static char pathCollect[TEXTURE_TILENUM][512];
+static u32 hashCollect[TEXTURE_TILENUM];
+static size_t pathNum = 0;
 
 u16 Texture_MapAdd(const char* path) {
-	if (pathNum >= (TEXTURE_MAPTILES * TEXTURE_MAPTILES))
+	if (pathNum >= (TEXTURE_TILENUM))
 		Crash("Too many entries for TextureMap\n - you know what this means.");
 
 	strcpy(pathCollect[pathNum], path);
-	return pathNum++;
+	return (u16)pathNum++;
+}
+void Texture_MapAddName(const char* path, int out_uv[]) {
+	if (pathNum >= (TEXTURE_TILENUM))
+		Crash("Too many entries for TextureMap\n - you know what this means.");
+
+	// check if already loaded
+	size_t index = 666999;
+	u32 hash	 = String_Hash(path);
+	for (size_t i = 0; i < pathNum; ++i) {
+		if (pathCollect[i] == hash)
+			index = i;
+	}
+	if (index == 666999)
+		index = pathNum;
+
+	out_uv[0] = ((index % TEXTURE_MAPTILES) << 4) << 8;
+	out_uv[1] = ((index / TEXTURE_MAPTILES) << 4) << 8;
+
+	if (index != 666999)
+		return;
+
+	strcpy(pathCollect[index], path);
+	hashCollect[index] = String_Hash(path);
+	pathNum++;
 }
 
 void Texture_MapInit(Texture_Map* map) {
@@ -168,7 +193,7 @@ void Texture_MapInit(Texture_Map* map) {
 	int filei			 = 0;
 	const char* filename = pathCollect[0];
 	int c				 = 0;
-	while (filename != NULL && c < (TEXTURE_MAPTILES * TEXTURE_MAPTILES) && filei < pathNum) {
+	while (filename != NULL && c < (TEXTURE_TILENUM) && filei < pathNum) {
 		if (access(filename, F_OK))
 			filename = String_ParsePackName(PACK_VANILLA, PATH_PACK_TEXTURES, filename);
 
@@ -184,8 +209,8 @@ void Texture_MapInit(Texture_Map* map) {
 			}
 
 			Icon* icon = &map->icons[c];
-			icon->u	   = 256 * locX;
-			icon->v	   = 256 * locY;
+			icon->u	   = locX << 8;
+			icon->v	   = locY << 8;
 
 			locX += TEXTURE_TILESIZE;
 			if (locX == TEXTURE_MAPSIZE) {
@@ -250,7 +275,7 @@ void Texture_MapDeinit(Texture_Map* map) {
 /*
 Icon Texture_MapGetIcon(Texture_Map* map, char* filename) {
 	u32 h = hash(filename);
-	for (size_t i = 0; i < TEXTURE_MAPTILES * TEXTURE_MAPTILES; i++) {
+	for (size_t i = 0; i < TEXTURE_TILENUM; i++) {
 		if (h == map->icons[i].textureHash) {
 			return map->icons[i];
 		}
