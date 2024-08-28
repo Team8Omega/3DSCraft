@@ -11,9 +11,9 @@ static BlockElement* elements;
 #define TEXTURE_NUM_MAX 16
 static char textures[TEXTURE_NUM_MAX][64];
 static char textureKeys[TEXTURE_NUM_MAX][32];
-static size_t textureNum		= 0;
-static bool hasAmbientOcclusion = true;
-static GuiLight guiLight		= GUILIGHT_NONE;
+static size_t textureNum			  = 0;
+static AmbientOcc hasAmbientOcclusion = AMBIENTOCC_NONE;
+static GuiLight guiLight			  = GUILIGHT_NONE;
 
 static char parentName[64];
 
@@ -56,10 +56,10 @@ static void getTextures(mpack_node_t root) {
 }
 static void getAmbientOcclusion(mpack_node_t root) {
 	if (!serial_has(root, "ambientocclusion")) {
-		hasAmbientOcclusion = true;
+		hasAmbientOcclusion = AMBIENTOCC_NONE;
 		return;
 	}
-	hasAmbientOcclusion = serial_get(root, bool, "ambientocclusiion", true);
+	hasAmbientOcclusion = serial_get(root, bool, "ambientocclusiion", true) ? AMBIENTOCC_TRUE : AMBIENTOCC_FALSE;
 }
 static void getGuiLight(mpack_node_t root) {
 	if (!serial_has(root, "gui_light")) {
@@ -88,9 +88,9 @@ BlockModel BlockModel_Deserialize(mpack_node_t root, const char* name) {
 	serial_get_error(root, "GuiLight");
 
 	BlockModel obj;
-	obj.hash				= String_Hash(name);
-	obj.name				= name;
-	obj.parentName			= parentName;
+	obj.hash = String_Hash(name);
+	strcpy(obj.name, name);
+	strcpy(obj.parentName, parentName);
 	obj.hasAmbientOcclusion = hasAmbientOcclusion;
 	obj.guiLight			= guiLight;
 	obj.elementNum			= elementNum;

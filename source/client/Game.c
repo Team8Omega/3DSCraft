@@ -70,10 +70,32 @@ static float s3dSlider;
 static bool sShowDebug;
 static bool sIsIngame;
 
+#include "client/renderer/block/model/BlockModel.h"
 #include "resources/model/ModelBakery.h"
 
 void testFunction() {
-	ModelBakery_GetModel("block/grass_block");
+	{
+		u32 startTime = svcGetSystemTick();
+
+		BlockModel* newModel = ModelBakery_GetModel("block/grass_block");
+
+		u32 endTime		  = svcGetSystemTick();
+		float elapsedMs	  = (float)(endTime - startTime) / (float)CPU_TICKS_PER_MSEC;
+		const char* light = newModel->guiLight != GUILIGHT_NONE ? newModel->guiLight == GUILIGHT_FRONT ? "front" : "side" : "none";
+		Crash("Loaded Model! Took %.3f ms.\n\nName: %s,\nParent: %s,\nElementNum: %lu\nGuiLight: %s", elapsedMs, newModel->name,
+			  newModel->parentName, newModel->elementNum, light);
+	}
+	{
+		u32 startTime = svcGetSystemTick();
+
+		BlockModel* newModel = ModelBakery_GetModel("block/grass_block");
+
+		u32 endTime		  = svcGetSystemTick();
+		float elapsedMs	  = (float)(endTime - startTime) / (float)CPU_TICKS_PER_MSEC;
+		const char* light = newModel->guiLight != GUILIGHT_NONE ? newModel->guiLight == GUILIGHT_FRONT ? "front" : "side" : "none";
+		Crash("Loaded Model! Took %.3f ms.\n\nName: %s,\nParent: %s,\nElementNum: %lu\nGuiLight: %s", elapsedMs, newModel->name,
+			  newModel->parentName, newModel->elementNum, light);
+	}
 }
 
 void gInit(const char* name, bool isNew, bool demo) {
