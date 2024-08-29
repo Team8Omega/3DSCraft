@@ -13,28 +13,28 @@
 static BlockElementFace sBuffer_Faces[6];
 static BlockElementFace FACE_EMPTY = { .exists = false };
 
-static int3 parseVector3(mpack_node_t e, const char* keyName) {
+static float3 parseVector3(mpack_node_t e, const char* keyName) {
 	mpack_node_t array = serial_get_node(e, keyName);
 	if (serial_get_arrayLength(array) != 3)
 		Crash("Expected 3 \'%s\' values, found %zu\n\'%s\' is of type %s", keyName, serial_get_arrayLength(array), keyName,
 			  mpack_type_to_string(array.data->type));
 
-	int3 val;
+	float3 val;
 	for (u8 i = 0; i < 3; ++i) {
-		val.v[i] = serial_get_at(array, int, i);
+		val.v[i] = serial_get_at(array, float, i);
 	}
 	return val;
 }
 
-static int3 parseToPos(mpack_node_t e) {
-	int3 vec = parseVector3(e, "to");
+static float3 parseToPos(mpack_node_t e) {
+	float3 vec = parseVector3(e, "to");
 	if (vec.x < MIN_EXTENT || vec.y < MIN_EXTENT || vec.z < MIN_EXTENT || vec.x >= MAX_EXTENT || vec.y >= MAX_EXTENT || vec.z >= MAX_EXTENT)
 		Crash("\'to\' specifier exceeds the allowed boundaries: [%f,%f,%f]", vec.x, vec.y, vec.z);
 
 	return vec;
 }
-static int3 parseFromPos(mpack_node_t e) {
-	int3 vec = parseVector3(e, "from");
+static float3 parseFromPos(mpack_node_t e) {
+	float3 vec = parseVector3(e, "from");
 	if (vec.x < MIN_EXTENT || vec.y < MIN_EXTENT || vec.z < MIN_EXTENT || vec.x >= MAX_EXTENT || vec.y >= MAX_EXTENT || vec.z >= MAX_EXTENT)
 		Crash("\'from\' specifier exceeds the allowed boundaries: [%f,%f,%f]", vec.x, vec.y, vec.z);
 
@@ -73,8 +73,8 @@ static void getFaces(mpack_node_t e) {
 }
 
 BlockElement BlockElement_Deserialize(mpack_node_t element) {
-	int3 from = parseFromPos(element);
-	int3 to	  = parseToPos(element);
+	float3 from = parseFromPos(element);
+	float3 to	= parseToPos(element);
 	getFaces(element);
 
 	if (serial_has(element, "shade") && !(serial_is(element, "shade", bool))) {

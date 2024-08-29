@@ -3,6 +3,6 @@
 #include "client/model/VertexFmt.h"
 
 typedef struct {
-	WorldVertex** faces;
+	WorldVertex** vertex;
 	size_t numFaces;
 } BakedModel;

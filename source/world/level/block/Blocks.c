@@ -18,7 +18,8 @@ void regist(BlockId id, const char* name, float resistance, float hardness, Mate
 }
 
 void Blocks_Init() {
-	Texture_MapAdd("romfs:/error.png");
+	int out[2];
+	Texture_MapAddName("romfs:/error.png", out);
 
 	regist(BLOCK_AIR, "air", 0.f, 0.f, MATERIAL_AIR, MAPCOLOR_NONE);
 	Block_SetNotOpaque(BLOCKS[BLOCK_AIR]);

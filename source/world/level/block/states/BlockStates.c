@@ -98,9 +98,9 @@ void BlockStates_Decompile() {
 		serial_get_error(root, "Post-BlockState");
 	}
 	u32 endTime		= svcGetSystemTick();
-	float elapsedMs = (float)(endTime - startTime) / (float)CPU_TICKS_PER_MSEC;
+	float elapsedMs = ((float)(endTime / (float)CPU_TICKS_PER_MSEC) - (float)(startTime / (float)CPU_TICKS_PER_MSEC));
 
 	ModelBakery_Deinit();
 
-	Crash("BlockStates loaded! took %.3f ms.", elapsedMs);
+	Crash("BlockStates loaded! took %.0f ms.", elapsedMs);
 }

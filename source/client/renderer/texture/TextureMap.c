@@ -147,13 +147,6 @@ static char pathCollect[TEXTURE_TILENUM][512];
 static u32 hashCollect[TEXTURE_TILENUM];
 static size_t pathNum = 0;
 
-u16 Texture_MapAdd(const char* path) {
-	if (pathNum >= (TEXTURE_TILENUM))
-		Crash("Too many entries for TextureMap\n - you know what this means.");
-
-	strcpy(pathCollect[pathNum], path);
-	return (u16)pathNum++;
-}
 void Texture_MapAddName(const char* path, int out_uv[]) {
 	if (pathNum >= (TEXTURE_TILENUM))
 		Crash("Too many entries for TextureMap\n - you know what this means.");

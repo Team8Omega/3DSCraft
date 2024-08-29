@@ -101,6 +101,7 @@ static BlockModel* getBlockModel(const char* name) {
 		} else {
 			newModel.elements = NULL;
 		}
+		newModel.faceNum = model.faceNum + parent->faceNum;
 
 	} else {
 		newModel = model;
@@ -111,49 +112,93 @@ static BlockModel* getBlockModel(const char* name) {
 	return &sUnbakedBlocks.data[sUnbakedBlocks.length - 1];
 }
 
-static const WorldVertex block_sides_lut[] = {
+static const bool block_lut_vertex[][3] = {
 	// West
-	{ { 0, 0, 0 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { 0, 0, 1 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
-	{ { 0, 1, 1 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
-	{ { 0, 1, 1 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
-	{ { 0, 1, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
-	{ { 0, 0, 0 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ false, false, false },
+	{ false, false, true },
+	{ false, true, true },
+	{ false, true, true },
+	{ false, true, false },
+	{ false, false, false },
 	// East
-	{ { 1, 0, 0 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
-	{ { 1, 1, 0 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
-	{ { 1, 1, 1 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
-	{ { 1, 1, 1 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
-	{ { 1, 0, 1 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { 1, 0, 0 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
+	{ true, false, false },
+	{ true, true, false },
+	{ true, true, true },
+	{ true, true, true },
+	{ true, false, true },
+	{ true, false, false },
 	// Down
-	{ { 0, 0, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
-	{ { 1, 0, 0 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
-	{ { 1, 0, 1 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
-	{ { 1, 0, 1 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
-	{ { 0, 0, 1 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { 0, 0, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
+	{ false, false, false },
+	{ true, false, false },
+	{ true, false, true },
+	{ true, false, true },
+	{ false, false, true },
+	{ false, false, false },
 	// Up
-	{ { 0, 1, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
-	{ { 0, 1, 1 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { 1, 1, 1 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
-	{ { 1, 1, 1 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
-	{ { 1, 1, 0 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
-	{ { 0, 1, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
+	{ false, true, false },
+	{ false, true, true },
+	{ true, true, true },
+	{ true, true, true },
+	{ true, true, false },
+	{ false, true, false },
 	// North
-	{ { 0, 0, 0 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
-	{ { 0, 1, 0 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
-	{ { 1, 1, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
-	{ { 1, 1, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
-	{ { 1, 0, 0 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { 0, 0, 0 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
+	{ false, false, false },
+	{ false, true, false },
+	{ true, true, false },
+	{ true, true, false },
+	{ true, false, false },
+	{ false, false, false },
 	// South
-	{ { 0, 0, 1 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { 1, 0, 1 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
-	{ { 1, 1, 1 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
-	{ { 1, 1, 1 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
-	{ { 0, 1, 1 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
-	{ { 0, 0, 1 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ false, false, true },
+	{ true, false, true },
+	{ true, true, true },
+	{ true, true, true },
+	{ false, true, true },
+	{ false, false, true },
+};
+static const bool block_lut_uv[][2] = {
+	// West
+	{ false, false },
+	{ true, false },
+	{ true, true },
+	{ true, true },
+	{ false, true },
+	{ false, false },
+	// East
+	{ true, false },
+	{ true, true },
+	{ false, true },
+	{ false, true },
+	{ false, false },
+	{ true, false },
+	// Down
+	{ false, true },
+	{ true, true },
+	{ true, false },
+	{ true, false },
+	{ false, false },
+	{ false, true },
+	// Up
+	{ false, true },
+	{ false, false },
+	{ true, false },
+	{ true, false },
+	{ true, true },
+	{ false, true },
+	// North
+	{ true, false },
+	{ true, true },
+	{ false, true },
+	{ false, true },
+	{ false, false },
+	{ true, false },
+	// South
+	{ false, false },
+	{ true, false },
+	{ true, true },
+	{ true, true },
+	{ false, true },
+	{ false, false },
 };
 
 // name, parentname, hash, elementnum, guilight, hasambientocclusion
@@ -174,10 +219,15 @@ typedef struct {
 
 static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 	BakedModel* baked = linearAlloc(sizeof(BakedModel));
-	u32 currentFace	  = 0;
 
-	baked->faces	= linearAlloc(sizeof(WorldVertex) * blockModel->faceNum * 6);
+	u32 currentVertex = 0;
+
 	baked->numFaces = blockModel->faceNum;
+	baked->vertex	= linearAlloc(sizeof(WorldVertex*) * 6 * 6);
+	for (size_t i = 0; i < 6 * 6; ++i) {
+		baked->vertex[i] = linearAlloc(sizeof(WorldVertex));
+		memset(baked->vertex[i], 0, sizeof(WorldVertex));
+	}
 
 	if (!blockModel) {
 		Crash("Baking BlockModel failed!\nRecieved NULL BlockModel as input.");
@@ -187,7 +237,8 @@ static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 	if (((int)blockModel->elements < 100 && blockModel->elementNum != 0) ||
 		((int)blockModel->textures < 100 && blockModel->textureNum != 0)) {
 		Crash(
-			"Baking BlockModel failed!\nRecieved invalid BlockModel as input, either elements or textures is NULL when num value isn't 0\n"
+			"Baking BlockModel failed!\nRecieved invalid BlockModel as input, either elements or textures is NULL when num value isn't "
+			"0\n"
 			"Elements: 0x%x, Num : %lu\n"
 			"Textures: 0x%x, Num : %lu\n",
 			blockModel->elements, blockModel->elementNum, blockModel->textures, blockModel->textureNum);
@@ -196,7 +247,8 @@ static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 	if (((int)blockModel->elements > 100 && blockModel->elementNum == 0) ||
 		((int)blockModel->textures > 100 && blockModel->textureNum == 0)) {
 		Crash(
-			"Baking BlockModel failed!\nRecieved invalid BlockModel as input, either elements or textures doesnt line up with num value\n"
+			"Baking BlockModel failed!\nRecieved invalid BlockModel as input, either elements or textures doesnt line up with num "
+			"value\n"
 			"Elements: 0x%x, Num: %lu\n"
 			"Textures: 0x%x, Num: %lu\n",
 			blockModel->elements, blockModel->elementNum, blockModel->textures, blockModel->textureNum);
@@ -216,9 +268,16 @@ static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 	for (size_t i = 0; i < blockModel->elementNum; ++i) {
 		BlockElement* element = &blockModel->elements[i];
 
-		int3 from = element->from, to = element->to;
+		currentVertex = 0;
+
+		float3 from = element->from, to = element->to;
 		for (u8 j = 0; j < 6; ++j) {
 			BlockElementFace* face = &element->faces[j];
+
+			if (!face->exists) {
+				currentVertex += 6;
+				continue;
+			}
 
 			int uv[2];
 			u32 hash = String_Hash(face->texture);
@@ -229,18 +288,19 @@ static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 				}
 			}
 
-			if (!face->exists)
-				continue;
-
-			WorldVertex** vertices = &baked->faces[6 * currentFace++];
-			memcpy(vertices, &block_sides_lut[6 * j], sizeof(WorldVertex) * 6);
 			for (u8 k = 0; k < 6; ++k) {
-				vertices[k]->pos[0] = vertices[k]->pos[0] == 0 ? from.x : to.x;
-				vertices[k]->pos[1] = vertices[k]->pos[1] == 0 ? from.y : to.y;
-				vertices[k]->pos[2] = vertices[k]->pos[2] == 0 ? from.z : to.z;
+				baked->vertex[currentVertex]->pos[0] = block_lut_vertex[currentVertex][0] ? to.x : from.x;
+				baked->vertex[currentVertex]->pos[1] = block_lut_vertex[currentVertex][1] ? to.y : from.y;
+				baked->vertex[currentVertex]->pos[2] = block_lut_vertex[currentVertex][2] ? to.z : from.z;
 
-				vertices[k]->uv0[0] = (vertices[k]->uv0[0] ? face->uv.uvs[UV_U1] : face->uv.uvs[UV_U2] + uv[0]);
-				vertices[k]->uv0[1] = (vertices[k]->uv0[1] ? face->uv.uvs[UV_V1] : face->uv.uvs[UV_V2] + uv[1]);
+				baked->vertex[currentVertex]->uv0[0] = (block_lut_uv[currentVertex][0] ? face->uv.uvs[UV_U2] : face->uv.uvs[UV_U1]) + uv[0];
+				baked->vertex[currentVertex]->uv0[1] = (block_lut_uv[currentVertex][1] ? face->uv.uvs[UV_V2] : face->uv.uvs[UV_V1]) + uv[1];
+
+				baked->vertex[currentVertex]->rgb[0] = 255;
+				baked->vertex[currentVertex]->rgb[1] = 255;
+				baked->vertex[currentVertex]->rgb[2] = 255;
+
+				currentVertex++;
 			}
 		}
 	}
