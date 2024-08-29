@@ -1,19 +1,20 @@
 #include "client/renderer/block/model/BlockModel.h"
 
-#include "client/renderer/block/model/BlockElement.h"
+#include <3ds.h>
 
+#include "client/renderer/block/model/BlockElement.h"
 #include "util/SerialUtils.h"
 #include "util/StringUtils.h"
 
-static size_t elementNum	  = 0;
-static BlockElement* elements = NULL;
+static char parentName[64];
 
-static ModelTextureEntry* textures	  = NULL;
-static size_t textureNum			  = 0;
+static BlockElement* elements	   = NULL;
+static size_t elementNum		   = 0;
+static ModelTextureEntry* textures = NULL;
+static size_t textureNum		   = 0;
+
 static AmbientOcc hasAmbientOcclusion = AMBIENTOCC_NONE;
 static GuiLight guiLight			  = GUILIGHT_NONE;
-
-static char parentName[64];
 
 static void getElements(mpack_node_t root) {
 	if (!serial_has(root, "elements")) {
@@ -24,7 +25,9 @@ static void getElements(mpack_node_t root) {
 
 	size_t size = serial_get_arrayLength(elementNode);
 	elementNum	= size;
-	elements	= malloc(sizeof(BlockElement) * size);
+
+	elements = linearAlloc(sizeof(BlockElement) * size);
+	memset(elements, 0, sizeof(BlockElement) * size);
 
 	for (size_t i = 0; i < size; ++i) {
 		mpack_node_t element = serial_get_arrayNodeAt(elementNode, i);
@@ -48,7 +51,8 @@ static void getTextures(mpack_node_t root) {
 
 	textureNum = serial_get_mapLength(textureNode);
 
-	textures = malloc(sizeof(ModelTextureEntry) * textureNum);
+	textures = linearAlloc(sizeof(ModelTextureEntry) * textureNum);
+	memset(textures, 0, sizeof(ModelTextureEntry) * textureNum);
 
 	for (size_t i = 0; i < textureNum; ++i) {
 		serial_get_keyname(textureNode, i, textures[i].key, 32);
@@ -107,11 +111,20 @@ BlockModel BlockModel_Deserialize(mpack_node_t root, const char* name) {
 	obj.hasAmbientOcclusion = hasAmbientOcclusion;
 	obj.guiLight			= guiLight;
 	obj.elementNum			= elementNum;
-	if (elementNum)
+	if (elementNum > 0) {
 		obj.elements = elements;
+	} else {
+		obj.elements = NULL;
+	}
 	obj.textureNum = textureNum;
-	if (textureNum)
+	if (textureNum > 0) {
 		obj.textures = textures;
+	} else {
+		obj.textures = NULL;
+	}
+
+	elements = NULL;
+	textures = NULL;
 
 	return obj;
 }

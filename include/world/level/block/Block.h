@@ -17,7 +17,6 @@ typedef struct {
 	u8 (*getRenderType)();
 	u32 (*getBlockColor)(Block *b, Direction dir, int x, int y, int z, u8 meta);
 	u32 (*getItemColor)(Direction dir, u8 meta);
-	void (*registerIcons)(Block *b);
 } BlockVtable;
 
 struct Block {

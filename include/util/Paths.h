@@ -18,3 +18,4 @@
 #define PATH_PACK_SOUNDS "sounds"
 #define PATH_PACK_LANG "lang"
 #define PATH_PACK_MODELS "models"
+#define PATH_PACK_BLOCK "blockstates"

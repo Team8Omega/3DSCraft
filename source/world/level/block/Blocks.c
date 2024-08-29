@@ -33,7 +33,7 @@ void Blocks_Init() {
 	BLOCKS[BLOCK_GRASS] = BlockGrass_Init(BLOCK_GRASS);
 	regist(BLOCK_DIRT, "dirt", 0.5f, 0.5f, MATERIAL_DIRT, MAPCOLOR_DIRT);
 	regist(BLOCK_COARSE_DIRT, "coarse_dirt", 0.5f, 0.5f, MATERIAL_DIRT, MAPCOLOR_DIRT);
-	regist(BLOCK_PODZOL, "podzol_side", 0.5f, 0.5f, MATERIAL_DIRT, MAPCOLOR_DIRT);
+	regist(BLOCK_PODZOL, "podzol", 0.5f, 0.5f, MATERIAL_DIRT, MAPCOLOR_DIRT);
 	regist(BLOCK_COBBLESTONE, "cobblestone", 2.0f, 6.0f, MATERIAL_STONE, MAPCOLOR_STONE);
 	regist(BLOCK_OAK_PLANKS, "oak_planks", 2.0f, 6.0f, MATERIAL_WOOD, MAPCOLOR_WOOD);
 	regist(BLOCK_SPRUCE_PLANKS, "spruce_planks", 2.0f, 6.0f, MATERIAL_WOOD, MAPCOLOR_WOOD);
@@ -46,8 +46,6 @@ void Blocks_Init() {
 	for (BlockId i = 0; i < BLOCK_COUNT; ++i) {
 		if (BLOCKS[i] == NULL)
 			Crash("ERROR: Block/s missing in initializer loop, please fix. internal error.");
-
-		BLOCKS[i]->vptr->registerIcons(BLOCKS[i]);
 
 		{
 			bool sw = false;
@@ -64,6 +62,4 @@ void Blocks_Init() {
 			BLOCKS[i]->useNeighborBrightness = sw;
 		}
 	}
-
-	Texture_MapInit(&gTexMapBlock);
 }

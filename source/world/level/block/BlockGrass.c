@@ -3,7 +3,7 @@
 #include "client/Crash.h"
 #include "util/StringUtils.h"
 #include "world/World.h"
-
+/*
 u16 iconGrassTop, iconSnowSide, iconGrassOverlay;
 
 static void registerIcons(Block* block) {
@@ -18,6 +18,7 @@ static void registerIcons(Block* block) {
 	path			 = String_ParseTextureNamePrefix("block", block->name, "_side_snow");
 	iconSnowSide	 = Texture_MapAdd(path);
 }
+*/
 static u32 getBlockColor(Block* b, Direction dir, int x, int y, int z, u8 meta) {
 	if (dir == Direction_Top) {
 		/*BiomeGen* b = World_GetBiomeGenAt(x, y, z);
@@ -57,7 +58,6 @@ Block* BlockGrass_Init(BlockId id) {
 	Block* b = Block_Init("grass_block", id, 0.6f, 0.6f, MATERIAL_GRASS, MAPCOLOR_GRASS);
 	// Block_SetHasOverlay(b);
 
-	b->vptr->registerIcons = registerIcons;
 	b->vptr->getBlockColor = getBlockColor;
 	b->vptr->getItemColor  = getItemColor;
 

@@ -10,10 +10,6 @@
 static u8 getRenderType() {
 	return 0;
 }
-static void registerIcons(Block* block) {
-	const char* path = String_ParseTextureName("block", block->name);
-	block->icon		 = Texture_MapAdd(path);
-}
 static u32 getBlockColor(Block* b, Direction dir, int x, int y, int z, u8 meta) {
 	return COLOR_WHITE;
 }
@@ -23,7 +19,6 @@ static u32 getItemColor(Direction dir, u8 meta) {
 
 static BlockVtable vtable_default = {
 	.getRenderType = getRenderType,
-	.registerIcons = registerIcons,
 	.getBlockColor = getBlockColor,
 	.getItemColor  = getItemColor,
 };

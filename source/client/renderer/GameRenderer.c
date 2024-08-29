@@ -18,6 +18,7 @@
 #include <client/renderer/texture/TextureMap.h>
 #include <world/GrassColors.h>
 #include <world/level/block/Block.h>
+#include <world/level/block/states/BlockStates.h>
 
 #include "client/gui/screens/PauseScreen.h"
 #include "client/gui/screens/SelectWorldScreen.h"
@@ -80,6 +81,10 @@ void GameRenderer_Init() {
 	BiomeGenType_Init();
 
 	Item_Init();
+
+	BlockStates_Decompile();
+
+	Texture_MapInit(&gTexMapBlock);
 }
 
 void GameRenderer_Deinit() {

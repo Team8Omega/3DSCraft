@@ -61,9 +61,9 @@ static u8 sFrameCounter = 0, sFps = 0, sTickCounter = 0, sTps = 0;
 static aptHookCookie sAptHook;
 
 static bool sRunning;
-static bool sHasInited;
-static bool sHasExited;
-static char* sUsername;
+static bool sHasInited = false;
+static bool sHasExited = false;
+static const char* sUsername;
 static bool sIsNew3ds;
 static bool sIsDemo;
 static float s3dSlider;
@@ -73,13 +73,14 @@ static bool sIsIngame;
 #include "client/renderer/block/model/BlockModel.h"
 #include "resources/model/ModelBakery.h"
 
+#ifdef _DEBUG
 void testFunction() {
-	ModelBakery_GetModel("block/grass_block");
+	// ModelBakery_GetModel("block/grass_block");
 }
+#endif
 
 void gInit(const char* name, bool isNew, bool demo) {
-	sUsername = (char*)malloc(strlen(name) + 1);
-	strcpy(sUsername, name);
+	sUsername = name;  // pre-allocated.
 	sIsNew3ds = isNew;
 	sIsDemo	  = demo;
 

@@ -11,6 +11,8 @@
 #include "util/Paths.h"
 
 void Crash(const char* reason, ...) {
+	aptSetHomeAllowed(false);
+
 	if (gfxGetFramebuffer(0, 0, 0, 0) == NULL)
 		gfxInitDefault();
 
@@ -40,17 +42,21 @@ void Crash(const char* reason, ...) {
 
 		hidScanInput();
 
-		if (hidKeysDown() & KEY_START)
-			exit(EXIT_FAILURE);
+		if (hidKeysDown() & KEY_START) {
+			gStop();
+			break;
+		}
 
 #ifdef TEST_UNCRASH
-		if (hidKeysDown() & KEY_SELECT)
+		if (hidKeysDown() & KEY_SELECT) {
+			gfxExit();
+			gfxInitDefault();
+			gfxSet3D(true);
+			aptSetHomeAllowed(true);
 			break;
+		}
 #endif
 	}
-	gfxExit();
-	gfxInitDefault();
-	gfxSet3D(true);
 }
 
 void Log(const char* reason, ...) {

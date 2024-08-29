@@ -15,17 +15,29 @@ void ModelBakery_Init() {
 	vec_init(&sUnbakedBlocks);
 }
 
+void ModelBakery_Deinit() {
+	BlockModel* model;
+	while (sUnbakedBlocks.length > 0) {
+		model = &vec_pop(&sUnbakedBlocks);
+
+		linearFree(model->textures);
+		linearFree(model->elements);
+	}
+}
+
 static BlockModel loadBlockModel(const char* name) {
 	const char* path = String_ParsePackName(PACK_VANILLA, PATH_PACK_MODELS, String_AddSuffix(name, ".mp"));
 
 	BlockModel model = {};
-	if (access(path, F_OK) == -1) {
-		Crash("File not found\nModelfile missing for %s\n", name);
+	if (access(path, F_OK)) {
+		Crash("File not found\nModelfile missing for %s\nFull Path: %s", name, path);
 		return model;
 	}
 
 	mpack_tree_t levelTree = serial_get_start(path);
-	model				   = BlockModel_Deserialize(serial_get_root(&levelTree), name);
+	mpack_node_t root	   = serial_get_root(&levelTree);
+	serial_get_error(root, "load BlockModel file");
+	model = BlockModel_Deserialize(root, name);
 
 	return model;
 }
@@ -45,6 +57,9 @@ static BlockModel* getBlockModel(const char* name) {
 
 	BlockModel* parent = NULL;
 	if (model.parentName[0] != '\0') {
+		if (strncmp(model.parentName, "minecraft:", 10) == 0) {
+			memmove(model.parentName, model.parentName + 10, strlen(model.parentName) - 10 + 1);
+		}
 		parent = getBlockModel(model.parentName);
 	}
 
@@ -59,22 +74,34 @@ static BlockModel* getBlockModel(const char* name) {
 		newModel.hasAmbientOcclusion =
 			model.hasAmbientOcclusion != AMBIENTOCC_NONE ? model.hasAmbientOcclusion : parent->hasAmbientOcclusion;
 
-		if (model.elementNum > 0) {
-			newModel.elementNum = model.elementNum;
-			newModel.elements	= model.elements;
+		size_t texNum		= model.textureNum + parent->textureNum;
+		newModel.textureNum = texNum;
+		if (texNum > 0) {
+			newModel.textures = linearAlloc(sizeof(ModelTextureEntry) * texNum);
+			for (size_t i = 0; i < parent->textureNum; ++i) {
+				memcpy(&newModel.textures[i], &parent->textures[i], sizeof(ModelTextureEntry));
+			}
+			for (size_t i = 0; i < model.textureNum; ++i) {
+				memcpy(&newModel.textures[parent->textureNum + i], &model.textures[i], sizeof(ModelTextureEntry));
+			}
 		} else {
-			newModel.elementNum = parent->elementNum;
-			newModel.elements	= model.elements;
+			newModel.textures = NULL;
 		}
 
-		size_t newTexNum  = model.textureNum + parent->textureNum;
-		newModel.textures = malloc(sizeof(ModelTextureEntry) * newTexNum);
-		for (size_t i = 0; i < parent->textureNum; ++i) {
-			newModel.textures[i] = parent->textures[i];
+		size_t elmNum		= model.elementNum + parent->elementNum;
+		newModel.elementNum = elmNum;
+		if (elmNum > 0) {
+			newModel.elements = linearAlloc(sizeof(BlockElement) * elmNum);
+			for (size_t i = 0; i < parent->elementNum; ++i) {
+				memcpy(&newModel.elements[i], &parent->elements[i], sizeof(BlockElement));
+			}
+			for (size_t i = 0; i < model.elementNum; ++i) {
+				memcpy(&newModel.elements[parent->elementNum + i], &model.elements[i], sizeof(BlockElement));
+			}
+		} else {
+			newModel.elements = NULL;
 		}
-		for (size_t i = 0; i < model.textureNum; ++i) {
-			newModel.textures[parent->textureNum + i] = model.textures[i];
-		}
+
 	} else {
 		newModel = model;
 	}
@@ -152,9 +179,37 @@ static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 	baked->faces	= linearAlloc(sizeof(WorldVertex) * blockModel->faceNum * 6);
 	baked->numFaces = blockModel->faceNum;
 
+	if (!blockModel) {
+		Crash("Baking BlockModel failed!\nRecieved NULL BlockModel as input.");
+		return NULL;
+	}
+
+	if (((int)blockModel->elements < 100 && blockModel->elementNum != 0) ||
+		((int)blockModel->textures < 100 && blockModel->textureNum != 0)) {
+		Crash(
+			"Baking BlockModel failed!\nRecieved invalid BlockModel as input, either elements or textures is NULL when num value isn't 0\n"
+			"Elements: 0x%x, Num : %lu\n"
+			"Textures: 0x%x, Num : %lu\n",
+			blockModel->elements, blockModel->elementNum, blockModel->textures, blockModel->textureNum);
+		return NULL;
+	}
+	if (((int)blockModel->elements > 100 && blockModel->elementNum == 0) ||
+		((int)blockModel->textures > 100 && blockModel->textureNum == 0)) {
+		Crash(
+			"Baking BlockModel failed!\nRecieved invalid BlockModel as input, either elements or textures doesnt line up with num value\n"
+			"Elements: 0x%x, Num: %lu\n"
+			"Textures: 0x%x, Num: %lu\n",
+			blockModel->elements, blockModel->elementNum, blockModel->textures, blockModel->textureNum);
+		return NULL;
+	}
+
 	TextureIcon textures[blockModel->textureNum];
 	for (size_t i = 0; i < blockModel->textureNum; ++i) {
 		textures[i].hash = String_Hash(blockModel->textures[i].key);
+
+		if (strncmp(blockModel->textures[i].name, "minecraft:", 10) == 0) {
+			memmove(blockModel->textures[i].name, blockModel->textures[i].name + 10, strlen(blockModel->textures[i].name) - 10 + 1);
+		}
 		Texture_MapAddName(blockModel->textures[i].name, textures[i].uv);
 	}
 
@@ -191,22 +246,19 @@ static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 	}
 
 	return baked;
-}  // note: free elements and textures sometime later, let this stay as is for now. once all blocks baked, cleanup.
+}
 
 BakedModel* ModelBakery_GetModel(const char* name) {
-	u32 startTime = svcGetSystemTick();
+	// u32 startTime = svcGetSystemTick();
 
 	BlockModel* unbaked = getBlockModel(name);
 
+	/*
 	u32 endTime		  = svcGetSystemTick();
 	float elapsedMs	  = (float)(endTime - startTime) / (float)CPU_TICKS_PER_MSEC;
 	const char* light = unbaked->guiLight != GUILIGHT_NONE ? unbaked->guiLight == GUILIGHT_FRONT ? "front" : "side" : "none";
-	Crash(
-		"Loaded Model! Took %.3f ms.\n\nName: %s,\nParent: %s,\nElementNum: %lu\nGuiLight: %s\nTextures: (%lu) %s:%s %s:%s %s:%s %s:%s "
-		"%s:%s",
-		elapsedMs, unbaked->name, unbaked->parentName, unbaked->elementNum, light, unbaked->textureNum, unbaked->textures[0].key,
-		unbaked->textures[0].name, unbaked->textures[1].key, unbaked->textures[1].name, unbaked->textures[2].key, unbaked->textures[2].name,
-		unbaked->textures[3].key, unbaked->textures[3].name, unbaked->textures[4].key, unbaked->textures[4].name);
-
+	Crash("Loaded Model! Took %.3f ms.\n\nName: %s,\nParent: %s,\nElementNum: %lu\nGuiLight: %s\nTextureNum: %d\nLinearFree: %lu KB",
+		  elapsedMs, unbaked->name, unbaked->parentName, unbaked->elementNum, light, unbaked->textureNum, linearSpaceFree() >> 10);
+	*/
 	return bakeBlockModel(unbaked);
 }
