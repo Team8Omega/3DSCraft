@@ -70,12 +70,11 @@ static float s3dSlider;
 static bool sShowDebug;
 static bool sIsIngame;
 
-#include "client/renderer/block/model/BlockModel.h"
-#include "resources/model/ModelBakery.h"
+#include "world/level/block/states/BlockStates.h"
 
 #ifdef _DEBUG
 void testFunction() {
-	// ModelBakery_GetModel("block/grass_block");
+	Crash("%d", BlockState_Get(BLOCK_GRASS, 0)->index);
 }
 #endif
 
@@ -166,8 +165,6 @@ static void init() {
 	gfxSet3D(true);
 
 	aptHook(&sAptHook, onApt, (void*)NULL);
-
-	testFunction();
 
 	Region_InitPools();
 
@@ -299,6 +296,8 @@ static void runGameLoop() {
 	if (currentScreen) {
 		Screen_Tick();
 	}
+
+	testFunction();
 }
 
 void gRun() {

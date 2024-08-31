@@ -36,7 +36,9 @@ static BlockModel loadBlockModel(const char* name) {
 
 	mpack_tree_t levelTree = serial_get_start(path);
 	mpack_node_t root	   = serial_get_root(&levelTree);
-	serial_get_error(root, "load BlockModel file");
+	if (serial_get_error(root, "loading BlockModel file"))
+		Crash("Name: %s, Path: %s", name, path);
+
 	model = BlockModel_Deserialize(root, name);
 
 	return model;

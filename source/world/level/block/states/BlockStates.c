@@ -11,7 +11,7 @@
 #include "util/random/WeightedRandom.h"
 #include "world/level/block/Block.h"
 
-BlockState BLOCKSTATES[BLOCK_COUNT];
+BlockStateHolder BLOCKSTATES[BLOCK_COUNT];
 
 static BlockState getState(mpack_node_t stateNode) {
 	BlockState state = {};
@@ -21,8 +21,8 @@ static BlockState getState(mpack_node_t stateNode) {
 	if (isArray) {
 		size = serial_get_arrayLength(stateNode);
 	}
-	state.variants	  = linearAlloc(sizeof(BlockStateVariant) * size);
-	state.numVariants = size;
+	state.variants	 = linearAlloc(sizeof(BlockStateVariant) * size);
+	state.variantNum = size;
 	if (isArray) {
 		float weights[size];
 		for (size_t i = 0; i < size; ++i) {
@@ -35,14 +35,16 @@ static BlockState getState(mpack_node_t stateNode) {
 				memmove(name, name + 10, strlen(name) - 10 + 1);
 			}
 
+			serial_get_error(varNode, "Pre-BlockState_ModelLoading");
 			state.variants[i].model = ModelManager_GetModel(name);
+			serial_get_error(varNode, "Post-BlockState_ModelLoading");
 			state.variants[i].index = i;
 			if (serial_get_node(varNode, "weight").data->type == mpack_type_float)
 				weights[i] = serial_get(varNode, float, "weight", 1.f);
 			else
 				weights[i] = (float)serial_get(varNode, uint, "weight", 1);
 		}
-		state.weightedRandom = WeightedRandom_Init(size, weights);
+		state.random = WeightedRandom_Init(size, weights);
 	} else {
 		char name[64];
 		serial_get_cstr(stateNode, "model", name, 64);
@@ -53,7 +55,7 @@ static BlockState getState(mpack_node_t stateNode) {
 
 		state.variants[0].model = ModelManager_GetModel(name);
 		state.variants[0].index = 0;
-		state.weightedRandom	= NULL;
+		state.random			= NULL;
 	}
 	return state;
 }
@@ -81,13 +83,22 @@ void BlockStates_Decompile() {
 		else if (serial_has(root, "variants")) {
 			mpack_node_t data = serial_get_node(root, "variants");
 			size_t size		  = serial_get_mapLength(data);
-			for (size_t i = 0; i < size; ++i) {
+
+			BlockStateHolder holder = { .stateNum = size };
+
+			holder.states = malloc(sizeof(BlockState) * size);
+
+			for (size_t j = 0; j < size; ++j) {
 				char keyname[64];
-				serial_get_keyname(data, i, keyname, 64);
+				serial_get_keyname(data, j, keyname, 64);
+
 				mpack_node_t variant = serial_get_node(data, keyname);
 				serial_get_error(variant, "Pre-BlockState");
-				BLOCKSTATES[i] = getState(variant);
+
+				holder.states[j] = getState(variant);
 			}
+			BLOCKSTATES[i] = holder;
+
 		} else {
 			char str[64];
 			serial_get_keyname(root, 0, str, 64);
@@ -103,4 +114,12 @@ void BlockStates_Decompile() {
 	ModelBakery_Deinit();
 
 	Crash("BlockStates loaded! took %.0f ms.", elapsedMs);
+}
+
+BlockStateVariant* BlockState_Get(BlockId blockId, u8 index) {
+	BlockState* statePtr = &BLOCKSTATES[blockId].states[index];
+
+	u32 varIdx = WeightedRandom_GetRandom(statePtr->random);
+
+	return &statePtr->variants[varIdx];
 }

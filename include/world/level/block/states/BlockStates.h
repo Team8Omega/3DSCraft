@@ -11,10 +11,17 @@ typedef struct {
 
 typedef struct {
 	BlockStateVariant* variants;
-	size_t numVariants;
-	WeightedRandom* weightedRandom;
+	size_t variantNum;
+	WeightedRandom* random;
 } BlockState;
 
-extern BlockState BLOCKSTATES[BLOCK_COUNT];
+typedef struct {
+	BlockState* states;
+	size_t stateNum;
+} BlockStateHolder;
+
+extern BlockStateHolder BLOCKSTATES[BLOCK_COUNT];
 
 void BlockStates_Decompile();
+
+BlockStateVariant* BlockState_Get(BlockId blockId, u8 index);
