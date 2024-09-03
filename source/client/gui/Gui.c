@@ -2,9 +2,9 @@
 
 #include <stdarg.h>
 
-#include "client/model/VertexFmt.h"
 #include "client/player/InputData.h"
 #include "client/renderer/SpriteBatch.h"
+#include "core/VertexFmt.h"
 #include "util/math/NumberUtils.h"
 
 void Gui_Label(int x, int y, int z, float size, bool shadow, s16 color, const char* text, ...) {

@@ -9,6 +9,11 @@
 #include "util/SerialUtils.h"
 #include "util/StringUtils.h"
 
+typedef struct {
+	BlockElement* elements;
+	size_t elementNum;
+} ElementBuffer;
+
 static vec_t(BlockModel) sUnbakedBlocks;
 
 void ModelBakery_Init() {
@@ -103,7 +108,7 @@ static BlockModel* getBlockModel(const char* name) {
 		} else {
 			newModel.elements = NULL;
 		}
-		newModel.faceNum = model.faceNum + parent->faceNum;
+		newModel.vertNum = model.vertNum + parent->vertNum;
 
 	} else {
 		newModel = model;
@@ -224,8 +229,8 @@ static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 
 	u32 currentVertex = 0;
 
-	baked->numFaces = blockModel->faceNum;
-	baked->vertex	= linearAlloc(sizeof(WorldVertex*) * 6 * 6);
+	baked->numVertex = blockModel->vertNum;
+	baked->vertex	 = linearAlloc(sizeof(WorldVertex*) * 6 * 6);
 	for (size_t i = 0; i < 6 * 6; ++i) {
 		baked->vertex[i] = linearAlloc(sizeof(WorldVertex));
 		memset(baked->vertex[i], 0, sizeof(WorldVertex));
@@ -291,12 +296,12 @@ static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 			}
 
 			for (u8 k = 0; k < 6; ++k) {
-				baked->vertex[currentVertex]->pos[0] = block_lut_vertex[currentVertex][0] ? to.x : from.x;
-				baked->vertex[currentVertex]->pos[1] = block_lut_vertex[currentVertex][1] ? to.y : from.y;
-				baked->vertex[currentVertex]->pos[2] = block_lut_vertex[currentVertex][2] ? to.z : from.z;
+				baked->vertex[currentVertex]->pos.x = block_lut_vertex[currentVertex][0] ? to.x : from.x;
+				baked->vertex[currentVertex]->pos.y = block_lut_vertex[currentVertex][1] ? to.y : from.y;
+				baked->vertex[currentVertex]->pos.z = block_lut_vertex[currentVertex][2] ? to.z : from.z;
 
-				baked->vertex[currentVertex]->uv0[0] = (block_lut_uv[currentVertex][0] ? face->uv.uvs[UV_U2] : face->uv.uvs[UV_U1]) + uv[0];
-				baked->vertex[currentVertex]->uv0[1] = (block_lut_uv[currentVertex][1] ? face->uv.uvs[UV_V2] : face->uv.uvs[UV_V1]) + uv[1];
+				baked->vertex[currentVertex]->uv[0] = (block_lut_uv[currentVertex][0] ? face->uv.uvs[UV_U2] : face->uv.uvs[UV_U1]) + uv[0];
+				baked->vertex[currentVertex]->uv[1] = (block_lut_uv[currentVertex][1] ? face->uv.uvs[UV_V2] : face->uv.uvs[UV_V1]) + uv[1];
 
 				baked->vertex[currentVertex]->rgb[0] = 255;
 				baked->vertex[currentVertex]->rgb[1] = 255;

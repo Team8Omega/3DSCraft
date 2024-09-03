@@ -2,10 +2,11 @@
 
 #include "client/gui/DebugUI.h"
 #include "client/gui/font/FontLoader.h"
-#include "client/model/VertexFmt.h"
 #include "client/renderer/texture/TextureMap.h"
+#include "core/VertexFmt.h"
 #include "util/StringUtils.h"
 #include "world/level/block/Block.h"
+#include "world/level/block/states/BlockStates.h"
 
 #include <stdarg.h>
 
@@ -121,8 +122,7 @@ void SpriteBatch_PushIcon(BlockId block, u8 metadata, s16 x, s16 y, s16 z) {
 		if (i != Direction_Top && i != Direction_South && i != Direction_West)
 			continue;
 
-		s16 iconUV[2];
-		// Block_GetBlockTexture(BLOCKS[block], i, 0, 0, 0, metadata, iconUV);
+		s16* iconUV = BLOCKSTATES[block].states[metadata].variants[0].model->vertex[i]->uv;
 
 #define oneDivIconsPerRow (32768 / 8)
 #define halfTexel (6)
@@ -132,10 +132,10 @@ void SpriteBatch_PushIcon(BlockId block, u8 metadata, s16 x, s16 y, s16 z) {
 
 		for (int j = 0; j < 5; j++) {
 			int k	   = i * 6 + j;
-			C3D_FVec p = FVec3_New((float)vertices[k].pos[0] - 0.5f, (float)vertices[k].pos[1] - 0.5f, (float)vertices[k].pos[2] - 0.5f);
+			C3D_FVec p = FVec3_New((float)vertices[k].pos.x - 0.5f, (float)vertices[k].pos.y - 0.5f, (float)vertices[k].pos.z - 0.5f);
 			C3D_FVec v = Mtx_MultiplyFVec3(&iconModelMtx, p);
-			vertices[k].pos[0] = FastFloor(v.x * 20.f * guiScale) + (x + 16) * guiScale;
-			vertices[k].pos[1] = -FastFloor(v.y * 20.f * guiScale) + (y + 16) * guiScale;  // invertieren auf der Y-Achse
+			vertices[k].pos.x = FastFloor(v.x * 20.f * guiScale) + (x + 16) * guiScale;
+			vertices[k].pos.y = -FastFloor(v.y * 20.f * guiScale) + (y + 16) * guiScale;  // invertieren auf der Y-Achse
 		}
 
 		WorldVertex bottomLeft	= vertices[i * 6 + 0];
@@ -151,10 +151,10 @@ void SpriteBatch_PushIcon(BlockId block, u8 metadata, s16 x, s16 y, s16 z) {
 		else if (i == Direction_West)
 			color16 = SHADER_RGB_DARKEN(color16, 10);
 
-#define unpackP(x) (x).pos[0], (x).pos[1]
-		vec_push(&cmdList,
-				 ((Sprite){ z, texture, unpackP(topLeft), unpackP(topRight), unpackP(bottomLeft), unpackP(bottomRight), iconUV[0] / 256,
-							iconUV[1] / 256 + TEXTURE_TILESIZE, iconUV[0] / 256 + TEXTURE_TILESIZE, iconUV[1] / 256, color16 }));
+#define unpackP(x) (x).pos.x, (x).pos.y
+		vec_push(&cmdList, ((Sprite){ z, texture, topLeft.pos.x, topLeft.pos.y, topRight.pos.x, topRight.pos.y, bottomLeft.pos.x,
+									  bottomLeft.pos.y, bottomRight.pos.x, bottomRight.pos.y, iconUV[0] / 256,
+									  iconUV[1] / 256 + TEXTURE_TILESIZE, iconUV[0] / 256 + TEXTURE_TILESIZE, iconUV[1] / 256, color16 }));
 
 #undef unpackP
 	}

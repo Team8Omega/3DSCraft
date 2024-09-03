@@ -38,7 +38,13 @@ static BlockState getState(mpack_node_t stateNode) {
 			serial_get_error(varNode, "Pre-BlockState_ModelLoading");
 			state.variants[i].model = ModelManager_GetModel(name);
 			serial_get_error(varNode, "Post-BlockState_ModelLoading");
+
+			size_t vNum = state.variants[i].model->numVertex;
+			if (vNum > state.vertexNum)
+				state.vertexNum = vNum;
+
 			state.variants[i].index = i;
+
 			if (serial_get_node(varNode, "weight").data->type == mpack_type_float)
 				weights[i] = serial_get(varNode, float, "weight", 1.f);
 			else
@@ -55,7 +61,9 @@ static BlockState getState(mpack_node_t stateNode) {
 
 		state.variants[0].model = ModelManager_GetModel(name);
 		state.variants[0].index = 0;
-		state.random			= NULL;
+		state.vertexNum			= state.variants[0].model->numVertex;
+
+		state.random = NULL;
 	}
 	return state;
 }

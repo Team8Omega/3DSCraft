@@ -12,6 +12,7 @@ typedef struct {
 typedef struct {
 	BlockStateVariant* variants;
 	size_t variantNum;
+	size_t vertexNum;
 	WeightedRandom* random;
 } BlockState;
 

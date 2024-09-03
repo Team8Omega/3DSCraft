@@ -57,7 +57,6 @@ void GameRenderer_Init() {
 	Shader_Init(&shaderWorld, world_shbin, world_shbin_size, false);
 	AttrInfo_Init(&shaderWorld.vertexAttribs);
 	AttrInfo_AddLoader(&shaderWorld.vertexAttribs, 0, GPU_FLOAT, 3);
-	AttrInfo_AddLoader(&shaderWorld.vertexAttribs, 1, GPU_SHORT, 2);
 	AttrInfo_AddLoader(&shaderWorld.vertexAttribs, 2, GPU_SHORT, 2);
 	AttrInfo_AddLoader(&shaderWorld.vertexAttribs, 3, GPU_UNSIGNED_BYTE, 3);
 	// Gui Shader

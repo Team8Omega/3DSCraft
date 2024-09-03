@@ -105,7 +105,7 @@ BlockModel BlockModel_Deserialize(mpack_node_t root, const char* name) {
 
 	BlockModel obj;
 	obj.hash	= String_Hash(name);
-	obj.faceNum = getFaceNum();
+	obj.vertNum = getFaceNum() * 6;
 	strcpy(obj.name, name);
 	strcpy(obj.parentName, parentName);
 	obj.hasAmbientOcclusion = hasAmbientOcclusion;

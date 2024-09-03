@@ -10,8 +10,22 @@
 #include "client/Game.h"
 #include "util/Paths.h"
 
+static char sharedReason[512] = { 0 };
+
+void Crash_Check() {
+	if (sharedReason[0] != 0)
+		Crash((const char*)sharedReason);
+}
+
 void Crash(const char* reason, ...) {
 	aptSetHomeAllowed(false);
+
+	if (threadGetHandle(threadGetCurrent()) != gThreadMain) {
+		va_list vl;
+		va_start(vl, reason);
+		vsnprintf((char*)sharedReason, sizeof(sharedReason), reason, vl);
+		return;
+	}
 
 	if (gfxGetFramebuffer(0, 0, 0, 0) == NULL)
 		gfxInitDefault();

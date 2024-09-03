@@ -1,6 +1,6 @@
 #pragma once
 
-#include "client/model/VertexFmt.h"
+#include "core/VertexFmt.h"
 #include "resources/model/BakedModel.h"
 
 void ModelManager_Init();

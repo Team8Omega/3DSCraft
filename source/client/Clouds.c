@@ -1,6 +1,6 @@
 #include "client/renderer/Clouds.h"
 
-#include "client/model/VertexFmt.h"
+#include "core/VertexFmt.h"
 
 #include <sino/sino.h>
 #include <stdint.h>
@@ -10,12 +10,12 @@
 #include <stdio.h>
 
 static WorldVertex vertices[] = {
-	{ { -1, 0, -1 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { 1, 0, -1 }, { INT16_MAX, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { 1, 0, 1 }, { INT16_MAX, INT16_MAX }, { 0, 0 }, { 255, 255, 255 } },
-	{ { 1, 0, 1 }, { INT16_MAX, INT16_MAX }, { 0, 0 }, { 255, 255, 255 } },
-	{ { -1, 0, 1 }, { 0, INT16_MAX }, { 0, 0 }, { 255, 255, 255 } },
-	{ { -1, 0, -1 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { -1, 0, -1 } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { 1, 0, -1 } }, { INT16_MAX, 0 }, { 255, 255, 255 } },
+	{ { { 1, 0, 1 } }, { INT16_MAX, INT16_MAX }, { 255, 255, 255 } },
+	{ { { 1, 0, 1 } }, { INT16_MAX, INT16_MAX }, { 255, 255, 255 } },
+	{ { { -1, 0, 1 } }, { 0, INT16_MAX }, { 255, 255, 255 } },
+	{ { { -1, 0, -1 } }, { 0, 0 }, { 255, 255, 255 } },
 };
 
 static C3D_Tex texture;
@@ -58,28 +58,28 @@ void Clouds_Tick(float tx, float ty, float tz) {
 
 	const int stepX = 8;
 	const int stepZ = 14;
-	if (((int)cloudVBO[0].uv0[0]) - stepX < -INT16_MAX) {
+	if (((int)cloudVBO[0].uv[0]) - stepX < -INT16_MAX) {
 		for (int i = 0; i < 6; i++) {
-			if (cloudVBO[i].pos[0] == -1)
-				cloudVBO[i].uv0[0] = 0;
+			if (cloudVBO[i].pos.x == -1)
+				cloudVBO[i].uv[0] = 0;
 			else
-				cloudVBO[i].uv0[0] = INT16_MAX;
+				cloudVBO[i].uv[0] = INT16_MAX;
 		}
 	} else {
 		for (int i = 0; i < 6; i++) {
-			cloudVBO[i].uv0[0] -= stepX;
+			cloudVBO[i].uv[0] -= stepX;
 		}
 	}
-	if (((int)cloudVBO[0].uv0[1]) + stepZ > INT16_MAX) {
+	if (((int)cloudVBO[0].uv[1]) + stepZ > INT16_MAX) {
 		for (int i = 0; i < 6; i++) {
-			if (cloudVBO[i].pos[2] == 1)
-				cloudVBO[i].uv0[1] = -INT16_MAX;
+			if (cloudVBO[i].pos.z == 1)
+				cloudVBO[i].uv[1] = -INT16_MAX;
 			else
-				cloudVBO[i].uv0[1] = 0;
+				cloudVBO[i].uv[1] = 0;
 		}
 	} else {
 		for (int i = 0; i < 6; i++) {
-			cloudVBO[i].uv0[1] += stepZ;
+			cloudVBO[i].uv[1] += stepZ;
 		}
 	}
 }
@@ -100,7 +100,7 @@ void Clouds_Render(int projUniform, C3D_Mtx* projectionview) {
 
 	C3D_BufInfo* bufInfo = C3D_GetBufInfo();
 	BufInfo_Init(bufInfo);
-	BufInfo_Add(bufInfo, cloudVBO, sizeof(WorldVertex), 4, 0x3210);
+	BufInfo_Add(bufInfo, cloudVBO, sizeof(WorldVertex), 3, 0x3210);
 
 	C3D_DrawArrays(GPU_TRIANGLES, 0, 6);
 

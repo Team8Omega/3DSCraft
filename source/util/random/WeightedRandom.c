@@ -2,11 +2,14 @@
 
 #include <stdlib.h>
 
-static RandomSeed seed = 0;
+#include "client/Crash.h"
+#include "util/random/Random.h"
+
+static Random* gen = NULL;
 
 WeightedRandom* WeightedRandom_Init(size_t numEntry, float entries[]) {
-	if (!seed)
-		seed = RandomSeed_Gen();
+	if (!gen)
+		gen = Random_Init(100);
 
 	WeightedRandom* ran = malloc(sizeof(WeightedRandom));
 
@@ -28,15 +31,14 @@ WeightedRandom* WeightedRandom_Init(size_t numEntry, float entries[]) {
 }
 
 u32 WeightedRandom_GetRandom(WeightedRandom* ran) {
-	srand(seed);
+	u32 result = Random_Next(gen);
 
-	u32 result = rand() % 100;
+	for (u32 i = 0; i < ran->length; ++i) {
+		if (ran->vals[i] > result)
+			return i;
 
-	for (size_t i = 0; i < ran->length; ++i) {
 		result -= ran->vals[i];
-
-		if (result < 0) {
-			return (u32)i;
-		}
 	}
+
+	return 0;
 }

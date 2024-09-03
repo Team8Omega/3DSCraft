@@ -5,11 +5,11 @@
 #include "client/Game.h"
 #include "client/gui/Gui.h"
 #include "client/gui/screens/SelectWorldScreen.h"
-#include "client/model/VertexFmt.h"
 #include "client/renderer/CubeMap.h"
 #include "client/renderer/Shader.h"
 #include "client/renderer/SpriteBatch.h"
 #include "client/renderer/texture/TextureMap.h"
+#include "core/VertexFmt.h"
 
 #include "Globals.h"
 

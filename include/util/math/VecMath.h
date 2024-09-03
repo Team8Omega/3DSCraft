@@ -68,4 +68,8 @@ static inline float3 f3_neg(float3 vec) {
 	return f3_new(-vec.x, -vec.y, -vec.z);
 }
 
+static inline bool f3_cmp(float3 a, float3 b) {
+	return a.x == b.x && a.y == b.y && a.z == b.z;
+}
+
 #define f3_unpack(v) (v).x, (v).y, (v).z

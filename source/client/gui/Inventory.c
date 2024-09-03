@@ -1,8 +1,8 @@
 #include "client/gui/Inventory.h"
 
 #include "client/gui/Gui.h"
-#include "client/model/VertexFmt.h"
 #include "client/renderer/SpriteBatch.h"
+#include "core/VertexFmt.h"
 
 static ItemStack *sourceStack = NULL, *proposedSourceStack = NULL;
 

@@ -5,6 +5,8 @@
 #include "world/chunk/ChunkWorker.h"
 #include "world/storage/SaveManager.h"
 
+extern Handle gThreadMain;
+
 void gInit(const char* username, bool isNew3ds, bool isDemo);
 void gRun();
 void gDisplayPauseMenu();

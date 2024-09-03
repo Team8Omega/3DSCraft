@@ -45,6 +45,8 @@ bool gIsNew3ds;
 
 bool gSkipWorldRender;
 
+Handle gThreadMain;
+
 static ChunkWorker sChunkWorker;
 static SuperFlatGen sFlatGen;
 static SmeaGen smeaGen;
@@ -74,7 +76,7 @@ static bool sIsIngame;
 
 #ifdef _DEBUG
 void testFunction() {
-	Crash("%d", BlockState_Get(BLOCK_GRASS, 0)->index);
+	// Crash("%d", BlockState_Get(BLOCK_GRASS, 0)->index);
 }
 #endif
 
@@ -160,6 +162,8 @@ static void init() {
 
 	sHasInited = true;
 
+	gThreadMain = threadGetHandle(threadGetCurrent());
+
 	gfxInitDefault();
 	osSetSpeedupEnable(true);  // Enable N3DS 804MHz operation, where available
 	gfxSet3D(true);
@@ -240,6 +244,8 @@ static void runTick(float tickDt) {
 }
 
 static void runGameLoop() {
+	Crash_Check();
+
 	sIsIngame = gWorld && gWorld->active && !currentScreen;
 
 #ifdef _DEBUG
@@ -296,8 +302,6 @@ static void runGameLoop() {
 	if (currentScreen) {
 		Screen_Tick();
 	}
-
-	testFunction();
 }
 
 void gRun() {

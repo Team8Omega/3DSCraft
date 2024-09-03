@@ -1,8 +1,8 @@
 #include "client/renderer/CubeMap.h"
 
 #include "client/Crash.h"
-#include "client/model/VertexFmt.h"
 #include "client/renderer/texture/TextureMap.h"
+#include "core/VertexFmt.h"
 #include "util/Paths.h"
 #include "util/math/NumberUtils.h"
 
@@ -12,52 +12,47 @@
 #define vUV ((1 << 15) - 1)
 const WorldVertex vertices[6 * 6] = {
 	// Face 1
-	{ { -vSize, -vSize, vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
-	{ { vSize, -vSize, vSize }, { 0, vUV }, { 0, 0 }, { 255, 255, 255 } },
-	{ { vSize, vSize, vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { -vSize, -vSize, vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
-	{ { vSize, vSize, vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { -vSize, vSize, vSize }, { vUV, 0 }, { 0, 0 }, { 255, 255, 255 } },
-
-	// Face 2
-	{ { -vSize, -vSize, -vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
-	{ { -vSize, -vSize, vSize }, { 0, vUV }, { 0, 0 }, { 255, 255, 255 } },
-	{ { -vSize, vSize, vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { -vSize, -vSize, -vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
-	{ { -vSize, vSize, vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { -vSize, vSize, -vSize }, { vUV, 0 }, { 0, 0 }, { 255, 255, 255 } },
-
-	// Face 3
-	{ { vSize, -vSize, -vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
-	{ { -vSize, -vSize, -vSize }, { 0, vUV }, { 0, 0 }, { 255, 255, 255 } },
-	{ { -vSize, vSize, -vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { vSize, -vSize, -vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
-	{ { -vSize, vSize, -vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { vSize, vSize, -vSize }, { vUV, 0 }, { 0, 0 }, { 255, 255, 255 } },
-
-	// Face 4
-	{ { vSize, -vSize, vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
-	{ { vSize, -vSize, -vSize }, { 0, vUV }, { 0, 0 }, { 255, 255, 255 } },
-	{ { vSize, vSize, -vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { vSize, -vSize, vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
-	{ { vSize, vSize, -vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { vSize, vSize, vSize }, { vUV, 0 }, { 0, 0 }, { 255, 255, 255 } },
-
-	// Face 5
-	{ { -vSize, vSize, vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
-	{ { vSize, vSize, vSize }, { 0, vUV }, { 0, 0 }, { 255, 255, 255 } },
-	{ { vSize, vSize, -vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { -vSize, vSize, vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
-	{ { vSize, vSize, -vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { -vSize, vSize, -vSize }, { vUV, 0 }, { 0, 0 }, { 255, 255, 255 } },
-
-	// Face 6
-	{ { -vSize, -vSize, -vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
-	{ { vSize, -vSize, -vSize }, { 0, vUV }, { 0, 0 }, { 255, 255, 255 } },
-	{ { vSize, -vSize, vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { -vSize, -vSize, -vSize }, { vUV, vUV }, { 0, 0 }, { 255, 255, 255 } },
-	{ { vSize, -vSize, vSize }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { -vSize, -vSize, vSize }, { vUV, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { -vSize, -vSize, vSize } }, { vUV, vUV }, { 255, 255, 255 } },
+	{ { { vSize, -vSize, vSize } }, { 0, vUV }, { 255, 255, 255 } },
+	{ { { vSize, vSize, vSize } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { -vSize, -vSize, vSize } }, { vUV, vUV }, { 255, 255, 255 } },
+	{ { { vSize, vSize, vSize } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { -vSize, vSize, vSize } }, { vUV, 0 }, { 255, 255, 255 } },
+	//{ Face 2
+	{ { { -vSize, -vSize, -vSize } }, { vUV, vUV }, { 255, 255, 255 } },
+	{ { { -vSize, -vSize, vSize } }, { 0, vUV }, { 255, 255, 255 } },
+	{ { { -vSize, vSize, vSize } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { -vSize, -vSize, -vSize } }, { vUV, vUV }, { 255, 255, 255 } },
+	{ { { -vSize, vSize, vSize } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { -vSize, vSize, -vSize } }, { vUV, 0 }, { 255, 255, 255 } },
+	//{ Face 3
+	{ { { vSize, -vSize, -vSize } }, { vUV, vUV }, { 255, 255, 255 } },
+	{ { { -vSize, -vSize, -vSize } }, { 0, vUV }, { 255, 255, 255 } },
+	{ { { -vSize, vSize, -vSize } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { vSize, -vSize, -vSize } }, { vUV, vUV }, { 255, 255, 255 } },
+	{ { { -vSize, vSize, -vSize } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { vSize, vSize, -vSize } }, { vUV, 0 }, { 255, 255, 255 } },
+	//{ Face 4
+	{ { { vSize, -vSize, vSize } }, { vUV, vUV }, { 255, 255, 255 } },
+	{ { { vSize, -vSize, -vSize } }, { 0, vUV }, { 255, 255, 255 } },
+	{ { { vSize, vSize, -vSize } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { vSize, -vSize, vSize } }, { vUV, vUV }, { 255, 255, 255 } },
+	{ { { vSize, vSize, -vSize } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { vSize, vSize, vSize } }, { vUV, 0 }, { 255, 255, 255 } },
+	//{ Face 5
+	{ { { -vSize, vSize, vSize } }, { vUV, vUV }, { 255, 255, 255 } },
+	{ { { vSize, vSize, vSize } }, { 0, vUV }, { 255, 255, 255 } },
+	{ { { vSize, vSize, -vSize } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { -vSize, vSize, vSize } }, { vUV, vUV }, { 255, 255, 255 } },
+	{ { { vSize, vSize, -vSize } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { -vSize, vSize, -vSize } }, { vUV, 0 }, { 255, 255, 255 } },
+	//{ Face 6
+	{ { { -vSize, -vSize, -vSize } }, { vUV, vUV }, { 255, 255, 255 } },
+	{ { { vSize, -vSize, -vSize } }, { 0, vUV }, { 255, 255, 255 } },
+	{ { { vSize, -vSize, vSize } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { -vSize, -vSize, -vSize } }, { vUV, vUV }, { 255, 255, 255 } },
+	{ { { vSize, -vSize, vSize } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { -vSize, -vSize, vSize } }, { vUV, 0 }, { 255, 255, 255 } },
 };
 
 static int projUniform;
@@ -120,7 +115,7 @@ void CubeMap_Render() {
 
 	C3D_BufInfo* bufInfo = C3D_GetBufInfo();
 	BufInfo_Init(bufInfo);
-	BufInfo_Add(bufInfo, cubeVBO, sizeof(WorldVertex), 4, 0x3210);
+	BufInfo_Add(bufInfo, cubeVBO, sizeof(WorldVertex), 3, 0x3210);
 
 	// ToDo: find Alternative method to disable fog
 	C3D_FogGasMode(false, 0, false);

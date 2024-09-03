@@ -4,6 +4,7 @@
 #include "client/renderer/VBOCache.h"
 #include "core/Direction.h"
 #include "world/level/block/Block.h"
+#include "world/level/block/states/BlockStates.h"
 
 #include "client/player/Player.h"
 
@@ -14,47 +15,47 @@
 
 const WorldVertex block_sides_lut[] = {
 	// West
-	{ { 0, 0, 0 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { 0, 0, 16 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
-	{ { 0, 16, 16 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
-	{ { 0, 16, 16 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
-	{ { 0, 16, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
-	{ { 0, 0, 0 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	// East
-	{ { 16, 0, 0 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
-	{ { 16, 16, 0 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
-	{ { 16, 16, 16 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
-	{ { 16, 16, 16 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
-	{ { 16, 0, 16 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { 16, 0, 0 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
-	// Down
-	{ { 0, 0, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
-	{ { 16, 0, 0 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
-	{ { 16, 0, 16 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
-	{ { 16, 0, 16 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
-	{ { 0, 0, 16 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { 0, 0, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
-	// Up
-	{ { 0, 16, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
-	{ { 0, 16, 16 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { 16, 16, 16 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
-	{ { 16, 16, 16 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
-	{ { 16, 16, 0 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
-	{ { 0, 16, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
-	// North
-	{ { 0, 0, 0 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
-	{ { 0, 16, 0 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
-	{ { 16, 16, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
-	{ { 16, 16, 0 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
-	{ { 16, 0, 0 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { 0, 0, 0 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
-	// South
-	{ { 0, 0, 16 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
-	{ { 16, 0, 16 }, { 1, 0 }, { 1, 0 }, { 255, 255, 255 } },
-	{ { 16, 16, 16 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
-	{ { 16, 16, 16 }, { 1, 1 }, { 1, 1 }, { 255, 255, 255 } },
-	{ { 0, 16, 16 }, { 0, 1 }, { 0, 1 }, { 255, 255, 255 } },
-	{ { 0, 0, 16 }, { 0, 0 }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { 0, 0, 0 } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { 0, 0, 16 } }, { 1, 0 }, { 255, 255, 255 } },
+	{ { { 0, 16, 16 } }, { 1, 1 }, { 255, 255, 255 } },
+	{ { { 0, 16, 16 } }, { 1, 1 }, { 255, 255, 255 } },
+	{ { { 0, 16, 0 } }, { 0, 1 }, { 255, 255, 255 } },
+	{ { { 0, 0, 0 } }, { 0, 0 }, { 255, 255, 255 } },
+	//{ East
+	{ { { 16, 0, 0 } }, { 1, 0 }, { 255, 255, 255 } },
+	{ { { 16, 16, 0 } }, { 1, 1 }, { 255, 255, 255 } },
+	{ { { 16, 16, 16 } }, { 0, 1 }, { 255, 255, 255 } },
+	{ { { 16, 16, 16 } }, { 0, 1 }, { 255, 255, 255 } },
+	{ { { 16, 0, 16 } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { 16, 0, 0 } }, { 1, 0 }, { 255, 255, 255 } },
+	//{ Down
+	{ { { 0, 0, 0 } }, { 0, 1 }, { 255, 255, 255 } },
+	{ { { 16, 0, 0 } }, { 1, 1 }, { 255, 255, 255 } },
+	{ { { 16, 0, 16 } }, { 1, 0 }, { 255, 255, 255 } },
+	{ { { 16, 0, 16 } }, { 1, 0 }, { 255, 255, 255 } },
+	{ { { 0, 0, 16 } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { 0, 0, 0 } }, { 0, 1 }, { 255, 255, 255 } },
+	//{ Up
+	{ { { 0, 16, 0 } }, { 0, 1 }, { 255, 255, 255 } },
+	{ { { 0, 16, 16 } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { 16, 16, 16 } }, { 1, 0 }, { 255, 255, 255 } },
+	{ { { 16, 16, 16 } }, { 1, 0 }, { 255, 255, 255 } },
+	{ { { 16, 16, 0 } }, { 1, 1 }, { 255, 255, 255 } },
+	{ { { 0, 16, 0 } }, { 0, 1 }, { 255, 255, 255 } },
+	//{ North
+	{ { { 0, 0, 0 } }, { 1, 0 }, { 255, 255, 255 } },
+	{ { { 0, 16, 0 } }, { 1, 1 }, { 255, 255, 255 } },
+	{ { { 16, 16, 0 } }, { 0, 1 }, { 255, 255, 255 } },
+	{ { { 16, 16, 0 } }, { 0, 1 }, { 255, 255, 255 } },
+	{ { { 16, 0, 0 } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { 0, 0, 0 } }, { 1, 0 }, { 255, 255, 255 } },
+	//{ South
+	{ { { 0, 0, 16 } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { 16, 0, 16 } }, { 1, 0 }, { 255, 255, 255 } },
+	{ { { 16, 16, 16 } }, { 1, 1 }, { 255, 255, 255 } },
+	{ { { 16, 16, 16 } }, { 1, 1 }, { 255, 255, 255 } },
+	{ { { 0, 16, 16 } }, { 0, 1 }, { 255, 255, 255 } },
+	{ { { 0, 0, 16 } }, { 0, 0 }, { 255, 255, 255 } },
 };
 
 typedef struct {
@@ -67,16 +68,13 @@ typedef struct {
 
 static vec_t(VBOUpdate) vboUpdates;
 
-#define MAX_FACES_PER_CLUSTER (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE / 2 * 6)
-
 typedef struct {
 	s8 x, y, z;
-	Direction direction;
 	BlockId block;
 	s8 ao;
 	u8 metadata;
 	bool transparent;
-} Face;
+} Model;
 
 static inline BlockId fastBlockFetch(Chunk* chunk, Cluster* cluster, int x, int y, int z) {
 	return (x < 0 || y < 0 || z < 0 || x >= CHUNK_SIZE || y >= CHUNK_SIZE || z >= CHUNK_SIZE)
@@ -138,15 +136,21 @@ void PolyGen_Harvest() {
 	LightLock_Unlock(&updateLock);
 }
 
-static Face faceBuffer[MAX_FACES_PER_CLUSTER];
-static int currentFace;
-static int transparentFaces;
+static Model modelBuffer[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
+static u32 currentModel;
+static u32 numVertexOpaque;
+static u32 numVertexTransparent;
 static u8 floodfill_visited[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
 
-static inline void addFace(int x, int y, int z, Direction dir, BlockId block, u8 metadata, int ao, bool transparent) {
+static inline void addMesh(bool isSolidBlock, int x, int y, int z, BlockId block, u8 metadata, int ao, bool transparent) {
 	if (x >= 0 && y >= 0 && z >= 0 && x < CHUNK_SIZE && y < CHUNK_SIZE && z < CHUNK_SIZE) {
-		faceBuffer[currentFace++] = (Face){ x, y, z, dir, block, ao, metadata, transparent };
-		transparentFaces += transparent;
+		modelBuffer[currentModel++] = (Model){ x, y, z, block, ao, metadata, transparent };
+
+		if (transparent) {
+			numVertexTransparent += BLOCKSTATES[block].states[metadata].vertexNum;
+		} else {
+			numVertexOpaque += BLOCKSTATES[block].states[metadata].vertexNum;
+		}
 	}
 }
 
@@ -174,10 +178,11 @@ static u16 floodFill(Cluster* cluster, int x, int y, int z, Direction entrySide0
 			if (x < 0 || y < 0 || z < 0 || x >= CHUNK_SIZE || y >= CHUNK_SIZE || z >= CHUNK_SIZE) {
 				exitPoints[i] = true;
 			} else {
-				if (!BLOCKS[cluster->blocks[x][y][z]])
+				if (cluster->blocks[x][y][z] > BLOCK_COUNT - 1)
 					World_SetBlock(x, y, z, BLOCK_AIR);
 
-				if (!(BLOCKS[cluster->blocks[x][y][z]]->opaque) && !(floodfill_visited[x][y][z] & 1)) {
+				if ((!(BLOCKS[cluster->blocks[x][y][z]]->opaque) || !BLOCKS[cluster->blocks[x][y][z]]->solidBlock) &&
+					!(floodfill_visited[x][y][z] & 1)) {
 					floodfill_visited[x][y][z] |= 1;
 					vec_push(&floodfill_queue, ((QueueElement){ x, y, z }));
 				}
@@ -186,8 +191,9 @@ static u16 floodFill(Cluster* cluster, int x, int y, int z, Direction entrySide0
 					cluster->blocks[x][y][z] != BLOCK_AIR) {
 					u8 meta			 = cluster->metadataLight[x][z][z] & 0xf;
 					bool transparent = Block_GetMaterial(BLOCKS[cluster->blocks[x][z][z]])->transculent;
+					bool solidBlock	 = BLOCKS[cluster->blocks[x][z][z]]->solidBlock;
 
-					addFace(x, y, z, DirectionOpposite[i], cluster->blocks[x][y][z], meta, 0, transparent);
+					addMesh(solidBlock, x, y, z, cluster->blocks[x][y][z], meta, 0, transparent);
 				}
 			}
 		}
@@ -200,8 +206,9 @@ static u16 floodFill(Cluster* cluster, int x, int y, int z, Direction entrySide0
 					seeThrough |= ChunkSeeThrough(i, j);
 	return seeThrough;
 }
-
+static int test;
 void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
+	test++;
 	for (int i = 0; i < CLUSTER_PER_CHUNK; i++) {
 		Cluster* cluster = &item.chunk->clusters[i];
 
@@ -211,8 +218,9 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 		cluster->vboRevision	= cluster->revision;
 		cluster->forceVBOUpdate = false;
 
-		currentFace		 = 0;
-		transparentFaces = 0;
+		currentModel		 = 0;
+		numVertexOpaque		 = 0;
+		numVertexTransparent = 0;
 
 		u16 seeThrough = 0;
 
@@ -227,13 +235,14 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 					Direction yDir = y == 0 ? Direction_Bottom : y == CHUNK_SIZE - 1 ? Direction_Top : Direction_None;
 
 					Block* block = BLOCKS[cluster->blocks[x][y][z]];
-					if (!block->opaque)
+					bool solid	 = block->solidBlock;
+					if (!block->opaque || !solid)
 						seeThrough |= floodFill(cluster, x, y, z, xDir, yDir, zDir);
 
 					Block* blockNeighbor = BLOCKS[fastBlockFetch(item.chunk, cluster, x + (!x ? -1 : 1), y, z)];
 
 					if (!blockNeighbor->opaque && cluster->blocks[x][y][z] != BLOCK_AIR) {
-						addFace(x, y, z, xDir, cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf, 0,
+						addMesh(solid, x, y, z, cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf, 0,
 								Block_GetMaterial(block)->transculent);
 					}
 				}
@@ -249,13 +258,14 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 					Direction zDir = z == 0 ? Direction_South : x == CHUNK_SIZE - 1 ? Direction_North : Direction_None;
 
 					Block* block = BLOCKS[cluster->blocks[x][y][z]];
-					if (!block->opaque)
+					bool solid	 = block->solidBlock;
+					if (!block->opaque || !solid)
 						seeThrough |= floodFill(cluster, x, y, z, xDir, yDir, zDir);
 
 					Block* blockNeighbor = BLOCKS[fastBlockFetch(item.chunk, cluster, x, y + (!y ? -1 : 1), z)];
 
 					if (!blockNeighbor->opaque && cluster->blocks[x][y][z] != BLOCK_AIR) {
-						addFace(x, y, z, yDir, cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf, 0,
+						addMesh(solid, x, y, z, cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf, 0,
 								Block_GetMaterial(block)->transculent);
 					}
 				}
@@ -271,13 +281,14 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 					Direction yDir = y == 0 ? Direction_Bottom : y == CHUNK_SIZE ? Direction_Top : Direction_None;
 
 					Block* block = BLOCKS[cluster->blocks[x][y][z]];
-					if (!block->opaque)
+					bool solid	 = block->solidBlock;
+					if (!block->opaque || !solid)
 						seeThrough |= floodFill(cluster, x, y, z, xDir, yDir, zDir);
 
 					Block* blockNeighbor = BLOCKS[fastBlockFetch(item.chunk, cluster, x, y, z + (!z ? -1 : 1))];
 
 					if (!blockNeighbor->opaque && cluster->blocks[x][y][z] != BLOCK_AIR) {
-						addFace(x, y, z, zDir, cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf, 0,
+						addMesh(solid, x, y, z, cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf, 0,
 								Block_GetMaterial(block)->transculent);
 					}
 				}
@@ -289,54 +300,81 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 			floodFill(cluster, px, py, pz, 0, 0, 0);
 		}
 
-		int transparentVertices = transparentFaces * 6;
-		int opaqueVertices		= (currentFace * 6) - transparentVertices;
 		VBOUpdate update;
 
-		if (currentFace) {
-			VBO_Block memBlock;
-			if (opaqueVertices > 0)
-				memBlock = VBO_Alloc(opaqueVertices * sizeof(WorldVertex));
-			VBO_Block transparentMem;
-			if (transparentFaces > 0)
-				transparentMem = VBO_Alloc(transparentVertices * sizeof(WorldVertex));
+		if (currentModel) {
+			VBO_Block opaqueMem;
+			if (numVertexOpaque > 0) {
+				opaqueMem = VBO_Alloc(numVertexOpaque * sizeof(WorldVertex));
 
-			WorldVertex* opaqueData		 = memBlock.memory;
+				if (!opaqueMem.memory)
+					return Crash("Failed Allocating VBO Opaque");
+			} else if (!numVertexTransparent) {
+				return Crash("Models are counted while Vertex are 0.\nModelNum:%d Opaque:%d Transparent:%d", currentModel, numVertexOpaque,
+							 numVertexTransparent);
+			}
+
+			VBO_Block transparentMem;
+			if (numVertexTransparent > 0) {
+				transparentMem = VBO_Alloc(numVertexTransparent * sizeof(WorldVertex));
+
+				if (!transparentMem.memory)
+					return Crash("Failed Allocating VBO Transparent");
+			}
+
+			WorldVertex* opaqueData		 = opaqueMem.memory;
 			WorldVertex* transparentData = transparentMem.memory;
-			for (int j = 0; j < currentFace; j++) {
-				Face face = faceBuffer[j];
+
+			for (int j = 0; j < currentModel; j++) {
+				Model face = modelBuffer[j];
 
 				int offsetX = face.x + item.chunk->x * CHUNK_SIZE;
 				int offsetZ = face.z + item.chunk->z * CHUNK_SIZE;
 				int offsetY = face.y + i * CHUNK_SIZE;
 
 				WorldVertex* data = face.transparent ? transparentData : opaqueData;
-				memcpy(data, &block_sides_lut[face.direction * 6], sizeof(WorldVertex) * 6);
 
-#define oneDivIconsPerRow (32768 >> 3)
+				WeightedRandom* random = BLOCKSTATES[face.block].states[face.metadata].random;
+				if (!random)
+					return Crash("%d, RANDOM IS NULL\nModelNum:%d Opaque:%d Transparent:%d Type:%d", test, currentModel, numVertexOpaque,
+								 numVertexTransparent, face.block);
+				BlockStateVariant* blockVar = &BLOCKSTATES[face.block].states[face.metadata].variants[WeightedRandom_GetRandom(random)];
+				if (!blockVar)
+					return Crash("%d, VAR IS NULL\nModelNum:%d Opaque:%d Transparent:%d Type:%d", test, currentModel, numVertexOpaque,
+								 numVertexTransparent, face.block);
+				if (!data)
+					return Crash("%d, DATA IS NULL \nModelNum:%d Opaque:%d Transparent:%d Type:%d", j, currentModel, numVertexOpaque,
+								 numVertexTransparent, face.block);
 
-				for (int k = 0; k < 6; k++) {
-					data[k].pos[0] += offsetX << 4;
-					data[k].pos[1] += offsetY << 4;
-					data[k].pos[2] += offsetZ << 4;
+				size_t size = blockVar->model->numVertex;
+
+				if (size == 0)
+					continue;
+
+				memcpy(data, blockVar->model->vertex, sizeof(WorldVertex) * size);
+
+				for (int k = 0; k < size; k++) {
+					data[k].pos.x += offsetX << 4;
+					data[k].pos.y += offsetY << 4;
+					data[k].pos.z += offsetZ << 4;
 				}
 				if (face.transparent)
-					transparentData += 6;
+					transparentData += size;
 				else
-					opaqueData += 6;
+					opaqueData += size;
 			}
 
-			update.vbo			  = memBlock;
+			update.vbo			  = opaqueMem;
 			update.transparentVBO = transparentMem;
 		}
 
 		update.x				   = item.chunk->x;
 		update.y				   = i;
 		update.z				   = item.chunk->z;
-		update.vertices			   = opaqueVertices;
+		update.vertices			   = numVertexOpaque;
 		update.delay			   = 0;
 		update.seeThrough		   = seeThrough;
-		update.transparentVertices = transparentVertices;
+		update.transparentVertices = numVertexTransparent;
 
 		LightLock_Lock(&updateLock);
 		vec_push(&vboUpdates, update);
