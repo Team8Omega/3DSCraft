@@ -198,7 +198,7 @@ static void init() {
 
 	// ndspInit();
 	/*sBackgroundSound.background = true;
-	sBackgroundSound.path		= String_ParsePackName(PACK_VANILLA, PATH_PACK_SOUNDS, "music/1.opus");
+	sBackgroundSound.path		= String_ParsePackName(PACK_VANILLA, PATH_PACK_SOUNDS, "music/1.opus", NULL);
 	Sound_PlayOpus(&sBackgroundSound);
 */
 	Cube_InitVBOs();  // needs to be called AFTER all cubes have been built.

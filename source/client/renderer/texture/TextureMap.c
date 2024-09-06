@@ -183,7 +183,7 @@ void Texture_MapInit(Texture_Map* map) {
 	int c				 = 0;
 	while (filename != NULL && c < (TEXTURE_TILENUM) && filei < pathNum) {
 		if (access(filename, F_OK))
-			filename = String_ParsePackName(PACK_VANILLA, PATH_PACK_TEXTURES, filename);
+			filename = String_ParsePackName(PACK_VANILLA, PATH_PACK_TEXTURES, String_AddSuffix(filename, ".png"));
 
 		u32* image;
 		unsigned int w, h;

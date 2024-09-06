@@ -17,7 +17,7 @@
 ; Inputs
 .alias in_xyz		v0
 .alias in_uv 		v1
-.alias in_rgb		v3
+.alias in_rgb		v2
 
 .entry vmain
 .proc vmain

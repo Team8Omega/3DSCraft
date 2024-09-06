@@ -57,8 +57,8 @@ void GameRenderer_Init() {
 	Shader_Init(&shaderWorld, world_shbin, world_shbin_size, false);
 	AttrInfo_Init(&shaderWorld.vertexAttribs);
 	AttrInfo_AddLoader(&shaderWorld.vertexAttribs, 0, GPU_FLOAT, 3);
-	AttrInfo_AddLoader(&shaderWorld.vertexAttribs, 2, GPU_SHORT, 2);
-	AttrInfo_AddLoader(&shaderWorld.vertexAttribs, 3, GPU_UNSIGNED_BYTE, 3);
+	AttrInfo_AddLoader(&shaderWorld.vertexAttribs, 1, GPU_SHORT, 2);
+	AttrInfo_AddLoader(&shaderWorld.vertexAttribs, 2, GPU_UNSIGNED_BYTE, 3);
 	// Gui Shader
 	Shader_Init(&shaderGui, gui_shbin, gui_shbin_size, false);
 	AttrInfo_Init(&shaderGui.vertexAttribs);
@@ -124,12 +124,6 @@ void GameRenderer_Render() {
 		C3D_TexEnvSrc(env, C3D_Both, GPU_TEXTURE0, GPU_PRIMARY_COLOR, 0);
 		C3D_TexEnvFunc(env, C3D_Both, GPU_MODULATE);
 
-		/*env = C3D_GetTexEnv(1);
-		C3D_TexEnvInit(env);
-		C3D_TexEnvSrc(env, C3D_RGB, GPU_PREVIOUS, GPU_PREVIOUS, GPU_PREVIOUS);
-		C3D_TexEnvOpRgb(env, GPU_TEVOP_RGB_SRC_COLOR, GPU_TEVOP_RGB_SRC_COLOR, GPU_TEVOP_RGB_SRC_ALPHA);
-		C3D_TexEnvFunc(env, C3D_Both, GPU_INTERPOLATE);
-*/
 		Shader_Bind(&shaderWorld);
 
 		SpriteBatch_SetScreen(true);

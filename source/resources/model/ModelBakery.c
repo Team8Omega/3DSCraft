@@ -220,6 +220,8 @@ enum {
 	UV_V2
 };
 typedef struct {
+	const char* key;
+	const char* ref;
 	u32 hash;
 	int uv[2];
 } TextureIcon;
@@ -263,13 +265,35 @@ static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 	}
 
 	TextureIcon textures[blockModel->textureNum];
-	for (size_t i = 0; i < blockModel->textureNum; ++i) {
-		textures[i].hash = String_Hash(blockModel->textures[i].key);
 
-		if (strncmp(blockModel->textures[i].name, "minecraft:", 10) == 0) {
-			memmove(blockModel->textures[i].name, blockModel->textures[i].name + 10, strlen(blockModel->textures[i].name) - 10 + 1);
+	for (size_t i = 0; i < blockModel->textureNum; ++i) {
+		const char* name = blockModel->textures[i].name;
+
+		if (strncmp(blockModel->textures[i].name, "#", 1) != 0) {
+			textures[i].hash = String_Hash(blockModel->textures[i].key);
+
+			if (strncmp(blockModel->textures[i].name, "minecraft:", 10) == 0)
+				name += 10;
+
+			Texture_MapAddName(name, textures[i].uv);
+
+			textures[i].ref = NULL;
+		} else {
+			textures[i].ref = name;
 		}
-		Texture_MapAddName(blockModel->textures[i].name, textures[i].uv);
+	}
+	for (size_t i = 0; i < blockModel->textureNum; ++i) {
+		if (textures[i].ref) {
+			textures[i].ref++;
+			u32 keyHash = String_Hash(textures[i].ref);
+
+			for (size_t j = 0; j < blockModel->textureNum; ++j) {
+				if (textures[i].hash == keyHash) {
+					textures[i].uv[0] = textures[j].uv[0];
+					textures[i].uv[1] = textures[j].uv[1];
+				}
+			}
+		}
 	}
 
 	for (size_t i = 0; i < blockModel->elementNum; ++i) {
