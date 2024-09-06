@@ -10,3 +10,5 @@ void WorldRenderer_Deinit();
 
 void WorldRenderer_Tick();
 void WorldRenderer_Render();
+
+void WorldRenderer_EnableFog();

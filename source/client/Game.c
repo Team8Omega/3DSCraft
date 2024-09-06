@@ -329,6 +329,8 @@ void gReleaseWorld() {
 	ChunkWorker_Finish(&sChunkWorker);
 
 	World_Deinit();
+
+	C3D_FogGasMode(false, 0, false);
 }
 
 void gLoadWorld(char* path, char* name, WorldGenType worldType, bool newWorld) {
@@ -382,6 +384,9 @@ void gLoadWorld(char* path, char* name, WorldGenType worldType, bool newWorld) {
 		gPlayer->hp		  = 20;
 	}
 	Screen_SetScreen(SCREEN_NONE);
+
+	WorldRenderer_EnableFog();
+
 	sLastTime = svcGetSystemTick();	 // fix timing
 }
 

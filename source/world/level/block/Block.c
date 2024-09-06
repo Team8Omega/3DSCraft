@@ -40,12 +40,13 @@ Block* Block_InitWithBounds(const char* name, BlockId id, float resistance, floa
 	Block_SetResistance(b, resistance);
 	Block_SetHardness(b, hardness);
 	Block_SetLightness(b, 0);
-	b->id		  = id;
-	b->material	  = material;
-	b->renderType = 0;	// hardcoded for now, 0 = normal block
-	b->mapColor	  = mapColor;
-	b->opaque	  = true;
-	b->solidBlock = true;
+	b->id				 = id;
+	b->material			 = material;
+	b->renderType		 = 0;  // not sure anymore, but i think 0 = normal, 1 = tile entity idek
+	b->mapColor			 = mapColor;
+	b->opaque			 = true;
+	b->solidBlock		 = true;
+	b->hasRandomVariants = false;
 	memcpy(&b->bounds, &bounds, sizeof(Box));
 	strcpy(b->name, name);
 

@@ -151,18 +151,18 @@ void Texture_MapAddName(const char* path, int out_uv[]) {
 	if (pathNum >= (TEXTURE_TILENUM))
 		Crash("Too many entries for TextureMap\n - you know what this means.");
 
+	size_t index = pathNum;
+
+	out_uv[0] = ((index % TEXTURE_MAPTILES) << 4);
+	out_uv[1] = ((index / TEXTURE_MAPTILES) << 4);
+
 	// check if already loaded
 	u32 hash = String_Hash(path);
 	for (size_t i = 0; i < pathNum; ++i) {
 		if (hashCollect[i] == hash)
 			return;
 	}
-
-	size_t index = pathNum++;
-
-	out_uv[0] = ((index % TEXTURE_MAPTILES) << 4) << 8;
-	out_uv[1] = ((index / TEXTURE_MAPTILES) << 4) << 8;
-
+	pathNum++;
 	strcpy(pathCollect[index], path);
 	hashCollect[index] = String_Hash(path);
 }

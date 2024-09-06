@@ -6,7 +6,10 @@ u16 sBuffer_UV[4] = { 0 };
 
 static void getUVs(mpack_node_t face) {
 	if (!serial_has(face, "uv")) {
-		memset(sBuffer_UV, 0, sizeof(sBuffer_UV));
+		sBuffer_UV[0] = 0;
+		sBuffer_UV[1] = 0;
+		sBuffer_UV[2] = 16;
+		sBuffer_UV[3] = 16;
 		return;
 	}
 	mpack_node_t uvNode = serial_get_node(face, "uv");

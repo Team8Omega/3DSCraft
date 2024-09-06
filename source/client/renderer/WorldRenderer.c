@@ -68,9 +68,6 @@ void WorldRenderer_Init(int projectionUniform_) {
 			data[i + 127] = val - data[i - 1];
 	}
 	FogLut_FromArray(&fogLut, data);
-	C3D_FogGasMode(GPU_FOG, GPU_PLAIN_DENSITY, false);
-	C3D_FogColor(0xffd990);
-	C3D_FogLutBind(&fogLut);
 
 	Clouds_Init();
 }
@@ -84,6 +81,12 @@ void WorldRenderer_Deinit() {
 	Hand_Deinit();
 
 	Clouds_Deinit();
+}
+
+void WorldRenderer_EnableFog() {
+	C3D_FogGasMode(GPU_FOG, GPU_PLAIN_DENSITY, false);
+	C3D_FogColor(0xffd990);
+	C3D_FogLutBind(&fogLut);
 }
 
 static void renderWorld() {

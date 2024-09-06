@@ -13,9 +13,9 @@ void SmeaGen_Generate(WorkerItem item, void* this) {
 
 			const int smeasClusterSize = 8;
 			const int smeasChunkHeight = 16;
-			int height				   = (int)(sino_2d((px) / (smeasClusterSize * 4), (pz) / (smeasClusterSize * 4)) * smeasClusterSize) +
-						 (smeasChunkHeight * smeasClusterSize / 2);
-
+			int height = 10; /*(int)(sino_2d((px) / (smeasClusterSize * 4), (pz) / (smeasClusterSize * 4)) * smeasClusterSize) +
+		  (smeasChunkHeight * smeasClusterSize / 2);
+*/
 			for (int y = 0; y < height - 3; y++) {
 				Chunk_SetBlock(item.chunk, x, y, z, BLOCK_STONE);
 			}

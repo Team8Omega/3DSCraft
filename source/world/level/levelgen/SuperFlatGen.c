@@ -12,7 +12,7 @@ void SuperFlatGen_Generate(WorkerItem item, void* this) {
 			case 0:
 				block = BLOCK_BEDROCK;
 				break;
-			case 1 ... 10:
+			/*case 1 ... 10:
 				block = BLOCK_STONE;
 				break;
 			case 11 ... 15:
@@ -20,7 +20,7 @@ void SuperFlatGen_Generate(WorkerItem item, void* this) {
 				break;
 			case 16:
 				block = BLOCK_GRASS;
-				break;
+				break;*/
 			default:
 				block = BLOCK_AIR;
 				break;

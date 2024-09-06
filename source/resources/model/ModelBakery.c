@@ -41,6 +41,7 @@ static BlockModel loadBlockModel(const char* name) {
 
 	mpack_tree_t levelTree = serial_get_start(path);
 	mpack_node_t root	   = serial_get_root(&levelTree);
+
 	if (serial_get_error(root, "loading BlockModel file"))
 		Crash("Name: %s, Path: %s", name, path);
 
@@ -220,16 +221,15 @@ enum {
 	UV_V2
 };
 typedef struct {
-	const char* key;
-	const char* ref;
+	u32 refHash;
 	u32 hash;
 	int uv[2];
 } TextureIcon;
 
 static BakedModel* bakeBlockModel(BlockModel* blockModel) {
-	BakedModel* baked = linearAlloc(sizeof(BakedModel));
-
 	u32 currentVertex = 0;
+
+	BakedModel* baked = linearAlloc(sizeof(BakedModel));
 
 	baked->numVertex = blockModel->vertNum;
 	baked->vertex	 = linearAlloc(sizeof(WorldVertex*) * 6 * 6);
@@ -269,30 +269,34 @@ static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 	for (size_t i = 0; i < blockModel->textureNum; ++i) {
 		const char* name = blockModel->textures[i].name;
 
-		if (strncmp(blockModel->textures[i].name, "#", 1) != 0) {
-			textures[i].hash = String_Hash(blockModel->textures[i].key);
+		textures[i].hash  = String_Hash(blockModel->textures[i].key);
+		textures[i].uv[0] = 0;
+		textures[i].uv[1] = 0;
 
+		if (strncmp(blockModel->textures[i].name, "#", 1) != 0) {
 			if (strncmp(blockModel->textures[i].name, "minecraft:", 10) == 0)
 				name += 10;
 
 			Texture_MapAddName(name, textures[i].uv);
 
-			textures[i].ref = NULL;
+			textures[i].refHash = 0;
 		} else {
-			textures[i].ref = name;
+			const char* refName = name;
+			refName++;
+
+			textures[i].refHash = String_Hash(refName);
 		}
 	}
 	for (size_t i = 0; i < blockModel->textureNum; ++i) {
-		if (textures[i].ref) {
-			textures[i].ref++;
-			u32 keyHash = String_Hash(textures[i].ref);
-
+		if (textures[i].refHash) {
 			for (size_t j = 0; j < blockModel->textureNum; ++j) {
-				if (textures[i].hash == keyHash) {
+				if (textures[j].hash == textures[i].refHash) {
 					textures[i].uv[0] = textures[j].uv[0];
 					textures[i].uv[1] = textures[j].uv[1];
 				}
 			}
+			if (textures[i].uv[0] == 0 && textures[i].uv[1] == 0)
+				Crash("Could not get texture reference!\nBlock: %s\nTextureIdx: %d", blockModel->name, i);
 		}
 	}
 
@@ -310,22 +314,36 @@ static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 				continue;
 			}
 
-			int uv[2];
-			u32 hash = String_Hash(face->texture);
+			char* texName = face->texture;
+			texName++;
+
+			u32 hash  = String_Hash(texName);
+			int uv[2] = { 0, 0 };
 			for (size_t i = 0; i < blockModel->textureNum; ++i) {
 				if (textures[i].hash == hash) {
 					uv[0] = textures[i].uv[0];
 					uv[1] = textures[i].uv[1];
 				}
 			}
+			if (uv[0] == 0 && uv[1] == 0)
+				Crash("Could not get texture reference from face!\nBlock: %s\nTexture: %s\nAttempted search: %s", blockModel->name,
+					  face->texture, texName);
 
 			for (u8 k = 0; k < 6; ++k) {
 				baked->vertex[currentVertex]->pos.x = block_lut_vertex[currentVertex][0] ? to.x : from.x;
 				baked->vertex[currentVertex]->pos.y = block_lut_vertex[currentVertex][1] ? to.y : from.y;
 				baked->vertex[currentVertex]->pos.z = block_lut_vertex[currentVertex][2] ? to.z : from.z;
 
-				baked->vertex[currentVertex]->uv[0] = (block_lut_uv[currentVertex][0] ? face->uv.uvs[UV_U2] : face->uv.uvs[UV_U1]) + uv[0];
-				baked->vertex[currentVertex]->uv[1] = (block_lut_uv[currentVertex][1] ? face->uv.uvs[UV_V2] : face->uv.uvs[UV_V1]) + uv[1];
+#define toTexCrd(x, tw) (s16)(((float)(x) / (float)(tw)) * (float)((1 << 15) - 1))
+
+				baked->vertex[currentVertex]->uv[0] =
+					toTexCrd((block_lut_uv[currentVertex][0] ? face->uv.uvs[UV_U1] : face->uv.uvs[UV_U2]) + uv[0], TEXTURE_MAPSIZE);
+				baked->vertex[currentVertex]->uv[1] =
+					toTexCrd((block_lut_uv[currentVertex][1] ? face->uv.uvs[UV_V1] : face->uv.uvs[UV_V2]) + uv[1], TEXTURE_MAPSIZE);
+
+				// Crash("n %d/%d/%d/%d", face->uv.uvs[0], face->uv.uvs[1], face->uv.uvs[2], face->uv.uvs[3]);
+				// Crash("UVsdasd %d/%d", (block_lut_uv[currentVertex][0] ? face->uv.uvs[UV_U1] : face->uv.uvs[UV_U2]) + uv[0],
+				//	  (block_lut_uv[currentVertex][1] ? face->uv.uvs[UV_V1] : face->uv.uvs[UV_V2]) + uv[1]);
 
 				baked->vertex[currentVertex]->rgb[0] = 255;
 				baked->vertex[currentVertex]->rgb[1] = 255;

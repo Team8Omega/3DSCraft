@@ -155,15 +155,24 @@ static inline void addMesh(bool isSolidBlock, int x, int y, int z, Direction dir
 	if (x >= 0 && y >= 0 && z >= 0 && x < CHUNK_SIZE && y < CHUNK_SIZE && z < CHUNK_SIZE) {
 		if (isSolidBlock) {
 			faceBuffer[currentFace++] = (Model){ x, y, z, block, ao, metadata, transparent, dir };
+
+			if (!transparent) {
+				numVertexOpaque += 6;
+			} else {
+				numVertexTransparent += 6;
+			}
+
 		} else {  // TODO: avoid adding models 6 times per block.
 			modelBuffer[currentModel++] = (Model){ x, y, z, block, ao, metadata, transparent, dir };
+
+			if (!transparent) {
+				numVertexOpaque += BLOCKSTATES[block].states[metadata].vertexNum;
+			} else {
+				numVertexTransparent += BLOCKSTATES[block].states[metadata].vertexNum;
+			}
+
+			complexMesh_visited[x][y][z] |= 1;
 		}
-		if (transparent) {
-			numVertexTransparent += BLOCKSTATES[block].states[metadata].vertexNum;
-		} else {
-			numVertexOpaque += BLOCKSTATES[block].states[metadata].vertexNum;
-		}
-		complexMesh_visited[x][y][z] |= 1;
 	}
 }
 
@@ -346,15 +355,23 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 
 				WorldVertex* data = face.transparent ? transparentData : opaqueData;
 
-				WeightedRandom* random		= BLOCKSTATES[face.block].states[face.metadata].random;
-				BlockStateVariant* blockVar = &BLOCKSTATES[face.block].states[face.metadata].variants[WeightedRandom_GetRandom(random)];
+				BlockStateVariant* blockVar;
 
-				memcpy(data, blockVar->model->vertex[i * 6], sizeof(WorldVertex) * 6);
+				if (BLOCKS[face.block]->hasRandomVariants) {
+					WeightedRandom* random = BLOCKSTATES[face.block].states[face.metadata].random;
+					blockVar			   = &BLOCKSTATES[face.block].states[face.metadata].variants[WeightedRandom_GetRandom(random)];
+				} else {
+					blockVar = &BLOCKSTATES[face.block].states[face.metadata].variants[0];
+				}
+
+				memcpy(data, blockVar->model->vertex[face.dir * 6], sizeof(WorldVertex) * 6);
 
 				for (int k = 0; k < 6; k++) {
-					data[k].pos.x += offsetX << 4;
-					data[k].pos.y += offsetY << 4;
-					data[k].pos.z += offsetZ << 4;
+					const float3* pos = &block_sides_lut[face.dir * 6 + k].pos;
+
+					data[k].pos.x = pos->x + (offsetX << 4);
+					data[k].pos.y = pos->y + (offsetY << 4);
+					data[k].pos.z = pos->z + (offsetZ << 4);
 				}
 				if (face.transparent)
 					transparentData += 6;
@@ -362,7 +379,7 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 					opaqueData += 6;
 			}
 			for (int j = 0; j < currentModel; j++) {
-				Crash("You added models?");
+				Crash("You added models? If not, dont set isSolidBlock to false. DEV INFO, REPORT!");
 				Model face = modelBuffer[j];
 
 				int offsetX = face.x + item.chunk->x * CHUNK_SIZE;
@@ -371,8 +388,14 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 
 				WorldVertex* data = face.transparent ? transparentData : opaqueData;
 
-				WeightedRandom* random		= BLOCKSTATES[face.block].states[face.metadata].random;
-				BlockStateVariant* blockVar = &BLOCKSTATES[face.block].states[face.metadata].variants[WeightedRandom_GetRandom(random)];
+				BlockStateVariant* blockVar;
+
+				if (BLOCKS[face.block]->hasRandomVariants) {
+					WeightedRandom* random = BLOCKSTATES[face.block].states[face.metadata].random;
+					blockVar			   = &BLOCKSTATES[face.block].states[face.metadata].variants[WeightedRandom_GetRandom(random)];
+				} else {
+					blockVar = &BLOCKSTATES[face.block].states[face.metadata].variants[0];
+				}
 
 				size_t size = blockVar->model->numVertex;
 

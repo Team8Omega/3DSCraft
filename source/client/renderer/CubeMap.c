@@ -117,9 +117,6 @@ void CubeMap_Render() {
 	BufInfo_Init(bufInfo);
 	BufInfo_Add(bufInfo, cubeVBO, sizeof(WorldVertex), 3, 0x3210);
 
-	// ToDo: find Alternative method to disable fog
-	C3D_FogGasMode(false, 0, false);
-
 	for (u8 i = 0; i < 6; i++) {
 		C3D_TexBind(0, &cubeTextures[i]);
 		C3D_DrawArrays(GPU_TRIANGLES, i * 6, 6);

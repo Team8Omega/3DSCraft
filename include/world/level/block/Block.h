@@ -34,6 +34,7 @@ struct Block {
 	bool useNeighborBrightness;	 // set by code(see Blocks_Init)
 	bool opaque;				 // if yes, dont allow light to pass thru
 	bool solidBlock;
+	bool hasRandomVariants;
 };
 
 extern Texture_Map gTexMapBlock;

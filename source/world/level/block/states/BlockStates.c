@@ -104,6 +104,9 @@ void BlockStates_Decompile() {
 				serial_get_error(variant, "Pre-BlockState");
 
 				holder.states[j] = getState(variant);
+
+				if (holder.states[j].random)
+					BLOCKS[i]->hasRandomVariants = true;
 			}
 			BLOCKSTATES[i] = holder;
 
