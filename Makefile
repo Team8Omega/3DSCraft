@@ -104,7 +104,7 @@ LIBS		+= -lm `$(PREFIX)pkg-config opusfile --libs`
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(CTRULIB) $(CURDIR)
+LIBDIRS	:= $(CURDIR) $(PORTLIBS) $(CTRULIB)
 
 
 
@@ -224,6 +224,12 @@ run:
 	
 rund: #run dima
 	@3dslink $(TARGET).3dsx -a 192.168.178.37
+
+ctru:
+	@echo Compiling libctru, make sure it exists at ./private/libctru/
+	@make -C private/libctru -f ./Makefile --no-print-directory
+	@cp private/libctru/lib/* ./lib/
+	@echo Copied to lib/libctru*.a
 
 ifneq ($(OS),Windows_NT)
 ADDR2LINE   ?= $(DEVKITARM)/bin/arm-none-eabi-addr2line

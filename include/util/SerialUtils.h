@@ -94,13 +94,16 @@ static size_t inline serial_get_arrayLength(mpack_node_t node) {
 static size_t inline serial_get_mapLength(mpack_node_t node) {
 	return mpack_node_map_count(node);
 }
-static bool inline serial_get_error(mpack_node_t node, const char* context) {
-	mpack_error_t err = node.tree->error;
+static bool inline serial_get_errorTree(mpack_tree_t* tree, const char* context) {
+	mpack_error_t err = tree->error;
 	if (err != mpack_ok) {
 		Crash("MPERR: Deserialization error of type \n%s\nat %s", mpack_error_to_string(err), context);
 		return true;
 	}
 	return false;
+}
+static bool inline serial_get_error(mpack_node_t node, const char* context) {
+	return serial_get_errorTree(node.tree, context);
 }
 static void inline serial_save_error(mpack_writer_t* writer) {
 	mpack_error_t err = writer->error;

@@ -5,7 +5,7 @@
 static RandomSeed SEED_UNIQUIFIER = 8682522807148012ULL;
 
 RandomSeed RandomSeed_Gen() {
-	static u32 lock = 0;
+	static s32 lock = 0;
 	RandomSeed seed;
 
 	syncArbitrateAddress(&lock, ARBITRATION_WAIT_IF_LESS_THAN, 0);

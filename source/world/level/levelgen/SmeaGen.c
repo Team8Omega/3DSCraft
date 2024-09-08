@@ -13,13 +13,14 @@ void SmeaGen_Generate(WorkerItem item, void* this) {
 
 			const int smeasClusterSize = 8;
 			const int smeasChunkHeight = 16;
-			int height = 10; /*(int)(sino_2d((px) / (smeasClusterSize * 4), (pz) / (smeasClusterSize * 4)) * smeasClusterSize) +
+			int height = 16; /*(int)(sino_2d((px) / (smeasClusterSize * 4), (pz) / (smeasClusterSize * 4)) * smeasClusterSize) +
 		  (smeasChunkHeight * smeasClusterSize / 2);
 */
-			for (int y = 0; y < height - 3; y++) {
+			Chunk_SetBlock(item.chunk, x, 0, z, BLOCK_BEDROCK);
+			for (int y = 1; y < height - 3; ++y) {
 				Chunk_SetBlock(item.chunk, x, y, z, BLOCK_STONE);
 			}
-			for (int y = height - 3; y < height; y++) {
+			for (int y = height - 3; y < height; ++y) {
 				Chunk_SetBlock(item.chunk, x, y, z, BLOCK_DIRT);
 			}
 			Chunk_SetBlock(item.chunk, x, height, z, BLOCK_GRASS);

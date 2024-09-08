@@ -9,13 +9,14 @@
 
 #include <stdio.h>
 
+#define sz 40
 static WorldVertex vertices[] = {
-	{ { { -1, 0, -1 } }, { 0, 0 }, { 255, 255, 255 } },
-	{ { { 1, 0, -1 } }, { INT16_MAX, 0 }, { 255, 255, 255 } },
-	{ { { 1, 0, 1 } }, { INT16_MAX, INT16_MAX }, { 255, 255, 255 } },
-	{ { { 1, 0, 1 } }, { INT16_MAX, INT16_MAX }, { 255, 255, 255 } },
-	{ { { -1, 0, 1 } }, { 0, INT16_MAX }, { 255, 255, 255 } },
-	{ { { -1, 0, -1 } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { -sz, 0, -sz } }, { 0, 0 }, { 255, 255, 255 } },
+	{ { { sz, 0, -sz } }, { INT16_MAX, 0 }, { 255, 255, 255 } },
+	{ { { sz, 0, sz } }, { INT16_MAX, INT16_MAX }, { 255, 255, 255 } },
+	{ { { sz, 0, sz } }, { INT16_MAX, INT16_MAX }, { 255, 255, 255 } },
+	{ { { -sz, 0, sz } }, { 0, INT16_MAX }, { 255, 255, 255 } },
+	{ { { -sz, 0, -sz } }, { 0, 0 }, { 255, 255, 255 } },
 };
 
 static C3D_Tex texture;
@@ -53,7 +54,7 @@ static C3D_Mtx modelMtx;
 
 void Clouds_Tick(float tx, float ty, float tz) {
 	Mtx_Identity(&modelMtx);
-	Mtx_Translate(&modelMtx, tx, ty + 69.f, tz, true);
+	Mtx_Translate(&modelMtx, tx, ty + 69.f * 16, tz, true);
 	Mtx_Scale(&modelMtx, 90.f, 90.f, 90.f);
 
 	const int stepX = 8;

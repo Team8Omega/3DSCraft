@@ -15,6 +15,7 @@ typedef struct {
 } ElementBuffer;
 
 static vec_t(BlockModel) sUnbakedBlocks;
+extern u32 __ctru_linear_heap_size;
 
 void ModelBakery_Init() {
 	vec_init(&sUnbakedBlocks);
@@ -25,8 +26,10 @@ void ModelBakery_Deinit() {
 	while (sUnbakedBlocks.length > 0) {
 		model = &vec_pop(&sUnbakedBlocks);
 
-		linearFree(model->textures);
-		linearFree(model->elements);
+		if (model->textures && model->textureNum > 1)
+			free(model->textures);
+		if (model->elements && model->elementNum > 1)
+			free(model->elements);
 	}
 }
 
@@ -42,8 +45,10 @@ static BlockModel loadBlockModel(const char* name) {
 	mpack_tree_t levelTree = serial_get_start(path);
 	mpack_node_t root	   = serial_get_root(&levelTree);
 
-	if (serial_get_error(root, "loading BlockModel file"))
-		Crash("Name: %s, Path: %s", name, path);
+	if (serial_get_error(root, "loading BlockModel file")) {
+		Crash("Name: %s, Path: %s\nLinear Free: %zu/%zu kB", name, path, linearSpaceFree() >> 10, __ctru_linear_heap_size >> 10);
+		return model;
+	}
 
 	model = BlockModel_Deserialize(root, name);
 
@@ -85,7 +90,7 @@ static BlockModel* getBlockModel(const char* name) {
 		size_t texNum		= model.textureNum + parent->textureNum;
 		newModel.textureNum = texNum;
 		if (texNum > 0) {
-			newModel.textures = linearAlloc(sizeof(ModelTextureEntry) * texNum);
+			newModel.textures = malloc(sizeof(ModelTextureEntry) * texNum);
 			for (size_t i = 0; i < parent->textureNum; ++i) {
 				memcpy(&newModel.textures[i], &parent->textures[i], sizeof(ModelTextureEntry));
 			}
@@ -99,7 +104,7 @@ static BlockModel* getBlockModel(const char* name) {
 		size_t elmNum		= model.elementNum + parent->elementNum;
 		newModel.elementNum = elmNum;
 		if (elmNum > 0) {
-			newModel.elements = linearAlloc(sizeof(BlockElement) * elmNum);
+			newModel.elements = malloc(sizeof(BlockElement) * elmNum);
 			for (size_t i = 0; i < parent->elementNum; ++i) {
 				memcpy(&newModel.elements[i], &parent->elements[i], sizeof(BlockElement));
 			}
@@ -109,7 +114,6 @@ static BlockModel* getBlockModel(const char* name) {
 		} else {
 			newModel.elements = NULL;
 		}
-		newModel.vertNum = model.vertNum + parent->vertNum;
 
 	} else {
 		newModel = model;
@@ -229,21 +233,20 @@ typedef struct {
 static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 	u32 currentVertex = 0;
 
-	BakedModel* baked = linearAlloc(sizeof(BakedModel));
+	BakedModel* baked = malloc(sizeof(BakedModel));
 
-	baked->numVertex = blockModel->vertNum;
-	baked->vertex	 = linearAlloc(sizeof(WorldVertex*) * 6 * 6);
-	for (size_t i = 0; i < 6 * 6; ++i) {
-		baked->vertex[i] = linearAlloc(sizeof(WorldVertex));
-		memset(baked->vertex[i], 0, sizeof(WorldVertex));
-	}
+	baked->numVertex = blockModel->elementNum * (6 * 6);
+	baked->vertex	 = malloc(sizeof(WorldVertex) * baked->numVertex);
 
-	if (!blockModel) {
-		Crash("Baking BlockModel failed!\nRecieved NULL BlockModel as input.");
+	if (baked->vertex == NULL) {
+		Crash_Ext("Allocation Error for BlockModel Baking\nName: %s", CRASH_ALLOC, blockModel->name);
+		free(baked);
 		return NULL;
 	}
 
-	if (((int)blockModel->elements < 100 && blockModel->elementNum != 0) ||
+	memset(baked->vertex, 0, sizeof(WorldVertex) * baked->numVertex);
+
+	/*if (((int)blockModel->elements < 100 && blockModel->elementNum != 0) ||
 		((int)blockModel->textures < 100 && blockModel->textureNum != 0)) {
 		Crash(
 			"Baking BlockModel failed!\nRecieved invalid BlockModel as input, either elements or textures is NULL when num value isn't "
@@ -262,7 +265,7 @@ static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 			"Textures: 0x%x, Num: %lu\n",
 			blockModel->elements, blockModel->elementNum, blockModel->textures, blockModel->textureNum);
 		return NULL;
-	}
+	}*/
 
 	TextureIcon textures[blockModel->textureNum];
 
@@ -325,29 +328,26 @@ static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 					uv[1] = textures[i].uv[1];
 				}
 			}
+
 			if (uv[0] == 0 && uv[1] == 0)
 				Crash("Could not get texture reference from face!\nBlock: %s\nTexture: %s\nAttempted search: %s", blockModel->name,
 					  face->texture, texName);
 
 			for (u8 k = 0; k < 6; ++k) {
-				baked->vertex[currentVertex]->pos.x = block_lut_vertex[currentVertex][0] ? to.x : from.x;
-				baked->vertex[currentVertex]->pos.y = block_lut_vertex[currentVertex][1] ? to.y : from.y;
-				baked->vertex[currentVertex]->pos.z = block_lut_vertex[currentVertex][2] ? to.z : from.z;
+				baked->vertex[currentVertex].pos.x = block_lut_vertex[currentVertex][0] ? to.x : from.x;
+				baked->vertex[currentVertex].pos.y = block_lut_vertex[currentVertex][1] ? to.y : from.y;
+				baked->vertex[currentVertex].pos.z = block_lut_vertex[currentVertex][2] ? to.z : from.z;
 
 #define toTexCrd(x, tw) (s16)(((float)(x) / (float)(tw)) * (float)((1 << 15) - 1))
 
-				baked->vertex[currentVertex]->uv[0] =
-					toTexCrd((block_lut_uv[currentVertex][0] ? face->uv.uvs[UV_U1] : face->uv.uvs[UV_U2]) + uv[0], TEXTURE_MAPSIZE);
-				baked->vertex[currentVertex]->uv[1] =
-					toTexCrd((block_lut_uv[currentVertex][1] ? face->uv.uvs[UV_V1] : face->uv.uvs[UV_V2]) + uv[1], TEXTURE_MAPSIZE);
+				baked->vertex[currentVertex].uv[0] =
+					toTexCrd(uv[0] + (block_lut_uv[currentVertex][0] ? face->uv.uvs[UV_U2] : face->uv.uvs[UV_U1]), TEXTURE_MAPSIZE);
+				baked->vertex[currentVertex].uv[1] =
+					toTexCrd(uv[1] + (block_lut_uv[currentVertex][1] ? face->uv.uvs[UV_V2] : face->uv.uvs[UV_V1]), TEXTURE_MAPSIZE);
 
-				// Crash("n %d/%d/%d/%d", face->uv.uvs[0], face->uv.uvs[1], face->uv.uvs[2], face->uv.uvs[3]);
-				// Crash("UVsdasd %d/%d", (block_lut_uv[currentVertex][0] ? face->uv.uvs[UV_U1] : face->uv.uvs[UV_U2]) + uv[0],
-				//	  (block_lut_uv[currentVertex][1] ? face->uv.uvs[UV_V1] : face->uv.uvs[UV_V2]) + uv[1]);
-
-				baked->vertex[currentVertex]->rgb[0] = 255;
-				baked->vertex[currentVertex]->rgb[1] = 255;
-				baked->vertex[currentVertex]->rgb[2] = 255;
+				baked->vertex[currentVertex].rgb[0] = 255;
+				baked->vertex[currentVertex].rgb[1] = 255;
+				baked->vertex[currentVertex].rgb[2] = 255;
 
 				currentVertex++;
 			}

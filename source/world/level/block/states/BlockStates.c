@@ -1,6 +1,7 @@
 #include "world/level/block/states/BlockStates.h"
 
 #include <3ds.h>
+#include <malloc.h>
 #include <unistd.h>
 
 #include "resources/model/ModelBakery.h"
@@ -12,6 +13,7 @@
 #include "world/level/block/Block.h"
 
 BlockStateHolder BLOCKSTATES[BLOCK_COUNT];
+extern u32 __ctru_linear_heap_size;
 
 static BlockState getState(mpack_node_t stateNode) {
 	BlockState state = {};
@@ -36,6 +38,7 @@ static BlockState getState(mpack_node_t stateNode) {
 			}
 
 			serial_get_error(varNode, "Pre-BlockState_ModelLoading");
+			serial_get_error(stateNode, "Pre-BlockState_ModelLoading 2");
 			state.variants[i].model = ModelManager_GetModel(name);
 			serial_get_error(varNode, "Post-BlockState_ModelLoading");
 
@@ -69,7 +72,9 @@ static BlockState getState(mpack_node_t stateNode) {
 }
 
 void BlockStates_Decompile() {
-	u32 startTime = svcGetSystemTick();
+	u32 startTime	 = svcGetSystemTick();
+	u32 startSpace	 = linearSpaceFree();
+	size_t startHeap = mallinfo().uordblks;
 
 	for (size_t i = 0; i < BLOCK_COUNT; ++i) {
 		Block* block = BLOCKS[i];
@@ -86,36 +91,48 @@ void BlockStates_Decompile() {
 		mpack_tree_t tree = serial_get_start(name);
 		mpack_node_t root = serial_get_root(&tree);
 
-		if (serial_has(root, "multipart"))
-			Crash("BlockState MultiPart unsupported\nNot added yet, please contact developer!\n\nAt %s", name);
-		else if (serial_has(root, "variants")) {
-			mpack_node_t data = serial_get_node(root, "variants");
-			size_t size		  = serial_get_mapLength(data);
+		u32 typehash = 0;
+		{
+			char keyname[32];
+			serial_get_keyname(root, 0, keyname, 32);
+			typehash = String_Hash(keyname);
+		}
+		switch (typehash) {
+			case (u32)249898626611028071:  // multipart
+				Crash("BlockState MultiPart unsupported\nNot added yet, please contact developer!\n\nAt %s", name);
+				break;
 
-			BlockStateHolder holder = { .stateNum = size };
+			case (u32)7573043612985229:	 // variants
+				mpack_node_t data = serial_get_node(root, "variants");
+				size_t size		  = serial_get_mapLength(data);
 
-			holder.states = malloc(sizeof(BlockState) * size);
+				BlockStateHolder holder = { .stateNum = size };
 
-			for (size_t j = 0; j < size; ++j) {
-				char keyname[64];
-				serial_get_keyname(data, j, keyname, 64);
+				holder.states = malloc(sizeof(BlockState) * size);
 
-				mpack_node_t variant = serial_get_node(data, keyname);
-				serial_get_error(variant, "Pre-BlockState");
+				for (size_t j = 0; j < size; ++j) {
+					char keyname[64];
+					serial_get_keyname(data, j, keyname, 64);
 
-				holder.states[j] = getState(variant);
+					mpack_node_t variant = serial_get_node(data, keyname);
+					serial_get_error(variant, "Pre-BlockState");
 
-				if (holder.states[j].random)
-					BLOCKS[i]->hasRandomVariants = true;
-			}
-			BLOCKSTATES[i] = holder;
+					holder.states[j] = getState(variant);
 
-		} else {
-			char str[64];
-			serial_get_keyname(root, 0, str, 64);
-			Crash("BlockState Unknown type!\nType could not be detected or was not implemented.\nName: %s\nAt: %s\nBlockName: %s", str,
-				  name, block->name);
-			return;
+					serial_get_error(variant, "Mid-BlockState");
+
+					if (holder.states[j].random)
+						BLOCKS[i]->hasRandomVariants = true;
+				}
+				BLOCKSTATES[i] = holder;
+				break;
+
+			default:
+				char str[64];
+				serial_get_keyname(root, 0, str, 64);
+				Crash("BlockState Unknown type!\nType could not be detected or was not implemented.\nName: %s\nAt: %s\nBlockName: %s", str,
+					  name, block->name);
+				return;
 		}
 		serial_get_error(root, "Post-BlockState");
 	}
@@ -124,7 +141,14 @@ void BlockStates_Decompile() {
 
 	ModelBakery_Deinit();
 
-	Crash("BlockStates loaded! took %.0f ms.", elapsedMs);
+	u32 endSpace  = linearSpaceFree();
+	u32 usedSpace = startSpace - endSpace;
+
+	size_t endHeap	= mallinfo().uordblks;
+	size_t usedHeap = endHeap - startHeap;
+
+	Crash_Ext("BlockStates loaded! took %.0f ms.\nUsed now: Lin: %ukB, Heap: %zukB, All: %ukB", CRASH_ALLOC, elapsedMs, usedSpace >> 10,
+			  usedHeap >> 10, (usedSpace + usedHeap) >> 10);
 }
 
 BlockStateVariant* BlockState_Get(BlockId blockId, u8 index) {

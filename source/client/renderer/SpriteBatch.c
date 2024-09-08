@@ -122,7 +122,7 @@ void SpriteBatch_PushIcon(BlockId block, u8 metadata, s16 x, s16 y, s16 z) {
 		if (i != Direction_Top && i != Direction_South && i != Direction_West)
 			continue;
 
-		s16* iconUV = BLOCKSTATES[block].states[metadata].variants[0].model->vertex[i]->uv;
+		s16* iconUV = BLOCKSTATES[block].states[metadata].variants[0].model->vertex[i * 6].uv;
 
 #define oneDivIconsPerRow (32768 / 8)
 #define halfTexel (6)

@@ -192,7 +192,7 @@ static u16 floodFill(Cluster* cluster, int x, int y, int z, Direction entrySide0
 	while (floodfill_queue.length > 0) {
 		QueueElement item = vec_pop(&floodfill_queue);
 
-		for (int i = 0; i < 6; i++) {
+		for (int i = 0; i < 6; ++i) {
 			const s8* offset = DirectionToOffset[i];
 			int x			 = item.x + offset[0];
 			int y			 = item.y + offset[1];
@@ -221,9 +221,9 @@ static u16 floodFill(Cluster* cluster, int x, int y, int z, Direction entrySide0
 		}
 	}
 	u16 seeThrough = 0;
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 6; ++i)
 		if (exitPoints[i])
-			for (int j = 0; j < 6; j++)
+			for (int j = 0; j < 6; ++j)
 				if (i != j && exitPoints[j])
 					seeThrough |= ChunkSeeThrough(i, j);
 	return seeThrough;
@@ -231,7 +231,7 @@ static u16 floodFill(Cluster* cluster, int x, int y, int z, Direction entrySide0
 static int test;
 void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 	test++;
-	for (int i = 0; i < CLUSTER_PER_CHUNK; i++) {
+	for (int i = 0; i < CLUSTER_PER_CHUNK; ++i) {
 		Cluster* cluster = &item.chunk->clusters[i];
 
 		if (cluster->revision == cluster->vboRevision && !cluster->forceVBOUpdate)
@@ -252,10 +252,10 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 		for (int x = 0; x < CHUNK_SIZE; x += CHUNK_SIZE - 1) {
 			Direction xDir = !x ? Direction_West : Direction_East;
 
-			for (int z = 0; z < CHUNK_SIZE; z++) {
+			for (int z = 0; z < CHUNK_SIZE; ++z) {
 				Direction zDir = z == 0 ? Direction_North : z == CHUNK_SIZE - 1 ? Direction_South : Direction_None;
 
-				for (int y = 0; y < CHUNK_SIZE; y++) {
+				for (int y = 0; y < CHUNK_SIZE; ++y) {
 					Direction yDir = y == 0 ? Direction_Bottom : y == CHUNK_SIZE - 1 ? Direction_Top : Direction_None;
 
 					Block* block = BLOCKS[cluster->blocks[x][y][z]];
@@ -275,10 +275,10 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 		for (int y = 0; y < CHUNK_SIZE; y += CHUNK_SIZE - 1) {
 			Direction yDir = !y ? Direction_Bottom : Direction_Top;
 
-			for (int x = 0; x < CHUNK_SIZE; x++) {
+			for (int x = 0; x < CHUNK_SIZE; ++x) {
 				Direction xDir = x == 0 ? Direction_West : x == CHUNK_SIZE - 1 ? Direction_East : Direction_None;
 
-				for (int z = 0; z < CHUNK_SIZE; z++) {
+				for (int z = 0; z < CHUNK_SIZE; ++z) {
 					Direction zDir = z == 0 ? Direction_South : x == CHUNK_SIZE - 1 ? Direction_North : Direction_None;
 
 					Block* block = BLOCKS[cluster->blocks[x][y][z]];
@@ -298,10 +298,10 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 		for (int z = 0; z < CHUNK_SIZE; z += CHUNK_SIZE - 1) {
 			Direction zDir = !z ? Direction_North : Direction_South;
 
-			for (int x = 0; x < CHUNK_SIZE; x++) {
+			for (int x = 0; x < CHUNK_SIZE; ++x) {
 				Direction xDir = x == 0 ? Direction_West : x == CHUNK_SIZE - 1 ? Direction_East : Direction_None;
 
-				for (int y = 0; y < CHUNK_SIZE; y++) {
+				for (int y = 0; y < CHUNK_SIZE; ++y) {
 					Direction yDir = y == 0 ? Direction_Bottom : y == CHUNK_SIZE ? Direction_Top : Direction_None;
 
 					Block* block = BLOCKS[cluster->blocks[x][y][z]];
@@ -346,7 +346,7 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 			WorldVertex* opaqueData		 = opaqueMem.memory;
 			WorldVertex* transparentData = transparentMem.memory;
 
-			for (int j = 0; j < currentFace; j++) {
+			for (int j = 0; j < currentFace; ++j) {
 				Model face = faceBuffer[j];
 
 				int offsetX = face.x + item.chunk->x * CHUNK_SIZE;
@@ -364,9 +364,9 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 					blockVar = &BLOCKSTATES[face.block].states[face.metadata].variants[0];
 				}
 
-				memcpy(data, blockVar->model->vertex[face.dir * 6], sizeof(WorldVertex) * 6);
+				memcpy(data, (blockVar->model->vertex + face.dir * 6), sizeof(WorldVertex) * 6);
 
-				for (int k = 0; k < 6; k++) {
+				for (int k = 0; k < 6; ++k) {
 					const float3* pos = &block_sides_lut[face.dir * 6 + k].pos;
 
 					data[k].pos.x = pos->x + (offsetX << 4);
@@ -378,7 +378,7 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 				else
 					opaqueData += 6;
 			}
-			for (int j = 0; j < currentModel; j++) {
+			for (int j = 0; j < currentModel; ++j) {
 				Crash("You added models? If not, dont set isSolidBlock to false. DEV INFO, REPORT!");
 				Model face = modelBuffer[j];
 
@@ -404,7 +404,7 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 
 				memcpy(data, blockVar->model->vertex, sizeof(WorldVertex) * size);
 
-				for (int k = 0; k < size; k++) {
+				for (int k = 0; k < size; ++k) {
 					data[k].pos.x += offsetX << 4;
 					data[k].pos.y += offsetY << 4;
 					data[k].pos.z += offsetZ << 4;

@@ -54,7 +54,7 @@ void Hand_Draw(int projUniform, C3D_Mtx* projection, ItemStack stack) {
 			u8 color[3];
 			Block_GetItemColor(BLOCKS[stack.block], i, stack.meta, color);
 
-			s16* iconUV = BLOCKSTATES[stack.block].states[stack.meta].variants[0].model->vertex[i]->uv;
+			s16* iconUV = BLOCKSTATES[stack.block].states[stack.meta].variants[0].model->vertex[i * 6].uv;
 
 #define oneDivIconsPerRow (32768 / 8)
 #define halfTexel (6)

@@ -17,6 +17,8 @@
 #include "util/Paths.h"
 #include "util/StringUtils.h"
 
+static C3D_Tex sTexError;
+
 u32 hash(const char* str) {
 	unsigned long hash = 5381;
 	int c;
@@ -26,6 +28,10 @@ u32 hash(const char* str) {
 }
 
 void tileImage32(u32* src, u8* dst, int sizex, int sizez);
+
+void Texture_Init() {
+	Texture_Load(&sTexError, "romfs:/error.png");
+}
 
 void Texture_Load(C3D_Tex* result, const char* filename) {
 	const char* filepath = filename;
@@ -62,6 +68,8 @@ void Texture_Load(C3D_Tex* result, const char* filename) {
 		GSPGPU_FlushDataCache(imgInLinRam, width * height * sizeof(u32));
 		free(image);
 
+		C3D_TexSetFilter(result, GPU_NEAREST, GPU_NEAREST);
+
 		if (width < 64 || height < 64) {
 			C3D_SyncTextureCopy(imgInLinRam, 0, result->data, 0, width * height * sizeof(u32), 8);
 		} else {
@@ -73,6 +81,8 @@ void Texture_Load(C3D_Tex* result, const char* filename) {
 
 		linearFree(imgInLinRam);
 	} else {
+		// 83 = alloc
+		//
 #ifdef DEBUG_LOG
 		if (error != 0) {
 			char name[512];
@@ -80,7 +90,16 @@ void Texture_Load(C3D_Tex* result, const char* filename) {
 			DebugUI_Log("Failed to load texture %s: Code %d", name, error);
 		}
 #endif
-		Texture_Load(result, "romfs:/error.png");
+
+		if (error == 83) {
+			Crash_Ext("Allocation Error at Texture_Load\nCould not allocate space for '%s'", CRASH_ALLOC, filename);
+		}
+
+		memcpy(result, &sTexError, sizeof(C3D_Tex));
+		result->data = linearAlloc(sTexError.size);
+		if (!result->data)
+			Crash("ahem.");
+		memcpy(result->data, sTexError.data, sTexError.size);
 	}
 }
 
@@ -189,8 +208,8 @@ void Texture_MapInit(Texture_Map* map) {
 		unsigned int w, h;
 		u32 error = lodepng_decode32_file((u8**)&image, &w, &h, filename);
 		if (w == TEXTURE_TILESIZE && h == TEXTURE_TILESIZE && image != NULL && error == 0) {
-			for (int x = 0; x < TEXTURE_TILESIZE; x++) {
-				for (int y = 0; y < TEXTURE_TILESIZE; y++) {
+			for (int x = 0; x < TEXTURE_TILESIZE; ++x) {
+				for (int y = 0; y < TEXTURE_TILESIZE; ++y) {
 					buffer[(locX + x) + ((y + locY) * TEXTURE_MAPSIZE)] =
 						__builtin_bswap32(image[x + ((TEXTURE_TILESIZE - y - 1) * TEXTURE_TILESIZE)]);
 				}

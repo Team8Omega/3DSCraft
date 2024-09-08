@@ -305,9 +305,9 @@ static void runGameLoop() {
 }
 
 void gRun() {
-	sRunning = true;
-
 	init();
+
+	sRunning = true;
 
 	while (sRunning && aptMainLoop()) {
 		runGameLoop();

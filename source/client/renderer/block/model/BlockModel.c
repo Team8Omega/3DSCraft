@@ -26,7 +26,7 @@ static void getElements(mpack_node_t root) {
 	size_t size = serial_get_arrayLength(elementNode);
 	elementNum	= size;
 
-	elements = linearAlloc(sizeof(BlockElement) * size);
+	elements = malloc(sizeof(BlockElement) * size);
 	memset(elements, 0, sizeof(BlockElement) * size);
 
 	for (size_t i = 0; i < size; ++i) {
@@ -51,7 +51,7 @@ static void getTextures(mpack_node_t root) {
 
 	textureNum = serial_get_mapLength(textureNode);
 
-	textures = linearAlloc(sizeof(ModelTextureEntry) * textureNum);
+	textures = malloc(sizeof(ModelTextureEntry) * textureNum);
 	memset(textures, 0, sizeof(ModelTextureEntry) * textureNum);
 
 	for (size_t i = 0; i < textureNum; ++i) {
@@ -76,6 +76,7 @@ static void getGuiLight(mpack_node_t root) {
 
 	guiLight = strcmp(str, "front") == 0 ? GUILIGHT_FRONT : GUILIGHT_SIDE;
 }
+/*
 static size_t getFaceNum() {
 	size_t faceNum = 0;
 	for (size_t i = 0; i < elementNum; ++i) {
@@ -87,6 +88,7 @@ static size_t getFaceNum() {
 	}
 	return faceNum;
 }
+*/
 BlockModel BlockModel_Deserialize(mpack_node_t root, const char* name) {
 	getElements(root);
 	serial_get_error(root, "Elements");
@@ -104,24 +106,20 @@ BlockModel BlockModel_Deserialize(mpack_node_t root, const char* name) {
 	serial_get_error(root, "GuiLight");
 
 	BlockModel obj;
-	obj.hash	= String_Hash(name);
-	obj.vertNum = getFaceNum() * 6;
+	obj.hash = String_Hash(name);
+
 	strcpy(obj.name, name);
 	strcpy(obj.parentName, parentName);
+
 	obj.hasAmbientOcclusion = hasAmbientOcclusion;
-	obj.guiLight			= guiLight;
-	obj.elementNum			= elementNum;
-	if (elementNum > 0) {
-		obj.elements = elements;
-	} else {
-		obj.elements = NULL;
-	}
+
+	obj.guiLight = guiLight;
+
+	obj.elementNum = elementNum;
+	obj.elements   = elementNum > 0 ? elements : NULL;
+
 	obj.textureNum = textureNum;
-	if (textureNum > 0) {
-		obj.textures = textures;
-	} else {
-		obj.textures = NULL;
-	}
+	obj.textures   = textureNum > 0 ? textures : NULL;
 
 	elements = NULL;
 	textures = NULL;

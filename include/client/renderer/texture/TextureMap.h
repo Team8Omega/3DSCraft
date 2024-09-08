@@ -19,6 +19,8 @@ typedef struct {
 	Icon icons[TEXTURE_MAPTILES * TEXTURE_MAPTILES];
 } Texture_Map;
 
+void Texture_Init();
+
 void Texture_MapAddName(const char* path, int out_uv[]);
 void Texture_MapInit(Texture_Map* map);
 // Icon Texture_MapGetIcon(Texture_Map* map, char* filename);

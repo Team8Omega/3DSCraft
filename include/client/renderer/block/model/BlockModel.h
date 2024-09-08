@@ -28,8 +28,6 @@ typedef struct {
 	char name[64];
 	char parentName[64];
 
-	size_t vertNum;
-
 	BlockElement* elements;
 	size_t elementNum;
 

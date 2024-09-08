@@ -56,17 +56,18 @@ void WorldRenderer_Init(int projectionUniform_) {
 	Hand_Init();
 
 	float data[256];
-	for (int i = 0; i <= 128; i++) {
+	for (int i = 0; i <= 128; ++i) {
 		float val = 1.f;
 		if (i == 0)
 			val = 0.0f;
 		else if (i == 1)
-			val = 0.9f;
+			val = 0.8f;
 		if (i < 128)
 			data[i] = val;
 		if (i > 0)
 			data[i + 127] = val - data[i - 1];
 	}
+
 	FogLut_FromArray(&fogLut, data);
 
 	Clouds_Init();
@@ -211,7 +212,7 @@ static void renderWorld() {
 	}
 	C3D_AlphaTest(false, GPU_GREATER, 0);
 
-	DebugUI_Text("C: %u V: %u D: %u pC: %u, pU: %d", clustersDrawn, polysTotal, (int)renderDistance,
+	DebugUI_Text("C: %u V: %lu D: %.0f pC: %zu, pU: %d", clustersDrawn, polysTotal, renderDistance,
 				 gWorld->chunkCache[CHUNKCACHE_SIZE / 2][CHUNKCACHE_SIZE / 2]->tasksRunning, gWorkqueue.queue.length);
 }
 

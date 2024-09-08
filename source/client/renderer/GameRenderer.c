@@ -67,6 +67,8 @@ void GameRenderer_Init() {
 
 	PolyGen_Init();
 
+	Texture_Init();
+
 	WorldRenderer_Init(shaderWorld.uLocProjection);
 
 	SpriteBatch_Init(shaderGui.uLocProjection);

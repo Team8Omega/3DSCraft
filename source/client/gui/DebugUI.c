@@ -59,6 +59,8 @@ static DebugUI_State menuState	   = MENUSTATE_NONE;
 static DebugUI_State menuStateLast = MENUSTATE_NONE;
 static u8 debugMenuOptionNum	   = 0;
 
+static FILE* fileLog;
+
 static void menu_showDebug() {
 	gGetShowDebug() ? gSetShowDebug(false) : gSetShowDebug(true);
 }
@@ -84,6 +86,7 @@ void DebugUI_Init() {
 		logLines[i] = malloc(LOG_LINE_LENGTH);
 		memset(logLines[i], 0x0, LOG_LINE_LENGTH);
 	}
+
 #endif
 #ifdef DEBUG_INFO
 	for (int i = 0; i < STATUS_LINES; i++) {
@@ -91,6 +94,12 @@ void DebugUI_Init() {
 		memset(statusLines[i], 0x0, STATUS_LINE_LENGTH);
 	}
 #endif
+
+	fileLog = fopen(PATH_ROOT "log.txt", "w");
+	fprintf(fileLog, "3DSCraft Log");
+	fclose(fileLog);
+
+	fileLog = fopen(PATH_ROOT "log.txt", "a");
 }
 void DebugUI_Deinit() {
 #ifdef DEBUG_LOG
@@ -101,6 +110,8 @@ void DebugUI_Deinit() {
 	for (int i = 0; i < STATUS_LINES; i++)
 		free(statusLines[i]);
 #endif
+
+	fclose(fileLog);
 }
 
 void DebugUI_Text(const char* text, ...) {
@@ -128,15 +139,16 @@ void DebugUI_TextAt(u8 line, const char* text, ...) {
 }
 
 void DebugUI_Log(const char* text, ...) {
-#ifdef DEBUG_LOG
-	if (isLogPaused)
-		return;
-
 	if (strlen(text) < 0)
 		return;
 
 	va_list args;
 	va_start(args, text);
+	vfprintf(fileLog, text, args);
+
+#ifdef DEBUG_LOG
+	if (isLogPaused)
+		return;
 
 	char stringFormatted[512];
 	vsprintf(stringFormatted, text, args);
@@ -154,8 +166,8 @@ void DebugUI_Log(const char* text, ...) {
 	strncpy(logLines[0], stringFormatted, LOG_LINE_LENGTH);
 	logLines[0][LOG_LINE_LENGTH - 1] = '\0';
 
-	va_end(args);
 #endif
+	va_end(args);
 }
 
 #ifdef DEBUG_INFO
