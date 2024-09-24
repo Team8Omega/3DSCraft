@@ -51,15 +51,15 @@ You can change following controls in `sd:/3dscraft/options.ini`:
 ## Building
 - Install Devkitpro
 - Install libraries as follows
-   - ```pacman -S 3ds-libvorbisidec 3ds-pkg-config```
+   - ```(dkp-)pacman -S 3ds-dev 3ds-libvorbisidec 3ds-pkg-config 3dstools```
 - run make, read the errors properly.
 - Get 3DSCraft.cia/.3dsx :)
 
 # History
- - [Our repo here](https://github.com/Team8Omega/3DSCraft) is a [reupload of](https://github.com/EinfachEli08/3DSCraft) the fork from
- - ["Modification of Craftus Redesigned"](https://github.com/Onixiya/craftus) by Onixiya, which forked 
- - [Craftus Redesigned](https://github.com/yunes-0840/Craftus-Redesigned) by GamesSanti/yunes-0840, which forked 
- - [Craftus_Reloaded](https://github.com/RSDuck/craftus_reloaded) by RSDuck, which forked the original 
+ - [Our repo here](https://github.com/Team8Omega/3DSCraft) is a [reupload](https://github.com/EinfachEli08/3DSCraft) of a fork from
+ - ["Modification of Craftus Redesigned"](https://github.com/Onixiya/craftus) by Onixiya, which forked
+ - [Craftus Redesigned](https://github.com/yunes-0840/Craftus-Redesigned) by GamesSanti/yunes-0840, which forked
+ - [Craftus_Reloaded](https://github.com/RSDuck/craftus_reloaded) by RSDuck, which forked the original
  - [Craftus3DS](https://github.com/RSDuck/Craftus3DS) by RSDuck.
 
 # Credits

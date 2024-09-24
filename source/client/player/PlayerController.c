@@ -283,7 +283,7 @@ void PlayerController_Tick(PlayerController* ctrl, Sound* sound, float dt) {
 		movement = f3_sub(movement, f3_new(0.f, crouch, 0.f));
 	}
 	if (f3_magSqr(movement) > 0.f) {
-		float speed = 4.3f * f3_mag(f3_new(-strafeLeft + strafeRight, -crouch + jump, -forward + backward));
+		float speed = 4.3f;
 		gPlayer->bobbing += speed * 1.5f * dt;
 		movement = f3_scl(f3_nrm(movement), speed);
 	}
@@ -293,14 +293,16 @@ void PlayerController_Tick(PlayerController* ctrl, Sound* sound, float dt) {
 	float lookUp	= IsKeyDown(ctrl->controlScheme.lookUp, &agnosticInput);
 	float lookDown	= IsKeyDown(ctrl->controlScheme.lookDown, &agnosticInput);
 
-	gPlayer->yaw += (lookLeft + -lookRight) * 160.f * DEG_TO_RAD * dt;
+	u8 sensitivity = 100;	 // %
+
+	gPlayer->yaw += (lookLeft + -lookRight) * (float)(sensitivity);
 	if (gPlayer->yaw > YAW_MAX)
 		gPlayer->yaw = YAW_MIN + (gPlayer->yaw - YAW_MAX);
 	else if (gPlayer->yaw < YAW_MIN)
 		gPlayer->yaw = YAW_MAX + (gPlayer->yaw - YAW_MIN);
 
-	gPlayer->pitch += (-lookDown + lookUp) * 160.f * DEG_TO_RAD * dt;
-	gPlayer->pitch = CLAMP(gPlayer->pitch, -DEG_TO_RAD * 89.9f, DEG_TO_RAD * 89.9f);
+	gPlayer->pitch += (-lookDown + lookUp) * (float)(sensitivity);
+	gPlayer->pitch = CLAMP(gPlayer->pitch, -DEG_TO_RAD * 90.0f, DEG_TO_RAD * 90.0f);
 
 	float placeBlock = IsKeyDown(ctrl->controlScheme.placeBlock, &agnosticInput);
 	float breakBlock = IsKeyDown(ctrl->controlScheme.breakBlock, &agnosticInput);
@@ -313,14 +315,18 @@ void PlayerController_Tick(PlayerController* ctrl, Sound* sound, float dt) {
 		Player_Jump(movement);
 
 	bool releasedJump = WasKeyReleased(ctrl->controlScheme.jump, &agnosticInput);
-	if (ctrl->flyTimer >= 0.f) {
-		if (jump > 0.f)
-			gPlayer->flying ^= true;
-		ctrl->flyTimer += dt;
-		if (ctrl->flyTimer > 0.25f)
-			ctrl->flyTimer = -1.f;
+	if (ctrl->flyTimer > -1) {
+		if (ctrl->flyTimer > 6.f)
+			ctrl->flyTimer = -1;
+		else {
+			if (jump && (ctrl->flyTimer += dt) > 0.01f) {
+				gPlayer->flying ^= true;
+				ctrl->flyTimer = -1;
+			}
+		}
+
 	} else if (releasedJump) {
-		ctrl->flyTimer = 0.f;
+		ctrl->flyTimer = 0;
 	}
 
 	bool releasedCrouch = WasKeyReleased(ctrl->controlScheme.crouch, &agnosticInput);

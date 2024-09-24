@@ -221,7 +221,7 @@ void Player_Move(float dt, float3 accl) {
 
 	gPlayer->breakPlaceTimeout -= dt;
 	gPlayer->simStepAccum += dt;
-	const float SimStep = 1.f / 60.f;
+	const float SimStep = 1.f / 20.f;
 	while (gPlayer->simStepAccum >= SimStep) {
 		gPlayer->velocity.y -= GravityPlusFriction * SimStep * 2.f;
 		if (gPlayer->velocity.y < MaxFallVelocity)

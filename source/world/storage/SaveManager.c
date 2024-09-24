@@ -88,7 +88,7 @@ void SaveManager_Unload(SaveManager* mgr) {
 	serial_save_cstr(&writer, "name", gWorld->worldInfo.name);
 
 	// start player
-	serial_save_array(&writer, "players", PARAM_NUM_PER_PLAYER);
+	serial_save_array(&writer, "players", 1);
 	mpack_start_map(&writer, PARAM_NUM_PER_PLAYER);
 
 	serial_save_float(&writer, "x", gPlayer->position.x);

@@ -24,6 +24,9 @@ static inline float3 f3_new(float x, float y, float z) {
 static inline float3 f3_add(float3 a, float3 b) {
 	return f3_new(a.x + b.x, a.y + b.y, a.z + b.z);
 }
+static inline float3 f3_addf(float3 a, float b) {
+	return f3_new(a.x + b, a.y + b, a.z + b);
+}
 static inline float3 f3_sub(float3 a, float3 b) {
 	return f3_new(a.x - b.x, a.y - b.y, a.z - b.z);
 }

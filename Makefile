@@ -212,7 +212,7 @@ $(BUILD):
 clean: clean-exe
 	@echo clean ...
 	@rm -rf $(BUILD) 
-	
+
 clean-exe:
 ifneq ($(WORKFLOW),1)
 	@rm -f $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf $(TARGET).cia $(TARGET).cxi $(TARGET).cfa $(TARGET).lst build/banner.bnr

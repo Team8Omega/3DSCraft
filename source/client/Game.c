@@ -286,9 +286,9 @@ static void runGameLoop() {
 	fetchInput();
 
 	// OG Game has Simulations capped to 20 fps and render is X fps
-	const float tickDt = sDt * (60 / 20);
+	// const float tickDt = sDt * (60 / 20);
 	while (sTimeAccum >= 1.f / 20.f) {
-		runTick(tickDt);
+		runTick(sDt);
 
 		sTimeAccum -= 1.f / 20.f;
 		sTickCounter++;
