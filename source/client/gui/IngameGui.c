@@ -10,17 +10,16 @@
 // this is actual minecraft ported code
 
 void renderHealth() {
-	//basic implementation from Minecraft indev
-	//TODO: more features will be added later#
+	// basic implementation from Minecraft indev
+	// TODO: more features will be added later#
 
 	int health = gPlayer->hp;
-	int yPos = 120 - 21;
+	int yPos   = 120 - 21;
 	SpriteBatch_BindGuiTexture(GuiTexture_Icons);
-	for(int amount = 0; amount < 10; ++amount) {
-
-		int var6 = 0;
+	for (int amount = 0; amount < 10; ++amount) {
+		int var6  = 0;
 		bool var9 = true;
-		if(var9) {
+		if (var9) {
 			var6 = 1;
 		}
 
@@ -28,29 +27,29 @@ void renderHealth() {
 
 		int prevHealth = gPlayer->hp;
 
-		if(health <= 4){
-			yPos += nextafter(2,0);
+		if (health <= 4) {
+			yPos += nextafter(2, 0);
 		}
-		SpriteBatch_PushQuad(spriteSize + (amount * 8), yPos, -1,spriteSize, spriteSize,  16 + var6 * spriteSize, 0, spriteSize, spriteSize);
+		SpriteBatch_PushQuad(spriteSize + (amount * 8), yPos, -1, spriteSize, spriteSize, 16 + var6 * spriteSize, 0, spriteSize,
+							 spriteSize);
 
-		if(var9) {
-			if((amount << 1) + 1 < prevHealth) {
-				SpriteBatch_PushQuad(spriteSize+ (amount * 8), yPos,0,spriteSize, spriteSize, 70, 0, spriteSize, spriteSize);
+		if (var9) {
+			if ((amount << 1) + 1 < prevHealth) {
+				SpriteBatch_PushQuad(spriteSize + (amount * 8), yPos, 0, spriteSize, spriteSize, 70, 0, spriteSize, spriteSize);
 			}
 
-			if((amount << 1) + 1 == prevHealth) {
-				SpriteBatch_PushQuad(spriteSize+ (amount * 8), yPos,0,spriteSize, spriteSize,79, 0, spriteSize, spriteSize);
+			if ((amount << 1) + 1 == prevHealth) {
+				SpriteBatch_PushQuad(spriteSize + (amount * 8), yPos, 0, spriteSize, spriteSize, 79, 0, spriteSize, spriteSize);
 			}
 		}
 
-		if((amount << 1) + 1 < health) {
-			SpriteBatch_PushQuad(spriteSize+ (amount * 8), yPos,0,spriteSize, spriteSize, 52, 0, spriteSize, spriteSize);
+		if ((amount << 1) + 1 < health) {
+			SpriteBatch_PushQuad(spriteSize + (amount * 8), yPos, 0, spriteSize, spriteSize, 52, 0, spriteSize, spriteSize);
 		}
 
-		if((amount << 1) + 1 == health) {
-			SpriteBatch_PushQuad(spriteSize+ (amount * 8), yPos,0,spriteSize, spriteSize, 61, 0, spriteSize, spriteSize);
+		if ((amount << 1) + 1 == health) {
+			SpriteBatch_PushQuad(spriteSize + (amount * 8), yPos, 0, spriteSize, spriteSize, 61, 0, spriteSize, spriteSize);
 		}
-
 	}
 }
 
@@ -115,7 +114,7 @@ static void callAction(IngameClickAction a) {
 	}
 }
 
-void IngameGui_RenderBottom() {
+static void renderBottomHub() {
 	SpriteBatch_SetScale(1);
 	SpriteBatch_BindGuiTexture(GuiTexture_Widgets);
 
@@ -143,4 +142,8 @@ void IngameGui_RenderBottom() {
 
 	// held item text
 	SpriteBatch_PushText(2, 110, 1, SHADER_RGB(18, 18, 18), false, INT_MAX, 0, "Helditemname");
+}
+
+void IngameGui_RenderBottom() {
+	renderBottomHub();
 }

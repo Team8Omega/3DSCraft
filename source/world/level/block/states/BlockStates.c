@@ -4,6 +4,7 @@
 #include <malloc.h>
 #include <unistd.h>
 
+#include "client/gui/DebugUI.h"
 #include "resources/model/ModelBakery.h"
 #include "resources/model/ModelManager.h"
 #include "util/Paths.h"
@@ -147,8 +148,8 @@ void BlockStates_Decompile() {
 	size_t endHeap	= mallinfo().uordblks;
 	size_t usedHeap = endHeap - startHeap;
 
-	Crash_Ext("BlockStates loaded! took %.0f ms.\nUsed now: Lin: %ukB, Heap: %zukB, All: %ukB", CRASH_ALLOC, elapsedMs, usedSpace >> 10,
-			  usedHeap >> 10, (usedSpace + usedHeap) >> 10);
+	DebugUI_Log("BlockStates loaded! took %.0f ms - Used now: Lin: %ukB, Heap: %zukB, All: %ukB", CRASH_ALLOC, elapsedMs, usedSpace >> 10,
+				usedHeap >> 10, (usedSpace + usedHeap) >> 10);
 }
 
 BlockStateVariant* BlockState_Get(BlockId blockId, u8 index) {
