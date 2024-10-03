@@ -225,6 +225,9 @@ run:
 rund: #run dima
 	@3dslink $(TARGET).3dsx -a 192.168.178.37
 
+emue: entry
+	@../../Desktop/citra-windows-msvc-20240303-0ff3440/citra-qt.exe 3DSCraft.3dsx
+
 ctru:
 	@echo Compiling libctru, make sure it exists at ./private/libctru/
 	@make -C private/libctru -f ./Makefile --no-print-directory
