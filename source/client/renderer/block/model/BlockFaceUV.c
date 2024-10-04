@@ -15,7 +15,7 @@ static void getUVs(mpack_node_t face) {
 	mpack_node_t uvNode = serial_get_node(face, "uv");
 
 	if (serial_get_arrayLength(uvNode) != 4) {
-		Crash("Expected 4 uv values, found: %d", serial_get_arrayLength(uvNode));
+		Crash(0, "Expected 4 uv values, found: %d", serial_get_arrayLength(uvNode));
 		memset(sBuffer_UV, 0, sizeof(sBuffer_UV));
 		return;
 	}
@@ -27,7 +27,7 @@ static void getUVs(mpack_node_t face) {
 static int getRotation(mpack_node_t face) {
 	int rot = serial_get(face, int, "rotation", 0);
 	if (rot != 0 && (rot < 0 || (rot % 90) != 0 || (rot / 90) > 3))
-		Crash("Invalid rotation %d found, only 0/90/180/270 allowed");
+		Crash(0, "Invalid rotation %d found, only 0/90/180/270 allowed");
 
 	return rot;
 }

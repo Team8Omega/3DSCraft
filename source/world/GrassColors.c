@@ -11,7 +11,7 @@ static u32 grassBuffer[GRASSMAP_SIZE * GRASSMAP_SIZE];
 
 #define colR(c) ((c >> 16) & 0xff)
 #define colG(c) (((c) >> 8) & 0xff)
-#define colB(c) ((c)&0xff)
+#define colB(c) ((c) & 0xff)
 
 #include <stdio.h>
 #include <string.h>
@@ -20,7 +20,7 @@ static u32 grassBuffer[GRASSMAP_SIZE * GRASSMAP_SIZE];
 void GrassColors_DebugToFile() {
 	FILE* file = fopen("sdmc:/3dscraft/debug.txt", "w");
 	if (!file) {
-		Crash("Failed to open debug file for writing!");
+		Crash(0, "Failed to open debug file for writing!");
 		return;
 	}
 
@@ -63,7 +63,7 @@ void GrassColors_Init() {
 
 #define colR(c) ((c >> 16) & 0xff)
 #define colG(c) (((c) >> 8) & 0xff)
-#define colB(c) ((c)&0xff)
+#define colB(c) ((c) & 0xff)
 
 u32 GrassColors_Get(float temp, float rain) {
 	rain *= temp;

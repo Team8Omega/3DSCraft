@@ -50,7 +50,8 @@ void Region_Init(Region* region, int x, int z) {
 	}
 
 	if (region->dataFile == NULL) {
-		Crash("World Path invalid, internal error. Unable to load Region %d.%d.\n\nPath name: %s\nBuffer String: %s\nBuffer Address: 0x%x",
+		Crash(0,
+			  "World Path invalid, internal error. Unable to load Region %d.%d.\n\nPath name: %s\nBuffer String: %s\nBuffer Address: 0x%x",
 			  x, z, gWorld->worldInfo.path, buffer, buffer);
 	}
 
@@ -102,7 +103,7 @@ void Region_SaveIndex(Region* region) {
 
 	FILE* file = fopen(buffer, "r+b");
 	if (file == NULL) {
-		Crash("Failed to open Region file %d.%d for writing metadata %s", buffer, region->x, region->z);
+		Crash(0, "Failed to open Region file %d.%d for writing metadata %s", buffer, region->x, region->z);
 	}
 
 	fseek(file, 0, SEEK_SET);
@@ -191,7 +192,7 @@ void Region_SaveChunk(Region* region, Chunk* chunk) {
 
 	mpack_error_t err = mpack_writer_destroy(&writer);
 	if (err != mpack_ok) {
-		Crash("MPack error %d while saving chunk %d.%d.%d\nPath: %s", err, x, z, chunk->x, region->dataFile);
+		Crash(0, "MPack error %d while saving chunk %d.%d.%d\nPath: %s", err, x, z, chunk->x, region->dataFile);
 	}
 
 	mz_ulong compressedSize = fileBufferSize;
@@ -227,7 +228,7 @@ void Region_LoadChunk(Region* region, Chunk* chunk) {
 	fseek(region->dataFile, headerSize + chunkInfo.position * sectorSize, SEEK_SET);
 
 	if (fread(fileBuffer, 1, chunkInfo.compressedSize, region->dataFile) != chunkInfo.compressedSize) {
-		Crash("Read chunk data size isn't equal to the expected size for chunk %d.%d.%d", chunk->x, chunk->z, x);
+		Crash(0, "Read chunk data size isn't equal to the expected size for chunk %d.%d.%d", chunk->x, chunk->z, x);
 	}
 
 	mz_ulong uncompressedSize = decompressBufferSize;
@@ -278,7 +279,7 @@ void Region_LoadChunk(Region* region, Chunk* chunk) {
 
 	mpack_error_t err = mpack_tree_destroy(&tree);
 	if (err != mpack_ok) {
-		Crash("MPack error %d while loading chunk %d.%d from region", err, chunk->x, chunk->z);
+		Crash(0, "MPack error %d while loading chunk %d.%d from region", err, chunk->x, chunk->z);
 	}
 
 	chunk->revision = chunkInfo.revision;

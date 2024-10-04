@@ -44,18 +44,18 @@ void checkValid() {
 		|| access(PATHPACK_SHORT PATH_PACK_LANG "/en_us.mp", F_OK)			//
 																			//|| access(PATHPACK_SHORT PATH_PACK_LANG "/en_us.mp", F_OK)
 	)
-		Crash(
-			"Hello there! Cannot find the vanilla game assets.\n\n\nPlease follow this link for instructions:\n"
-			"\'github.com/Team8Omega/3DSCraft-ResourcePacker\'\n\n\nYou have to "
-			"validly provide your own assets of thegame you purchased, as we do not support piracy.\n\nYou are not allowed to ask for\n"
-			"another persons dump, as we expect every player\nto have bought the original game.\nYou provide the assets, we provide the "
-			"code.\n\n\n\n\n\n\n3DSCraft by Team Omega, Minecraft by Mojang.\n\n\n\n");
+		Crash(0,
+			  "Hello there! Cannot find the vanilla game assets.\n\n\nPlease follow this link for instructions:\n"
+			  "\'github.com/Team8Omega/3DSCraft-ResourcePacker\'\n\n\nYou have to "
+			  "validly provide your own assets of thegame you purchased, as we do not support piracy.\n\nYou are not allowed to ask for\n"
+			  "another persons dump, as we expect every player\nto have bought the original game.\nYou provide the assets, we provide the "
+			  "code.\n\n\n\n\n\n\n3DSCraft by Team Omega, Minecraft by Mojang.\n\n\n\n");
 
 	// Check for valid license
 	if (access("romfs:/licenses.txt", F_OK))
-		Crash(
-			"This build is shipped without license information for third parties, and is therefore not legit.\nPlease build with "
-			"\'licenses.txt\', and try again.\nBig thanks to all the people who openly\nprovide their code for people to share.");
+		Crash(0,
+			  "This build is shipped without license information for third parties, and is therefore not legit.\nPlease build with "
+			  "\'licenses.txt\', and try again.\nBig thanks to all the people who openly\nprovide their code for people to share.");
 }
 
 void getUsername() {

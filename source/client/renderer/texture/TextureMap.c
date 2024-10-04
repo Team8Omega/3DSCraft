@@ -92,13 +92,13 @@ void Texture_Load(C3D_Tex* result, const char* filename) {
 #endif
 
 		if (error == 83) {
-			Crash_Ext("Allocation Error at Texture_Load\nCould not allocate space for '%s'", CRASH_ALLOC, filename);
+			Crash(CRASH_ALLOC, "Allocation Error at Texture_Load\nCould not allocate space for '%s'", filename);
 		}
 
 		memcpy(result, &sTexError, sizeof(C3D_Tex));
 		result->data = linearAlloc(sTexError.size);
 		if (!result->data)
-			Crash("ahem.");
+			Crash(0, "ahem.");
 		memcpy(result->data, sTexError.data, sTexError.size);
 	}
 }
@@ -168,7 +168,7 @@ static size_t pathNum = 0;
 
 void Texture_MapAddName(const char* path, int out_uv[]) {
 	if (pathNum >= TEXTURE_TILENUM)
-		Crash("Too many entries for TextureMap\n - you know what this means.");
+		Crash(0, "Too many entries for TextureMap\n - you know what this means.");
 
 	// check if already loaded
 	u32 hash = String_Hash(path);

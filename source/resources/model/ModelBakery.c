@@ -38,15 +38,16 @@ static BlockModel loadBlockModel(const char* name) {
 
 	BlockModel model = {};
 	if (access(path, F_OK)) {
-		Crash("File not found\nModelfile missing for %s\nFull Path: %s", name, path);
+		Crash(0, "File not found\nModelfile missing for %s\nFull Path: %s", name, path);
 		return model;
 	}
 
 	mpack_tree_t levelTree = serial_get_start(path);
 	mpack_node_t root	   = serial_get_root(&levelTree);
 
-	if (serial_get_error(root, "loading BlockModel file")) {
-		Crash("Name: %s, Path: %s\nLinear Free: %zu/%zu kB", name, path, linearSpaceFree() >> 10, __ctru_linear_heap_size >> 10);
+	int err = serial_get_errorTree(&levelTree, 0, false);
+	if (err) {
+		Crash(CRASH_ALLOC, "MPERR %d: \"%s\"\nBlockModel File could not be loaded:\n%s", err, mpack_error_to_string(err), path);
 		return model;
 	}
 
@@ -70,9 +71,7 @@ static BlockModel* getBlockModel(const char* name) {
 
 	BlockModel* parent = NULL;
 	if (model.parentName[0] != '\0') {
-		if (strncmp(model.parentName, "minecraft:", 10) == 0) {
-			memmove(model.parentName, model.parentName + 10, strlen(model.parentName) - 10 + 1);
-		}
+		namePrefixMC(model.parentName);
 		parent = getBlockModel(model.parentName);
 	}
 
@@ -239,7 +238,7 @@ static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 	baked->vertex	 = malloc(sizeof(WorldVertex) * baked->numVertex);
 
 	if (baked->vertex == NULL) {
-		Crash_Ext("Allocation Error for BlockModel Baking\nName: %s", CRASH_ALLOC, blockModel->name);
+		Crash(CRASH_ALLOC, "Allocation Error for BlockModel Baking\nName: %s", blockModel->name);
 		free(baked);
 		return NULL;
 	}
@@ -248,7 +247,7 @@ static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 
 	/*if (((int)blockModel->elements < 100 && blockModel->elementNum != 0) ||
 		((int)blockModel->textures < 100 && blockModel->textureNum != 0)) {
-		Crash(
+		Crash(0,
 			"Baking BlockModel failed!\nRecieved invalid BlockModel as input, either elements or textures is NULL when num value isn't "
 			"0\n"
 			"Elements: 0x%x, Num : %lu\n"
@@ -258,7 +257,7 @@ static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 	}
 	if (((int)blockModel->elements > 100 && blockModel->elementNum == 0) ||
 		((int)blockModel->textures > 100 && blockModel->textureNum == 0)) {
-		Crash(
+		Crash(0,
 			"Baking BlockModel failed!\nRecieved invalid BlockModel as input, either elements or textures doesnt line up with num "
 			"value\n"
 			"Elements: 0x%x, Num: %lu\n"
@@ -299,7 +298,7 @@ static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 				}
 			}
 			if (textures[i].uv[0] == 0 && textures[i].uv[1] == 0)
-				Crash("Could not get texture reference!\nBlock: %s\nTextureIdx: %d", blockModel->name, i);
+				Crash(0, "Could not get texture reference!\nBlock: %s\nTextureIdx: %d", blockModel->name, i);
 		}
 	}
 
@@ -330,7 +329,7 @@ static BakedModel* bakeBlockModel(BlockModel* blockModel) {
 			}
 
 			if (uv[0] == 0 && uv[1] == 0)
-				Crash("Could not get texture reference from face!\nBlock: %s\nTexture: %s\nAttempted search: %s", blockModel->name,
+				Crash(0, "Could not get texture reference from face!\nBlock: %s\nTexture: %s\nAttempted search: %s", blockModel->name,
 					  face->texture, texName);
 
 			for (u8 k = 0; k < 6; ++k) {
@@ -366,7 +365,7 @@ BakedModel* ModelBakery_GetModel(const char* name) {
 	u32 endTime		  = svcGetSystemTick();
 	float elapsedMs	  = (float)(endTime - startTime) / (float)CPU_TICKS_PER_MSEC;
 	const char* light = unbaked->guiLight != GUILIGHT_NONE ? unbaked->guiLight == GUILIGHT_FRONT ? "front" : "side" : "none";
-	Crash("Loaded Model! Took %.3f ms.\n\nName: %s,\nParent: %s,\nElementNum: %lu\nGuiLight: %s\nTextureNum: %d\nLinearFree: %lu KB",
+	Crash(0, "Loaded Model! Took %.3f ms.\n\nName: %s,\nParent: %s,\nElementNum: %lu\nGuiLight: %s\nTextureNum: %d\nLinearFree: %lu KB",
 		  elapsedMs, unbaked->name, unbaked->parentName, unbaked->elementNum, light, unbaked->textureNum, linearSpaceFree() >> 10);
 	*/
 	return bakeBlockModel(unbaked);

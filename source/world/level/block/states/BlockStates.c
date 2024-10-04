@@ -34,14 +34,11 @@ static BlockState getState(mpack_node_t stateNode) {
 			char name[64];
 			serial_get_cstr(varNode, "model", name, 64);
 
-			if (strncmp(name, "minecraft:", 10) == 0) {
-				memmove(name, name + 10, strlen(name) - 10 + 1);
-			}
+			namePrefixMC(name);
 
-			serial_get_error(varNode, "Pre-BlockState_ModelLoading");
-			serial_get_error(stateNode, "Pre-BlockState_ModelLoading 2");
+			serial_get_error(varNode, "Pre-BlockState_ModelLoading", true);
 			state.variants[i].model = ModelManager_GetModel(name);
-			serial_get_error(varNode, "Post-BlockState_ModelLoading");
+			serial_get_error(varNode, "Post-BlockState_ModelLoading", true);
 
 			size_t vNum = state.variants[i].model->numVertex;
 			if (vNum > state.vertexNum)
@@ -59,9 +56,7 @@ static BlockState getState(mpack_node_t stateNode) {
 		char name[64];
 		serial_get_cstr(stateNode, "model", name, 64);
 
-		if (strncmp(name, "minecraft:", 10) == 0) {
-			memmove(name, name + 10, strlen(name) - 10 + 1);
-		}
+		namePrefixMC(name);
 
 		state.variants[0].model = ModelManager_GetModel(name);
 		state.variants[0].index = 0;
@@ -85,7 +80,7 @@ void BlockStates_Decompile() {
 		strcat(name, ".mp");
 
 		if (access(name, F_OK)) {
-			Crash("BlockState file not found\nCould not open file for BlockState\nName:%s\nPath:%s", block->name, name);
+			Crash(0, "BlockState file not found\nCould not open file for BlockState\nName:%s\nPath:%s", block->name, name);
 			return;
 		}
 
@@ -100,7 +95,7 @@ void BlockStates_Decompile() {
 		}
 		switch (typehash) {
 			case (u32)249898626611028071:  // multipart
-				Crash("BlockState MultiPart unsupported\nNot added yet, please contact developer!\n\nAt %s", name);
+				Crash(0, "BlockState MultiPart unsupported\nNot added yet, please contact developer!\n\nAt %s", name);
 				break;
 
 			case (u32)7573043612985229:	 // variants
@@ -116,11 +111,11 @@ void BlockStates_Decompile() {
 					serial_get_keyname(data, j, keyname, 64);
 
 					mpack_node_t variant = serial_get_node(data, keyname);
-					serial_get_error(variant, "Pre-BlockState");
+					serial_get_error(variant, "Pre-BlockState", true);
 
 					holder.states[j] = getState(variant);
 
-					serial_get_error(variant, "Mid-BlockState");
+					serial_get_error(variant, "Mid-BlockState", true);
 
 					if (holder.states[j].random)
 						BLOCKS[i]->hasRandomVariants = true;
@@ -131,11 +126,11 @@ void BlockStates_Decompile() {
 			default:
 				char str[64];
 				serial_get_keyname(root, 0, str, 64);
-				Crash("BlockState Unknown type!\nType could not be detected or was not implemented.\nName: %s\nAt: %s\nBlockName: %s", str,
-					  name, block->name);
+				Crash(0, "BlockState Unknown type!\nType could not be detected or was not implemented.\nName: %s\nAt: %s\nBlockName: %s",
+					  str, name, block->name);
 				return;
 		}
-		serial_get_error(root, "Post-BlockState");
+		serial_get_error(root, "Post-BlockState", true);
 	}
 	u32 endTime		= svcGetSystemTick();
 	float elapsedMs = ((float)(endTime / (float)CPU_TICKS_PER_MSEC) - (float)(startTime / (float)CPU_TICKS_PER_MSEC));

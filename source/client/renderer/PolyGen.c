@@ -332,7 +332,7 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 				opaqueMem = VBO_Alloc(numVertexOpaque * sizeof(WorldVertex));
 
 				if (!opaqueMem.memory)
-					return Crash("Failed Allocating VBO Opaque %d %d", numVertexOpaque, currentFace);
+					return Crash(0, "Failed Allocating VBO Opaque %d %d", numVertexOpaque, currentFace);
 			}
 
 			VBO_Block transparentMem;
@@ -340,7 +340,7 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 				transparentMem = VBO_Alloc(numVertexTransparent * sizeof(WorldVertex));
 
 				if (!transparentMem.memory)
-					return Crash("Failed Allocating VBO Transparent");
+					return Crash(0, "Failed Allocating VBO Transparent");
 			}
 
 			WorldVertex* opaqueData		 = opaqueMem.memory;
@@ -379,7 +379,7 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 					opaqueData += 6;
 			}
 			for (int j = 0; j < currentModel; ++j) {
-				Crash("You added models? If not, dont set isSolidBlock to false. DEV INFO, REPORT!");
+				Crash(0, "You added models? If not, dont set isSolidBlock to false. DEV INFO, REPORT!");
 				Model face = modelBuffer[j];
 
 				int offsetX = face.x + item.chunk->x * CHUNK_SIZE;

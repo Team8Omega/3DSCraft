@@ -73,7 +73,7 @@ void Cube_DeinitVBOs() {
 
 Cube* Cube_Init(const CubeRaw* in, s16 texwidth, s16 texheight) {
 	if (!in) {
-		Crash("Passed unbaked CubeRaw is NULL!");
+		Crash(0, "Passed unbaked CubeRaw is NULL!");
 		return NULL;
 	}
 
@@ -172,7 +172,7 @@ extern Shader shaderWorld;
 
 void Cube_Draw(Cube* cube, C3D_Mtx* matrix) {
 	if (!cube)
-		Crash("CUBE==NULL");
+		Crash(0, "CUBE==NULL");
 
 	C3D_Mtx outMatrix;
 	Mtx_Identity(&outMatrix);
@@ -183,7 +183,7 @@ void Cube_Draw(Cube* cube, C3D_Mtx* matrix) {
 	WorldVertex* vbo = cubeModelVBOs[cube->vboIdx];
 
 	if (vbo == NULL)
-		Crash("Cube Num %d has NULL VBO!", cube->vboIdx);
+		Crash(0, "Cube Num %d has NULL VBO!", cube->vboIdx);
 
 	GSPGPU_FlushDataCache(vbo, sizeof(cube_sides_lut));
 

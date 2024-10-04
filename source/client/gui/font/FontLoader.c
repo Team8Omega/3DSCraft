@@ -49,6 +49,6 @@ void FontLoader_Init(Font* font, const char* filename) {
 
 		linearFree(imgInLinRam);
 	} else {
-		Crash("Failed to load font %s\n", filename);
+		Crash(0, "Failed to load font %s\n", filename);
 	}
 }

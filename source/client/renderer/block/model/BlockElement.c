@@ -16,7 +16,7 @@ static BlockElementFace FACE_EMPTY = { .exists = false };
 static float3 parseVector3(mpack_node_t e, const char* keyName) {
 	mpack_node_t array = serial_get_node(e, keyName);
 	if (serial_get_arrayLength(array) != 3)
-		Crash("Expected 3 \'%s\' values, found %zu\n\'%s\' is of type %s", keyName, serial_get_arrayLength(array), keyName,
+		Crash(0, "Expected 3 \'%s\' values, found %zu\n\'%s\' is of type %s", keyName, serial_get_arrayLength(array), keyName,
 			  mpack_type_to_string(array.data->type));
 
 	float3 val;
@@ -29,14 +29,14 @@ static float3 parseVector3(mpack_node_t e, const char* keyName) {
 static float3 parseToPos(mpack_node_t e) {
 	float3 vec = parseVector3(e, "to");
 	if (vec.x < MIN_EXTENT || vec.y < MIN_EXTENT || vec.z < MIN_EXTENT || vec.x >= MAX_EXTENT || vec.y >= MAX_EXTENT || vec.z >= MAX_EXTENT)
-		Crash("\'to\' specifier exceeds the allowed boundaries: [%f,%f,%f]", vec.x, vec.y, vec.z);
+		Crash(0, "\'to\' specifier exceeds the allowed boundaries: [%f,%f,%f]", vec.x, vec.y, vec.z);
 
 	return vec;
 }
 static float3 parseFromPos(mpack_node_t e) {
 	float3 vec = parseVector3(e, "from");
 	if (vec.x < MIN_EXTENT || vec.y < MIN_EXTENT || vec.z < MIN_EXTENT || vec.x >= MAX_EXTENT || vec.y >= MAX_EXTENT || vec.z >= MAX_EXTENT)
-		Crash("\'from\' specifier exceeds the allowed boundaries: [%f,%f,%f]", vec.x, vec.y, vec.z);
+		Crash(0, "\'from\' specifier exceeds the allowed boundaries: [%f,%f,%f]", vec.x, vec.y, vec.z);
 
 	return vec;
 }
@@ -45,7 +45,7 @@ static Direction getFacing(size_t idx) {
 	Direction dir = DirectionByName(DirectionNames[idx]);
 
 	if (dir == Direction_None)
-		Crash("Unknown facing: %s (%d)", DirectionNames[idx], dir);
+		Crash(0, "Unknown facing: %s (%d)", DirectionNames[idx], dir);
 
 	return dir;
 }
@@ -68,7 +68,7 @@ static void getFaces(mpack_node_t e) {
 	}
 
 	if (num < 1 || num > 6) {
-		Crash("Expected between 1 and 6 unique faces, got 0");
+		Crash(0, "Expected between 1 and 6 unique faces, got 0");
 	}
 }
 
@@ -78,15 +78,15 @@ BlockElement BlockElement_Deserialize(mpack_node_t element) {
 	getFaces(element);
 
 	if (serial_has(element, "shade") && !(serial_is(element, "shade", bool))) {
-		Crash("Expected shade to be Boolean");
+		Crash(0, "Expected shade to be Boolean");
 	}
 	bool shade = serial_get(element, bool, "shade", true);
 
 	if (serial_has(element, "rotation")) {
-		Crash("BlockElement Unsupported: found rotation value, which is not supported yet. Please contact developer!");
+		Crash(0, "BlockElement Unsupported: found rotation value, which is not supported yet. Please contact developer!");
 	}
 
-	serial_get_error(element, "Element Deserialize");
+	serial_get_error(element, "Element Deserialize", true);
 
 	BlockElement obj;
 	obj.from  = from;

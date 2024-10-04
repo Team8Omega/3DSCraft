@@ -45,7 +45,7 @@ static void SelectWorldScreen_ScanWorlds() {
 
 			u8 err = mpack_tree_destroy(&tree);
 			if (err != mpack_ok) {
-				Crash("Mpack failure \'%d\' while loading world %s", err, entry->d_name);
+				Crash(0, "Mpack failure \'%d\' while loading world %s", err, entry->d_name);
 				continue;
 			}
 

@@ -11,7 +11,7 @@ void ChunkWorker_Init(ChunkWorker* chunkworker) {
 	WorkQueue_Init(&gWorkqueue);
 
 	if (R_FAILED(APT_SetAppCpuTimeLimit(30))) {
-		Crash("Couldn't set AppCpuTimeLimit");
+		Crash(0, "Couldn't set AppCpuTimeLimit");
 	}
 
 	for (int i = 0; i < WorkerItemTypes_Count; i++)
@@ -22,7 +22,7 @@ void ChunkWorker_Init(ChunkWorker* chunkworker) {
 	chunkworker->thread =
 		threadCreate(&ChunkWorker_Mainloop, (void*)chunkworker, CHUNKWORKER_THREAD_STACKSIZE, prio - 1, gIsNew3ds ? 2 : 1, false);
 	if (!chunkworker->thread) {
-		Crash("Couldn't create worker thread");
+		Crash(0, "Couldn't create worker thread");
 	}
 
 	chunkworker->working = false;

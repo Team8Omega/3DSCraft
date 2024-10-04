@@ -88,7 +88,7 @@ void CubeMap_Deinit() {
 
 void CubeMap_Tick(C3D_Mtx* projection, float3 rotationOffset) {
 	if (cubeVBO == NULL) {
-		Crash("CubeMap not set!");
+		Crash(0, "CubeMap not set!");
 		return;
 	}
 

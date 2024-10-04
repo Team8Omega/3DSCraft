@@ -21,7 +21,7 @@ typedef struct {
 
 struct Block {
 	BlockVtable *vptr;		// virtual table for inheriting block classes.
-	char name[64];			// for texture path
+	const char *name;		// for texture path
 	BlockId id;				// block id, matches enum index.
 	u8 renderType;			// id for type of block/mesh
 	float hardness;			// how many hits to break block

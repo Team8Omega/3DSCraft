@@ -76,7 +76,7 @@ static bool sIsIngame;
 
 #ifdef _DEBUG
 void testFunction() {
-	// Crash("%d", BlockState_Get(BLOCK_GRASS, 0)->index);
+	// Crash(0, "%d", BlockState_Get(BLOCK_GRASS, 0)->index);
 }
 #endif
 
@@ -334,7 +334,7 @@ void gReleaseWorld() {
 }
 
 void gLoadWorld(char* path, char* name, WorldGenType worldType, bool newWorld) {
-	// Crash("path: %s\nname: %s\nworlsDtype: %d\nnewWorld: %s", path, name, worldType, newWorld ? "true" : "false");
+	// Crash(0, "path: %s\nname: %s\nworlsDtype: %d\nnewWorld: %s", path, name, worldType, newWorld ? "true" : "false");
 	char worldPath[256];
 	sprintf(worldPath, PATH_SAVES "%s", path);
 

@@ -46,7 +46,7 @@ void Blocks_Init() {
 
 	for (BlockId i = 0; i < BLOCK_COUNT; ++i) {
 		if (BLOCKS[i] == NULL)
-			Crash("ERROR: Block/s missing in initializer loop, please fix. internal error.");
+			Crash(0, "ERROR: Block/s missing in initializer loop, please fix. internal error.");
 
 		{
 			bool sw = false;

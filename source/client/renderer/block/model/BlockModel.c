@@ -91,19 +91,21 @@ static size_t getFaceNum() {
 */
 BlockModel BlockModel_Deserialize(mpack_node_t root, const char* name) {
 	getElements(root);
-	serial_get_error(root, "Elements");
+	// serial_get_error(root, "Elements", true);
 
 	getParentName(root);
-	serial_get_error(root, "ParentName");
+	// serial_get_error(root, "ParentName", true);
 
 	getTextures(root);
-	serial_get_error(root, "Textures");
+	// serial_get_error(root, "Textures", true);
 
 	getAmbientOcclusion(root);
-	serial_get_error(root, "AmbientOcculsion");
+	// serial_get_error(root, "AmbientOcculsion", true);
 
 	getGuiLight(root);
-	serial_get_error(root, "GuiLight");
+	// serial_get_error(root, "GuiLight", true);
+
+	serial_get_error(root, "BlockModel", true);
 
 	BlockModel obj;
 	obj.hash = String_Hash(name);
@@ -133,7 +135,7 @@ int BlockModel_GetDependencies(char** out_ids[]) {
 	int size	   = hasParent ? 1 : 0;
 
 	if (!out_ids) {
-		Crash("Segmentation Fault\nBlockModel_GetDependencies() recieved NULL ptr");
+		Crash(0, "Segmentation Fault\nBlockModel_GetDependencies() recieved NULL ptr");
 	}
 
 	if (hasParent) {

@@ -49,7 +49,7 @@ void LanguageManager_Load(const char* langCode) {
 		getLangFilename(filename, defaultLang);
 
 	if (access(filename, F_OK) == -1) {
-		Crash("Language file for english (lang/en_us.mp) is missing!");
+		Crash(0, "Language file for english (lang/en_us.mp) is missing!");
 		return;
 	}
 
@@ -68,6 +68,6 @@ void LanguageManager_Load(const char* langCode) {
 
 	mpack_error_t err = mpack_tree_destroy(&levelTree);
 	if (err != mpack_ok) {
-		Crash("Mpack error %d while loading language %s", err, langCode);
+		Crash(0, "Mpack error %d while loading language %s", err, langCode);
 	}
 }

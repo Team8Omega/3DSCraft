@@ -13,28 +13,24 @@
 #include "util/Paths.h"
 
 static char sharedReason[512] = { 0 };
+static CRASH_TYPE sharedType  = 0;
 
 static void crash_extInfo(FILE* file, CRASH_TYPE type);
 
 void Crash_Check() {
 	if (sharedReason[0] != 0)
-		Crash((const char*)sharedReason);
+		Crash(sharedType, (const char*)sharedReason);
 }
 
-void Crash(const char* reason, ...) {
-	va_list vl;
-	va_start(vl, reason);
-	Crash_Ext(reason, CRASH_DEFAULT, vl);
-	va_end(vl);
-}
-
-void Crash_Ext(const char* reason, CRASH_TYPE type, ...) {
+void Crash(CRASH_TYPE type, const char* reason, ...) {
 	aptSetHomeAllowed(false);
 
 	if (threadGetHandle(threadGetCurrent()) != gThreadMain) {
 		va_list vl;
-		va_start(vl, type);
+		va_start(vl, reason);
 		vsnprintf((char*)sharedReason, sizeof(sharedReason), reason, vl);
+		sharedType = type;
+		va_end(vl);
 		return;
 	}
 
@@ -42,18 +38,18 @@ void Crash_Ext(const char* reason, CRASH_TYPE type, ...) {
 		gfxInitDefault();
 
 	gfxSet3D(false);
-
 	consoleInit(GFX_TOP, NULL);
 
 	va_list vl;
-	va_start(vl, type);
+	va_start(vl, reason);
 	vprintf(reason, vl);
+	va_end(vl);
 
+	va_start(vl, reason);
 	FILE* f = fopen(PATH_ROOT "crash.txt", "w");
 	vfprintf(f, reason, vl);
 	crash_extInfo(f, type);
 	fclose(f);
-
 	va_end(vl);
 
 	if (gIsRunning()) {
@@ -64,9 +60,9 @@ void Crash_Ext(const char* reason, CRASH_TYPE type, ...) {
 	} else {
 		printf("\n\n");
 	}
+
 	while (true) {
 		gspWaitForVBlank();
-
 		hidScanInput();
 
 		if (hidKeysDown() & KEY_START) {
@@ -100,7 +96,7 @@ static void crash_extInfo(FILE* file, CRASH_TYPE type) {
 			FPRINT(file, "Linear Free: %lu/%lu kB\nHeap Free: %lu/%lu kB", linearSpaceFree() >> 10, envGetLinearHeapSize() >> 10,
 				   (envGetHeapSize() - mallinfo().uordblks) >> 10, envGetHeapSize() >> 10);
 			break;
-		case CRASH_DEFAULT:
+		default:
 			break;
 	}
 }
