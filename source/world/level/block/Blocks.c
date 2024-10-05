@@ -33,7 +33,7 @@ void Blocks_Init() {
 	regist(BLOCK_POLISHED_ANDESITE, "polished_andesite", 1.5f, 6.0, MATERIAL_STONE, MAPCOLOR_STONE);
 	BLOCKS[BLOCK_GRASS] = BlockGrass_Init(BLOCK_GRASS);
 	regist(BLOCK_DIRT, "dirt", 0.5f, 0.5f, MATERIAL_DIRT, MAPCOLOR_DIRT);
-	regist(BLOCK_COARSE_DIRT, "coarse_dirt", 0.5f, 0.5f, MATERIAL_DIRT, MAPCOLOR_DIRT);
+	/*regist(BLOCK_COARSE_DIRT, "coarse_dirt", 0.5f, 0.5f, MATERIAL_DIRT, MAPCOLOR_DIRT);
 	regist(BLOCK_PODZOL, "podzol", 0.5f, 0.5f, MATERIAL_DIRT, MAPCOLOR_DIRT);
 	regist(BLOCK_COBBLESTONE, "cobblestone", 2.0f, 6.0f, MATERIAL_STONE, MAPCOLOR_STONE);
 	regist(BLOCK_OAK_PLANKS, "oak_planks", 2.0f, 6.0f, MATERIAL_WOOD, MAPCOLOR_WOOD);
@@ -42,6 +42,7 @@ void Blocks_Init() {
 	regist(BLOCK_JUNGLE_PLANKS, "jungle_planks", 2.0f, 6.0f, MATERIAL_WOOD, MAPCOLOR_WOOD);
 	regist(BLOCK_ACACIA_PLANKS, "acacia_planks", 2.0f, 6.0f, MATERIAL_WOOD, MAPCOLOR_WOOD);
 	regist(BLOCK_DARK_OAK_PLANKS, "dark_oak_planks", 2.0f, 6.0f, MATERIAL_WOOD, MAPCOLOR_WOOD);
+	*/
 	regist(BLOCK_BEDROCK, "bedrock", -0.1f, 3600000.0F, MATERIAL_STONE, MAPCOLOR_STONE);
 
 	for (BlockId i = 0; i < BLOCK_COUNT; ++i) {
