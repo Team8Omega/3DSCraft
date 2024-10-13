@@ -13,54 +13,60 @@ endif
 TOPDIR ?= $(CURDIR)
 include $(DEVKITARM)/3ds_rules
 
-#---------------------------------------------------------------------------------
-# TARGET is the name of the output
-# BUILD is the directory where object files & intermediate files will be placed
-# SOURCES is a list of directories containing source code
-# DATA is a list of directories containing data files
-# INCLUDES is a list of directories containing header files
-#
-# NO_SMDH: if set to anything, no SMDH file is generated.
-# ROMFS is the directory which contains the RomFS, relative to the Makefile (Optional)
-# APP_TITLE is the name of the app stored in the SMDH file (Optional)
-# APP_DESCRIPTION is the description of the app stored in the SMDH file (Optional)
-# APP_AUTHOR is the author of the app stored in the SMDH file (Optional)
-# ICON is the filename of the icon (.png), relative to the project folder.
-#   If not set, it attempts to use one of the following (in this order):
-#     - <Project name>.png
-#     - icon.png
-#     - <libctru folder>/default_icon.png
-#---------------------------------------------------------------------------------
+#-------------------------------------------------------------
 
-VERSION_MAJOR	:= 0
-VERSION_MINOR	:= 5
-VERSION_MICRO	:= 4
-
-ifeq ($(DEBUG),)
-	DEBUG		:=	1
+ifeq ($(DEBUG),0)
+	DEBUG		:=	0
+else ifeq ($(DEB),0)
+	DEBUG		:=	0
+else ifeq ($(D),0)
+	DEBUG		:=	0
+else ifeq ($(RELEASE),1)
+	DEBUG		:=	0
+else ifeq ($(REL),1)
+	DEBUG		:=	0
+else ifeq ($(R),1)
+	DEBUG		:=	0
+else
+	DEBUG		:=  1
 endif
+
+ifeq ($(DEBUG),0)
+	TAG_YES 	:= release
+	TAG_NO 		:= debug
+else
+	TAG_YES 	:= debug
+	TAG_NO 		:= release
+endif
+
+#--------------------------------------------------------------
+
+TARGET 			:=  3DSCraft# Project Name
 
 ifeq ($(WORKFLOW),1)
-	ifeq ($(DEBUG), 0)
-		TARGET	:=	3DSCraft
-	else
-		TARGET	:=	3DSCraft-debug
-	endif
-else
-TARGET			:=	3DSCraft
+  ifeq ($(DEBUG),1)
+    TARGET 		:= $(TARGET)-debug
+  endif
 endif
 
+#--------------------------------------------------------------
+
+# Project
 BUILD			:=	build
 DATA			:=	data
 META			:=	project
 ROMFS			:=	romfs
 INCLUDES		:=	lib include .
-SOURCES 		:= $(shell find $(realpath lib) $(realpath source) $(realpath assets) -type d)
-SOURCES 		:= $(foreach dir, $(SOURCES), $(patsubst $(CURDIR)/%, %, $(dir)))
+SRCDIRS 		:= 	source
+
+# Version
+VERSION_MAJOR	:= 0
+VERSION_MINOR	:= 5
+VERSION_MICRO	:= 4
 
 # 3dsx
-APP_DESCRIPTION :=  "3DSCraft - Craftus Gen. 4"
-APP_AUTHOR		:=  "Team-Omega"
+APP_DESCRIPTION :=  "3DSCraft - Craftus Gen. 4" # HB Channel Description
+APP_AUTHOR		:=  "Team-Omega" # HB Channel Author
 ICON			:=	$(META)/icon.png
 
 # CIA
@@ -69,7 +75,6 @@ BANNER_IMAGE	:=	$(META)/banner.cgfx
 RSF_PATH		:=	$(META)/app.rsf
 LOGO			:=	$(META)/logo.bcma.lz
 ICON_FLAGS		:=	nosavebackups,visible
-
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -117,6 +122,8 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
 
 export OUTPUT	:=	$(CURDIR)/$(TARGET)
 export TOPDIR	:=	$(CURDIR)
+
+SOURCES 		:= 	$(foreach dir,$(SRCDIRS),$(patsubst $(CURDIR)/%,%, $(shell find $(realpath $(dir)) -type d)))
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
@@ -176,7 +183,7 @@ ifneq ($(ROMFS),)
 endif
 
 #---------------------------------------------------------------------------------------
-# Cia building preparation
+# tools
 #---------------------------------------------------------------------------------------
 ifneq ($(OS),Windows_NT)
 BANNERTOOL   ?= tools/bannertool
@@ -193,31 +200,86 @@ ifneq ($(strip $(LOGO)),)
 	MAKEROM_ARGS += -logo "$(LOGO)"
 endif
 
+#---------------------------------------------------------------------------------
+# building start
+#---------------------------------------------------------------------------------
+
 .PHONY: $(BUILD) clean all
 
-#---------------------------------------------------------------------------------
-entry:
-	@echo "Compiling $(TARGET), v$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_MICRO)"
-ifneq ($(strip $(DEBUG)),0)
-	@echo "GLOBAL DEBUG FLAG ENABLED"
-endif
-	@$(MAKE) --no-print-directory -f $(CURDIR)/Makefile $(BUILD)
+init: greet
+	@mkdir -p $(BUILD)
 
-all: entry cia 
+	@if [ ! -e "$(BUILD)/$(TAG_YES)" ] || [ -e "$(BUILD)/$(TAG_NO)" ]; then \
+		echo "tag" > "$(BUILD)/$(TAG_YES)"; \
+		rm -f "$(BUILD)/$(TAG_NO)"; \
+		if [ "$(wildcard $(BUILD)/*)" ]; then \
+			echo "# Detected change of target!"; \
+			$(MAKE) --no-print-directory -f $(CURDIR)/Makefile clean; \
+		fi; \
+	fi
+
+	@$(MAKE) --no-print-directory -f $(CURDIR)/Makefile $(BUILD);
+
+greet:
+	@echo -n "# Compiling $(TARGET), v$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_MICRO) - "
+ifneq ($(strip $(DEBUG)),0)
+	@echo "Debug"
+else
+	@echo "Release"
+endif
+
+all: init cia
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+
 #---------------------------------------------------------------------------------
+# build installable cia file
+#---------------------------------------------------------------------------------
+
+cxi:
+	@$(MAKEROM) -o $(TARGET).cxi $(MAKEROM_ARGS)
+	@echo "built ... $(TARGET).cxi (Code)"
+
+cfa:
+	@$(MAKEROM) -o $(TARGET).cfa -rsf $(RSF_PATH) -target t
+	@echo "built ... $(TARGET).cfa (RomFS)"
+
+cia: clean-cia cfa cxi 
+	@$(MAKEROM) -f cia -o $(TARGET).cia -target t -i $(TARGET).cxi:0:0 -i $(TARGET).cfa:1:1
+	@echo "built ... $(TARGET).cia (Final Package)"
+
+#---------------------------------------------------------------------------------
+# ctru compile
+#---------------------------------------------------------------------------------
+
+ctru:
+	@echo Compiling libctru, make sure it exists at ./private/libctru/
+	@make -C private/libctru -f ./Makefile --no-print-directory
+	@cp private/libctru/lib/* ./lib/
+	@echo Copied to lib/libctru*.a
+
+#---------------------------------------------------------------------------------
+# clean
+#---------------------------------------------------------------------------------
+
 clean: clean-exe
-	@echo clean ...
+	@echo "# Cleaning build"
 	@rm -rf $(BUILD) 
 
 clean-exe:
 ifneq ($(WORKFLOW),1)
-	@rm -f $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf $(TARGET).cia $(TARGET).cxi $(TARGET).cfa $(TARGET).lst build/banner.bnr
+	@rm -f $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf $(TARGET).cia $(TARGET).cxi $(TARGET).cfa $(TARGET).lst $(BUILD)/banner.bnr
 endif
+
+clean-cia:
+	@rm -f $(TARGET).cia $(TARGET).cxi $(TARGET).cfa
+
 #---------------------------------------------------------------------------------
+# debugging
+#---------------------------------------------------------------------------------
+
 run:
 	@echo running...
 	@3dslink $(TARGET).3dsx
@@ -225,14 +287,11 @@ run:
 rund: #run dima
 	@3dslink $(TARGET).3dsx -a 192.168.178.37
 
-emue: entry
-	@../../Desktop/citra-windows-msvc-20240303-0ff3440/citra-qt.exe 3DSCraft.3dsx
+emud: init
+	@citra-qt $(TARGET).3dsx
 
-ctru:
-	@echo Compiling libctru, make sure it exists at ./private/libctru/
-	@make -C private/libctru -f ./Makefile --no-print-directory
-	@cp private/libctru/lib/* ./lib/
-	@echo Copied to lib/libctru*.a
+emue: init
+	@../../Desktop/citra-windows-msvc-20240303-0ff3440/citra-qt.exe $(TARGET).3dsx
 
 ifneq ($(OS),Windows_NT)
 ADDR2LINE   ?= $(DEVKITARM)/bin/arm-none-eabi-addr2line
@@ -243,23 +302,13 @@ endif
 addr:
 	@$(ADDR2LINE) -e $(TARGET).elf -i -r -p -f -s $(A)
 
-clean-cia:
-	@rm -f $(TARGET).cia $(TARGET).cxi $(TARGET).cfa
-
-cia: clean-cia $(TARGET).cfa $(TARGET).cxi $(TARGET).cia
-
-$(TARGET).cxi:
-	@$(MAKEROM) -o $(TARGET).cxi $(MAKEROM_ARGS)
-	@echo "built ... $(TARGET).cxi (Code)"
-$(TARGET).cfa:
-	@$(MAKEROM) -o $(TARGET).cfa -rsf $(RSF_PATH) -target t
-	@echo "built ... $(TARGET).cfa (Manual)"
-
-$(TARGET).cia:
-	@$(MAKEROM) -f cia -o $(TARGET).cia -target t -i $(TARGET).cxi:0:0 -i $(TARGET).cfa:1:1
-	@echo "built ... $(TARGET).cia (Exe)"
 
 #---------------------------------------------------------------------------------
+#
+# inside build/ directory
+#
+#---------------------------------------------------------------------------------
+
 else
 
 DEPENDS	:=	$(OFILES:.o=.d)
@@ -288,13 +337,14 @@ endif
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-3dsx: $(OUTPUT).3dsx
 
 ifeq ($(strip $(NO_SMDH)),)
 $(OUTPUT).3dsx	:	$(OUTPUT).elf $(OUTPUT).smdh banner.bnr
 else
 $(OUTPUT).3dsx	:	$(OUTPUT).elf banner.bnr
 endif
+
+3dsx: $(OUTPUT).3dsx
 
 $(OUTPUT).elf	:	$(OFILES)
 
