@@ -57,7 +57,7 @@ DATA			:=	data
 META			:=	project
 ROMFS			:=	romfs
 INCLUDES		:=	lib include .
-SRCDIRS 		:= 	source
+SRCDIRS 		:= 	assets source
 
 # Version
 VERSION_MAJOR	:= 0
@@ -99,11 +99,11 @@ ifeq ($(DEBUG), 0)
 CFLAGS		+=	-fomit-frame-pointer -O2
 LIBS		:= -lcitro3d -lctru 
 else
-CFLAGS		+=	-Og -D_DEBUG
+CFLAGS		+=	-Og -fsanitize=undefined -fsanitize-trap -D_DEBUG
 LIBS		:= -lcitro3dd -lctrud
 endif
 
-LIBS		+= -lm `$(PREFIX)pkg-config opusfile --libs`
+LIBS		+= -lm `$(PREFIX)pkg-config opusfile --libs` -lgame
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -185,11 +185,10 @@ endif
 #---------------------------------------------------------------------------------------
 # tools
 #---------------------------------------------------------------------------------------
+
 ifneq ($(OS),Windows_NT)
-BANNERTOOL   ?= tools/bannertool
-MAKEROM      ?= tools/makerom
+MAKEROM      ?= makerom
 else
-BANNERTOOL   ?= tools/bannertool.exe
 MAKEROM      ?= tools/makerom.exe
 endif
 
@@ -216,9 +215,10 @@ init: greet
 			echo "# Detected change of target!"; \
 			$(MAKE) --no-print-directory -f $(CURDIR)/Makefile clean; \
 		fi; \
+		$(MAKE) --no-print-directory -f $(CURDIR)/Makefile clean-lib; \
 	fi
 
-	@$(MAKE) --no-print-directory -f $(CURDIR)/Makefile $(BUILD);
+	@$(MAKE) --no-print-directory -f $(CURDIR)/Makefile lib $(BUILD);
 
 greet:
 	@echo -n "# Compiling $(TARGET), v$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_MICRO) - "
@@ -250,6 +250,29 @@ cia: clean-cia cfa cxi
 	@$(MAKEROM) -f cia -o $(TARGET).cia -target t -i $(TARGET).cxi:0:0 -i $(TARGET).cfa:1:1
 	@echo "built ... $(TARGET).cia (Final Package)"
 
+#---------------------------------------------------------------------------------------
+# library
+#---------------------------------------------------------------------------------------
+
+ifneq ($(OS),Windows_NT)
+AR 		:= $(DEVKITARM)/bin/arm-none-eabi-ar
+else
+AR 		:= $(DEVKITARM)/bin/arm-none-eabi-ar.exe
+endif
+
+LIBSOURCES 	:= $(wildcard lib/**/*.c)
+LIBOBJS 	:= $(patsubst %.cpp, %.o, $(patsubst %.c, %.o, $(LIBSOURCES)))
+
+lib: lib/libgame.a
+
+lib/libgame.a: $(LIBOBJS)
+	@echo Building library file...
+	@$(AR) rcs lib/libgame.a $^
+
+lib/%.o: lib/%.c
+	@echo $@...
+	@$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
+
 #---------------------------------------------------------------------------------
 # ctru compile
 #---------------------------------------------------------------------------------
@@ -276,6 +299,10 @@ endif
 clean-cia:
 	@rm -f $(TARGET).cia $(TARGET).cxi $(TARGET).cfa
 
+clean-lib:
+	rm -f lib/**/*.o
+	rm -f lib/libgame.o
+
 #---------------------------------------------------------------------------------
 # debugging
 #---------------------------------------------------------------------------------
@@ -293,11 +320,7 @@ emud: init
 emue: init
 	@../../Desktop/citra-windows-msvc-20240303-0ff3440/citra-qt.exe $(TARGET).3dsx
 
-ifneq ($(OS),Windows_NT)
-ADDR2LINE   ?= $(DEVKITARM)/bin/arm-none-eabi-addr2line
-else
-ADDR2LINE   ?= $(DEVKITARM)/bin/arm-none-eabi-addr2line.exe
-endif
+ADDR2LINE   ?= $(DEVKITARM)/bin/arm-none-eabi-addr2line*
 
 addr:
 	@$(ADDR2LINE) -e $(TARGET).elf -i -r -p -f -s $(A)
@@ -314,11 +337,9 @@ else
 DEPENDS	:=	$(OFILES:.o=.d)
 
 ifneq ($(OS),Windows_NT)
-BANNERTOOL   ?= ../tools/bannertool
-MAKEROM      ?= ../tools/makerom
+BANNERTOOL   ?= bannertool
 else
-BANNERTOOL   ?= ../tools/bannertool.exe
-MAKEROM      ?= ../tools/makerom.exe
+BANNERTOOL   ?= tools/bannertool.exe
 endif
 
 

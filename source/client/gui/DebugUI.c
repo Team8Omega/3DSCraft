@@ -19,7 +19,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+static FILE* fileLog;
+
 #ifdef DEBUG_UI
+
 #define STATUS_LINES (240 / 8)
 #define LOG_LINES 30
 #define LOG_LINE_LENGTH 128
@@ -58,8 +61,6 @@ static bool isShowButton		   = true;
 static DebugUI_State menuState	   = MENUSTATE_NONE;
 static DebugUI_State menuStateLast = MENUSTATE_NONE;
 static u8 debugMenuOptionNum	   = 0;
-
-static FILE* fileLog;
 
 static void menu_showDebug() {
 	gGetShowDebug() ? gSetShowDebug(false) : gSetShowDebug(true);

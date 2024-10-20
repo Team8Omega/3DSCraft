@@ -10,29 +10,33 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-      - name: Setup environment
-        run: |
-          sudo chmod 777 tools/*
-          sudo chmod +x tools/*
-      - name: Clone and Build makerom
+      - name: Install build tools
         run: |
           sudo apt-get update
           sudo apt-get install g++ gcc make wget tar -y
-
+      - name: Build makerom
+        run: |
           git clone https://github.com/3DSGuy/Project_CTR
           cd Project_CTR
           
           make progs
 
           mkdir -p ../tools
-          cp makerom/bin/makerom ../tools/
+          sudo cp makerom/bin/makerom /usr/bin/
+          cd ..
+      - name: Build bannertool
+        run: |
+          git clone https://github.com/carstene1ns/3ds-bannertool
+          cd 3ds-bannertool
+          cmake .
+          make
+          sudo cp bannertool /usr/bin/
           cd ..
       - name: Build game code
         id: build
         run: |
           make WORKFLOW=1 DEBUG=0
           make WORKFLOW=1 DEBUG=0 cia
-          make WORKFLOW=1 clean
           make WORKFLOW=1 DEBUG=1
           make WORKFLOW=1 DEBUG=1 cia
           mkdir exe

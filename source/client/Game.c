@@ -190,12 +190,7 @@ static void init() {
 
 	GameRenderer_Init();
 
-	DebugUI_Init();
-
-	SaveManager_Init(&sSavemgr);
-	ChunkWorker_AddHandler(&sChunkWorker, WorkerItemType_Load, (WorkerFuncObj){ &SaveManager_LoadChunk, &sSavemgr, true });
-	ChunkWorker_AddHandler(&sChunkWorker, WorkerItemType_Save, (WorkerFuncObj){ &SaveManager_SaveChunk, &sSavemgr, true });
-
+	aptSetHomeAllowed(false);
 	// ndspInit();
 	/*sBackgroundSound.background = true;
 	sBackgroundSound.path		= String_ParsePackName(PACK_VANILLA, PATH_PACK_SOUNDS, "music/1.opus", NULL);

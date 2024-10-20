@@ -4,10 +4,10 @@
 *.cxi
 *.elf
 *.lst
-*.o
 *.t3x
 *.smdh
-lib/libgame.a
+*.o
+*.a
 
 private
 
