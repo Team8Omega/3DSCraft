@@ -20,6 +20,9 @@ makerom:
 	@$(WGET) -q -P $(TOOLS) $(MAKEROM)
 	@unzip -q -o $(TOOLS)/makerom*.zip -d $(TOOLS)
 	@rm -f $(TOOLS)/makerom*.zip*
+	@if [ "$(OS)" = "ubuntu" ]; then \
+		chmod +x tools/makerom*; \
+	fi
 
 bannertool:
 	@echo Building bannertool...

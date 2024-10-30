@@ -20,6 +20,9 @@ resources/textures.t3s
 !resources/patch
 !resources/patch.7z
 
+tools/makerom*
+tools/bannertool*
+
 .vscode
 .vs
 .idea

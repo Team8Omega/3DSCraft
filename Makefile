@@ -236,7 +236,7 @@ $(BUILD):
 
 makerom_check:
 	@if [ ! -f $(MAKEROM) ]; then \
-		make -f tools/prepare.mak makerom; \
+		make  --no-print-directory -f tools/prepare.mak makerom; \
 	else \
 		echo "# Makerom"; \
 	fi
@@ -354,9 +354,9 @@ else
 DEPENDS	:=	$(OFILES:.o=.d)
 
 ifneq ($(OS),Windows_NT)
-BANNERTOOL   ?= tools/bannertool
+BANNERTOOL   ?= ../tools/bannertool
 else
-BANNERTOOL   ?= tools/bannertool.exe
+BANNERTOOL   ?= ../tools/bannertool.exe
 endif
 
 ifeq ($(suffix $(BANNER_IMAGE)),.cgfx)
@@ -393,7 +393,7 @@ $(OUTPUT).smdh:
 
 bannertool_check:
 	@if [ ! -f $(BANNERTOOL) ]; then \
-		make -f ../tools/prepare.mak bannertool; \
+		make --no-print-directory  -f ../tools/prepare.mak bannertool; \
 	else \
 		echo "# Bannertool"; \
 	fi
