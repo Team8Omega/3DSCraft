@@ -187,7 +187,7 @@ endif
 #---------------------------------------------------------------------------------------
 
 ifneq ($(OS),Windows_NT)
-MAKEROM      ?= makerom
+MAKEROM      ?= tools/makerom
 else
 MAKEROM      ?= tools/makerom.exe
 endif
@@ -203,7 +203,7 @@ endif
 # building start
 #---------------------------------------------------------------------------------
 
-.PHONY: $(BUILD) clean all
+.PHONY: $(BUILD) clean all makerom_check bannertool_check greet init
 
 init: greet
 	@mkdir -p $(BUILD)
@@ -234,6 +234,13 @@ $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
+makerom_check:
+	@if [ ! -f $(MAKEROM) ]; then \
+		make -f tools/prepare.mak makerom; \
+	else \
+		echo "# Makerom"; \
+	fi
+
 #---------------------------------------------------------------------------------
 # build installable cia file
 #---------------------------------------------------------------------------------
@@ -246,7 +253,7 @@ cfa:
 	@$(MAKEROM) -o $(TARGET).cfa -rsf $(RSF_PATH) -target t
 	@echo "built ... $(TARGET).cfa (RomFS)"
 
-cia: clean-cia cfa cxi 
+cia: makerom_check clean-cia cfa cxi 
 	@$(MAKEROM) -f cia -o $(TARGET).cia -target t -i $(TARGET).cxi:0:0 -i $(TARGET).cfa:1:1
 	@echo "built ... $(TARGET).cia (Final Package)"
 
@@ -291,17 +298,27 @@ clean: clean-exe
 	@echo "# Cleaning build"
 	@rm -rf $(BUILD) 
 
-clean-exe:
+clean-exe: clean-cia
 ifneq ($(WORKFLOW),1)
-	@rm -f $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf $(TARGET).cia $(TARGET).cxi $(TARGET).cfa $(TARGET).lst $(BUILD)/banner.bnr
+	@echo "# Cleaning targets"
+	@rm -f $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf $(TARGET).lst $(BUILD)/banner.bnr
 endif
 
 clean-cia:
+	@echo "# Cleaning packages"
 	@rm -f $(TARGET).cia $(TARGET).cxi $(TARGET).cfa
 
 clean-lib:
-	rm -f lib/**/*.o
-	rm -f lib/libgame.o
+	@echo "# Cleaning libraries"
+	@rm -f lib/**/*.o
+	@rm -f lib/libgame.o
+
+clean-tool:
+	@echo "# Cleaning tools"
+	@rm -f tools/makerom* tools/bannertool*
+
+clean-all: clean clean-lib clean-tool
+	@echo "# Cleaned everything"
 
 #---------------------------------------------------------------------------------
 # debugging
@@ -337,11 +354,10 @@ else
 DEPENDS	:=	$(OFILES:.o=.d)
 
 ifneq ($(OS),Windows_NT)
-BANNERTOOL   ?= bannertool
+BANNERTOOL   ?= tools/bannertool
 else
 BANNERTOOL   ?= tools/bannertool.exe
 endif
-
 
 ifeq ($(suffix $(BANNER_IMAGE)),.cgfx)
 	BANNER_IMAGE_ARG := -ci
@@ -360,9 +376,9 @@ endif
 #---------------------------------------------------------------------------------
 
 ifeq ($(strip $(NO_SMDH)),)
-$(OUTPUT).3dsx	:	$(OUTPUT).elf $(OUTPUT).smdh banner.bnr
+$(OUTPUT).3dsx	:	bannertool_check $(OUTPUT).elf $(OUTPUT).smdh banner.bnr
 else
-$(OUTPUT).3dsx	:	$(OUTPUT).elf banner.bnr
+$(OUTPUT).3dsx	:	bannertool_check $(OUTPUT).elf banner.bnr
 endif
 
 3dsx: $(OUTPUT).3dsx
@@ -374,6 +390,13 @@ banner.bnr:
 
 $(OUTPUT).smdh:
 	@$(BANNERTOOL) makesmdh -s "$(TARGET)" -l "$(APP_DESCRIPTION)" -p "$(APP_AUTHOR)" -i "$(APP_ICON)" -f "$(ICON_FLAGS)" -o "../$(TARGET).smdh"
+
+bannertool_check:
+	@if [ ! -f $(BANNERTOOL) ]; then \
+		make -f ../tools/prepare.mak bannertool; \
+	else \
+		echo "# Bannertool"; \
+	fi
 
 #---------------------------------------------------------------------------------
 # you need a rule like this for each extension you use as binary data
