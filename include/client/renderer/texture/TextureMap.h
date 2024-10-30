@@ -21,7 +21,7 @@ typedef struct {
 
 void Texture_Init();
 
-void Texture_MapAddName(const char* path, int out_uv[]);
+u16 Texture_MapAdd(const char* path);
 void Texture_MapInit(Texture_Map* map);
 // Icon Texture_MapGetIcon(Texture_Map* map, char* filename);
 void Texture_MapDeinit(Texture_Map* map);

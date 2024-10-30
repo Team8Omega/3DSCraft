@@ -162,32 +162,15 @@ void downscaleImage(u8* data, int size) {
 	}
 }
 
-static char pathCollect[TEXTURE_TILENUM][512];
-static u32 hashCollect[TEXTURE_TILENUM];
-static size_t pathNum = 0;
+char pathCollect[TEXTURE_MAPTILES * TEXTURE_MAPTILES][512];
+u16 pathNum = 0;
 
-void Texture_MapAddName(const char* path, int out_uv[]) {
-	if (pathNum >= TEXTURE_TILENUM)
+u16 Texture_MapAdd(const char* path) {
+	if (pathNum >= (TEXTURE_MAPTILES * TEXTURE_MAPTILES))
 		Crash(0, "Too many entries for TextureMap\n - you know what this means.");
 
-	// check if already loaded
-	u32 hash = String_Hash(path);
-	for (size_t i = 0; i < pathNum; ++i) {
-		if (hashCollect[i] == hash) {
-			out_uv[0] = ((i % TEXTURE_MAPTILES) << 4);
-			out_uv[1] = ((i / TEXTURE_MAPTILES) << 4);
-			return;
-		}
-	}
-
-	size_t index = pathNum;
-
-	out_uv[0] = ((index % TEXTURE_MAPTILES) << 4);
-	out_uv[1] = ((index / TEXTURE_MAPTILES) << 4);
-
-	pathNum++;
-	strcpy(pathCollect[index], path);
-	hashCollect[index] = String_Hash(path);
+	strcpy(pathCollect[pathNum], path);
+	return pathNum++;
 }
 
 void Texture_MapInit(Texture_Map* map) {

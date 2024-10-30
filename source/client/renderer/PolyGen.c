@@ -4,7 +4,6 @@
 #include "client/renderer/VBOCache.h"
 #include "core/Direction.h"
 #include "world/level/block/Block.h"
-#include "world/level/block/states/BlockStates.h"
 
 #include "client/player/Player.h"
 
@@ -12,6 +11,8 @@
 #include <vec/vec.h>
 
 #include <3ds.h>
+
+#define MAX_FACES_PER_CLUSTER (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE / 2 * 6)
 
 const WorldVertex block_sides_lut[] = {
 	// West
@@ -70,12 +71,12 @@ static vec_t(VBOUpdate) vboUpdates;
 
 typedef struct {
 	s8 x, y, z;
+	Direction direction;
 	BlockId block;
 	s8 ao;
 	u8 metadata;
 	bool transparent;
-	Direction dir;
-} Model;
+} Face;
 
 static inline BlockId fastBlockFetch(Chunk* chunk, Cluster* cluster, int x, int y, int z) {
 	return (x < 0 || y < 0 || z < 0 || x >= CHUNK_SIZE || y >= CHUNK_SIZE || z >= CHUNK_SIZE)
@@ -139,40 +140,15 @@ void PolyGen_Harvest() {
 
 #define MAX_FACES_PER_CLUSTER (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE / 2 * 6)
 
-static Model modelBuffer[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
-static Model faceBuffer[MAX_FACES_PER_CLUSTER];
-static u32 currentModel;
-static u32 currentFace;
-static u32 numVertexOpaque;
-static u32 numVertexTransparent;
+static Face faceBuffer[MAX_FACES_PER_CLUSTER];
+static int currentFace;
+static int transparentFaces;
 static u8 floodfill_visited[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
-static u8 complexMesh_visited[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
 
-static inline void addMesh(bool isSolidBlock, int x, int y, int z, Direction dir, BlockId block, u8 metadata, int ao, bool transparent) {
-	if (complexMesh_visited[x][y][z] & 1)
-		return;
-
+static inline void addFace(int x, int y, int z, Direction dir, BlockId block, u8 metadata, int ao, bool transparent) {
 	if (x >= 0 && y >= 0 && z >= 0 && x < CHUNK_SIZE && y < CHUNK_SIZE && z < CHUNK_SIZE) {
-		if (isSolidBlock) {
-			faceBuffer[currentFace++] = (Model){ x, y, z, block, ao, metadata, transparent, dir };
-
-			if (!transparent) {
-				numVertexOpaque += 6;
-			} else {
-				numVertexTransparent += 6;
-			}
-
-		} else {  // TODO: avoid adding models 6 times per block.
-			modelBuffer[currentModel++] = (Model){ x, y, z, block, ao, metadata, transparent, dir };
-
-			if (!transparent) {
-				numVertexOpaque += BLOCKSTATES[block].states[metadata].vertexNum;
-			} else {
-				numVertexTransparent += BLOCKSTATES[block].states[metadata].vertexNum;
-			}
-
-			complexMesh_visited[x][y][z] |= 1;
-		}
+		faceBuffer[currentFace++] = (Face){ x, y, z, dir, block, ao, metadata, transparent };
+		transparentFaces += transparent;
 	}
 }
 
@@ -213,9 +189,8 @@ static u16 floodFill(Cluster* cluster, int x, int y, int z, Direction entrySide0
 					cluster->blocks[x][y][z] != BLOCK_AIR) {
 					u8 meta			 = cluster->metadataLight[x][z][z] & 0xf;
 					bool transparent = Block_GetMaterial(BLOCKS[cluster->blocks[x][z][z]])->transculent;
-					bool solid		 = BLOCKS[cluster->blocks[x][z][z]]->solidBlock;
 
-					addMesh(solid, x, y, z, DirectionOpposite[i], cluster->blocks[x][y][z], meta, 0, transparent);
+					addFace(x, y, z, DirectionOpposite[i], cluster->blocks[x][y][z], meta, 0, transparent);
 				}
 			}
 		}
@@ -228,9 +203,7 @@ static u16 floodFill(Cluster* cluster, int x, int y, int z, Direction entrySide0
 					seeThrough |= ChunkSeeThrough(i, j);
 	return seeThrough;
 }
-static int test;
 void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
-	test++;
 	for (int i = 0; i < CLUSTER_PER_CHUNK; ++i) {
 		Cluster* cluster = &item.chunk->clusters[i];
 
@@ -240,15 +213,12 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 		cluster->vboRevision	= cluster->revision;
 		cluster->forceVBOUpdate = false;
 
-		currentModel		 = 0;
-		currentFace			 = 0;
-		numVertexOpaque		 = 0;
-		numVertexTransparent = 0;
+		currentFace		 = 0;
+		transparentFaces = 0;
 
 		u16 seeThrough = 0;
 
 		memset(floodfill_visited, 0, sizeof(floodfill_visited));
-		memset(complexMesh_visited, 0, sizeof(complexMesh_visited));
 		for (int x = 0; x < CHUNK_SIZE; x += CHUNK_SIZE - 1) {
 			Direction xDir = !x ? Direction_West : Direction_East;
 
@@ -259,14 +229,13 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 					Direction yDir = y == 0 ? Direction_Bottom : y == CHUNK_SIZE - 1 ? Direction_Top : Direction_None;
 
 					Block* block = BLOCKS[cluster->blocks[x][y][z]];
-					bool solid	 = block->solidBlock;
-					if (!block->opaque || !solid)
+					if (!block->opaque)
 						seeThrough |= floodFill(cluster, x, y, z, xDir, yDir, zDir);
 
 					Block* blockNeighbor = BLOCKS[fastBlockFetch(item.chunk, cluster, x + (!x ? -1 : 1), y, z)];
 
 					if (!blockNeighbor->opaque && cluster->blocks[x][y][z] != BLOCK_AIR) {
-						addMesh(solid, x, y, z, xDir, cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf, 0,
+						addFace(x, y, z, xDir, cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf, 0,
 								Block_GetMaterial(block)->transculent);
 					}
 				}
@@ -282,14 +251,13 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 					Direction zDir = z == 0 ? Direction_South : x == CHUNK_SIZE - 1 ? Direction_North : Direction_None;
 
 					Block* block = BLOCKS[cluster->blocks[x][y][z]];
-					bool solid	 = block->solidBlock;
-					if (!block->opaque || !solid)
+					if (!block->opaque)
 						seeThrough |= floodFill(cluster, x, y, z, xDir, yDir, zDir);
 
 					Block* blockNeighbor = BLOCKS[fastBlockFetch(item.chunk, cluster, x, y + (!y ? -1 : 1), z)];
 
 					if (!blockNeighbor->opaque && cluster->blocks[x][y][z] != BLOCK_AIR) {
-						addMesh(solid, x, y, z, yDir, cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf, 0,
+						addFace(x, y, z, yDir, cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf, 0,
 								Block_GetMaterial(block)->transculent);
 					}
 				}
@@ -305,14 +273,13 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 					Direction yDir = y == 0 ? Direction_Bottom : y == CHUNK_SIZE ? Direction_Top : Direction_None;
 
 					Block* block = BLOCKS[cluster->blocks[x][y][z]];
-					bool solid	 = block->solidBlock;
-					if (!block->opaque || !solid)
+					if (!block->opaque)
 						seeThrough |= floodFill(cluster, x, y, z, xDir, yDir, zDir);
 
 					Block* blockNeighbor = BLOCKS[fastBlockFetch(item.chunk, cluster, x, y, z + (!z ? -1 : 1))];
 
 					if (!blockNeighbor->opaque && cluster->blocks[x][y][z] != BLOCK_AIR) {
-						addMesh(solid, x, y, z, zDir, cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf, 0,
+						addFace(x, y, z, zDir, cluster->blocks[x][y][z], cluster->metadataLight[x][y][z] & 0xf, 0,
 								Block_GetMaterial(block)->transculent);
 					}
 				}
@@ -324,95 +291,64 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 			floodFill(cluster, px, py, pz, 0, 0, 0);
 		}
 
+		int transparentVertices = transparentFaces * 6;
+		int opaqueVertices		= (currentFace * 6) - transparentVertices;
 		VBOUpdate update;
 
-		if (currentModel || currentFace) {
+		if (currentFace) {
 			VBO_Block opaqueMem;
-			if (numVertexOpaque > 0) {
-				opaqueMem = VBO_Alloc(numVertexOpaque * sizeof(WorldVertex));
-
-				if (!opaqueMem.memory)
-					return Crash(0, "Failed Allocating VBO Opaque %d %d", numVertexOpaque, currentFace);
-			}
+			if (opaqueVertices > 0)
+				opaqueMem = VBO_Alloc(opaqueVertices * sizeof(WorldVertex));
 
 			VBO_Block transparentMem;
-			if (numVertexTransparent > 0) {
-				transparentMem = VBO_Alloc(numVertexTransparent * sizeof(WorldVertex));
-
-				if (!transparentMem.memory)
-					return Crash(0, "Failed Allocating VBO Transparent");
-			}
+			if (transparentFaces > 0)
+				transparentMem = VBO_Alloc(transparentVertices * sizeof(WorldVertex));
 
 			WorldVertex* opaqueData		 = opaqueMem.memory;
 			WorldVertex* transparentData = transparentMem.memory;
 
 			for (int j = 0; j < currentFace; ++j) {
-				Model face = faceBuffer[j];
+				Face face = faceBuffer[j];
 
 				int offsetX = face.x + item.chunk->x * CHUNK_SIZE;
 				int offsetZ = face.z + item.chunk->z * CHUNK_SIZE;
 				int offsetY = face.y + i * CHUNK_SIZE;
 
-				WorldVertex* data = face.transparent ? transparentData : opaqueData;
-
-				BlockStateVariant* blockVar;
-
-				if (BLOCKS[face.block]->hasRandomVariants) {
-					WeightedRandom* random = BLOCKSTATES[face.block].states[face.metadata].random;
-					blockVar			   = &BLOCKSTATES[face.block].states[face.metadata].variants[WeightedRandom_GetRandom(random)];
+				s16 tex[2];
+				// s16 tex1[2];
+				/*bool canOverlay = BLOCKS[face.block]->hasOverlay && face.direction != Direction_Top && face.direction != Direction_Bottom;
+				if (canOverlay) {
+					Block_GetBlockTexture(BLOCKS[face.block], face.direction, face.x, face.y, face.z, face.metadata, tex1);
+					Block_GetBlockTexture(BLOCKS[face.block], Direction_None, face.x, face.y, face.z, face.metadata, tex0);
 				} else {
-					blockVar = &BLOCKSTATES[face.block].states[face.metadata].variants[0];
-				}
+				*/
+				Block_GetBlockTexture(BLOCKS[face.block], face.direction, face.x, face.y, face.z, face.metadata, tex);
+				//}
 
-				memcpy(data, (blockVar->model->vertex + face.dir * 6), sizeof(WorldVertex) * 6);
+				WorldVertex* data = face.transparent ? transparentData : opaqueData;
+				memcpy(data, &block_sides_lut[face.direction * 6], sizeof(WorldVertex) * 6);
 
-				for (int k = 0; k < 6; ++k) {
-					const float3* pos = &block_sides_lut[face.dir * 6 + k].pos;
+				u8 color[3];
+				Block_GetBlockColor(BLOCKS[face.block], face.direction, face.x, face.y, face.z, face.metadata, color);
 
-					data[k].pos.x = pos->x + (offsetX << 4);
-					data[k].pos.y = pos->y + (offsetY << 4);
-					data[k].pos.z = pos->z + (offsetZ << 4);
+#define oneDivIconsPerRow (32768 >> 3)
+#define halfTexel (6)
+
+				for (int k = 0; k < 6; k++) {
+					data[k].pos.x += offsetX << 4;
+					data[k].pos.y += offsetY << 4;
+					data[k].pos.z += offsetZ << 4;
+					data[k].uv[0] = (data[k].uv[0] == 1 ? (oneDivIconsPerRow - 1) : 1) + tex[0];
+					data[k].uv[1] = (data[k].uv[1] == 1 ? (oneDivIconsPerRow - 1) : 1) + tex[1];
+
+					data[k].rgb[0] = color[0];
+					data[k].rgb[1] = color[1];
+					data[k].rgb[2] = color[2];
 				}
 				if (face.transparent)
 					transparentData += 6;
 				else
 					opaqueData += 6;
-			}
-			for (int j = 0; j < currentModel; ++j) {
-				Crash(0, "You added models? If not, dont set isSolidBlock to false. DEV INFO, REPORT!");
-				Model face = modelBuffer[j];
-
-				int offsetX = face.x + item.chunk->x * CHUNK_SIZE;
-				int offsetZ = face.z + item.chunk->z * CHUNK_SIZE;
-				int offsetY = face.y + i * CHUNK_SIZE;
-
-				WorldVertex* data = face.transparent ? transparentData : opaqueData;
-
-				BlockStateVariant* blockVar;
-
-				if (BLOCKS[face.block]->hasRandomVariants) {
-					WeightedRandom* random = BLOCKSTATES[face.block].states[face.metadata].random;
-					blockVar			   = &BLOCKSTATES[face.block].states[face.metadata].variants[WeightedRandom_GetRandom(random)];
-				} else {
-					blockVar = &BLOCKSTATES[face.block].states[face.metadata].variants[0];
-				}
-
-				size_t size = blockVar->model->numVertex;
-
-				if (size == 0)
-					continue;
-
-				memcpy(data, blockVar->model->vertex, sizeof(WorldVertex) * size);
-
-				for (int k = 0; k < size; ++k) {
-					data[k].pos.x += offsetX << 4;
-					data[k].pos.y += offsetY << 4;
-					data[k].pos.z += offsetZ << 4;
-				}
-				if (face.transparent)
-					transparentData += size;
-				else
-					opaqueData += size;
 			}
 
 			update.vbo			  = opaqueMem;
@@ -422,10 +358,10 @@ void PolyGen_GeneratePolygons(WorkerItem item, void* this) {
 		update.x				   = item.chunk->x;
 		update.y				   = i;
 		update.z				   = item.chunk->z;
-		update.vertices			   = numVertexOpaque;
+		update.vertices			   = opaqueVertices;
 		update.delay			   = 0;
 		update.seeThrough		   = seeThrough;
-		update.transparentVertices = numVertexTransparent;
+		update.transparentVertices = transparentVertices;
 
 		LightLock_Lock(&updateLock);
 		vec_push(&vboUpdates, update);

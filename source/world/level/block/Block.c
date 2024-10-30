@@ -10,17 +10,29 @@
 static u8 getRenderType() {
 	return 0;
 }
+static void registerIcons(Block* block) {
+	const char* path = String_ParseTextureName("block", block->name);
+	block->icon		 = Texture_MapAdd(path);
+}
 static u32 getBlockColor(Block* b, Direction dir, int x, int y, int z, u8 meta) {
 	return COLOR_WHITE;
 }
 static u32 getItemColor(Direction dir, u8 meta) {
 	return COLOR_WHITE;
 }
+static u16 getBlockTexture(Block* block, Direction dir, int x, int y, int z, u8 metadata) {
+	return block->icon;
+}
 
 static BlockVtable vtable_default = {
-	.getRenderType = getRenderType,
-	.getBlockColor = getBlockColor,
-	.getItemColor  = getItemColor,
+	.getRenderType	 = getRenderType,
+	.registerIcons	 = registerIcons,
+	.getBlockColor	 = getBlockColor,
+	.getBlockTexture = getBlockTexture,
+	.getItemColor	 = getItemColor,
+	.getRenderType	 = getRenderType,
+	.getBlockColor	 = getBlockColor,
+	.getItemColor	 = getItemColor,
 };
 
 static const Box boxDefault = { { { 0.0F, 0.0F, 0.0F } }, { { 1.0F, 1.0F, 1.0F } } };
@@ -40,7 +52,6 @@ Block* Block_InitWithBounds(const char* name, BlockId id, float resistance, floa
 	Block_SetResistance(b, resistance);
 	Block_SetHardness(b, hardness);
 	Block_SetLightness(b, 0);
-	b->name				 = strdup(name);
 	b->id				 = id;
 	b->material			 = material;
 	b->renderType		 = 0;  // not sure anymore, but i think 0 = normal, 1 = tile entity idek
@@ -49,6 +60,7 @@ Block* Block_InitWithBounds(const char* name, BlockId id, float resistance, floa
 	b->solidBlock		 = true;
 	b->hasRandomVariants = false;
 	memcpy(&b->bounds, &bounds, sizeof(Box));
+	strcpy(b->name, name);
 
 	return b;
 }
@@ -68,6 +80,9 @@ void Block_SetBounds(Block* b, float3 from, float3 to) {
 }
 void Block_SetLightness(Block* b, u8 v) {
 	b->lightness = v;
+}
+void Block_SetHasOverlay(Block* b) {
+	b->hasOverlay = true;
 }
 void Block_SetNotSolidBlock(Block* b) {
 	b->solidBlock = false;
@@ -109,4 +124,15 @@ void Block_GetItemColor(Block* b, Direction dir, u8 meta, u8 out[]) {
 	out[0] = colR(color);
 	out[1] = colG(color);
 	out[2] = colB(color);
+}
+
+void Block_GetBlockTexture(Block* b, Direction dir, int x, int y, int z, u8 meta, s16 out_uv[]) {
+	if (!b)
+		return;
+
+	u16 tex			= b->vptr->getBlockTexture(b, dir, x, y, z, meta);
+	const Icon icon = gTexMapBlock.icons[tex];
+
+	out_uv[0] = icon.u;
+	out_uv[1] = icon.v;
 }

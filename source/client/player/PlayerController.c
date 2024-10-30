@@ -283,7 +283,7 @@ void PlayerController_Tick(PlayerController* ctrl, Sound* sound, float dt) {
 		movement = f3_sub(movement, f3_new(0.f, crouch, 0.f));
 	}
 	if (f3_magSqr(movement) > 0.f) {
-		float speed = 4.3f;
+		float speed = 4.3f * f3_mag(f3_new(-strafeLeft + strafeRight, -crouch + jump, -forward + backward));
 		gPlayer->bobbing += speed * 1.5f * dt;
 		movement = f3_scl(f3_nrm(movement), speed);
 	}
@@ -293,16 +293,14 @@ void PlayerController_Tick(PlayerController* ctrl, Sound* sound, float dt) {
 	float lookUp	= IsKeyDown(ctrl->controlScheme.lookUp, &agnosticInput);
 	float lookDown	= IsKeyDown(ctrl->controlScheme.lookDown, &agnosticInput);
 
-	u8 sensitivity = 100;	 // %
-
-	gPlayer->yaw += (lookLeft + -lookRight) * (float)(sensitivity);
+	gPlayer->yaw += (lookLeft + -lookRight) * 160.f * DEG_TO_RAD * dt;
 	if (gPlayer->yaw > YAW_MAX)
 		gPlayer->yaw = YAW_MIN + (gPlayer->yaw - YAW_MAX);
 	else if (gPlayer->yaw < YAW_MIN)
 		gPlayer->yaw = YAW_MAX + (gPlayer->yaw - YAW_MIN);
 
-	gPlayer->pitch += (-lookDown + lookUp) * (float)(sensitivity);
-	gPlayer->pitch = CLAMP(gPlayer->pitch, -DEG_TO_RAD * 90.0f, DEG_TO_RAD * 90.0f);
+	gPlayer->pitch += (-lookDown + lookUp) * 160.f * DEG_TO_RAD * dt;
+	gPlayer->pitch = CLAMP(gPlayer->pitch, -DEG_TO_RAD * 89.9f, DEG_TO_RAD * 89.9f);
 
 	float placeBlock = IsKeyDown(ctrl->controlScheme.placeBlock, &agnosticInput);
 	float breakBlock = IsKeyDown(ctrl->controlScheme.breakBlock, &agnosticInput);

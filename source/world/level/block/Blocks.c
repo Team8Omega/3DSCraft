@@ -18,8 +18,7 @@ void regist(BlockId id, const char* name, float resistance, float hardness, Mate
 }
 
 void Blocks_Init() {
-	int out[2];
-	Texture_MapAddName("romfs:/error.png", out);
+	Texture_MapAdd("romfs:/error.png");
 
 	regist(BLOCK_AIR, "air", 0.f, 0.f, MATERIAL_AIR, MAPCOLOR_NONE);
 	Block_SetNotOpaque(BLOCKS[BLOCK_AIR]);
@@ -49,6 +48,8 @@ void Blocks_Init() {
 		if (BLOCKS[i] == NULL)
 			Crash(0, "ERROR: Block/s missing in initializer loop, please fix. internal error.");
 
+		BLOCKS[i]->vptr->registerIcons(BLOCKS[i]);
+
 		{
 			bool sw = false;
 
@@ -64,4 +65,5 @@ void Blocks_Init() {
 			BLOCKS[i]->useNeighborBrightness = sw;
 		}
 	}
+	Texture_MapInit(&gTexMapBlock);
 }

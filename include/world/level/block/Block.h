@@ -17,11 +17,13 @@ typedef struct {
 	u8 (*getRenderType)();
 	u32 (*getBlockColor)(Block *b, Direction dir, int x, int y, int z, u8 meta);
 	u32 (*getItemColor)(Direction dir, u8 meta);
+	u16 (*getBlockTexture)(Block *b, Direction dir, int x, int y, int z, u8 meta);
+	void (*registerIcons)(Block *b);
 } BlockVtable;
 
 struct Block {
 	BlockVtable *vptr;		// virtual table for inheriting block classes.
-	const char *name;		// for texture path
+	char name[64];			// for texture path
 	BlockId id;				// block id, matches enum index.
 	u8 renderType;			// id for type of block/mesh
 	float hardness;			// how many hits to break block
@@ -33,6 +35,7 @@ struct Block {
 	u16 icon;					 // index of texture icon
 	bool useNeighborBrightness;	 // set by code(see Blocks_Init)
 	bool opaque;				 // if yes, dont allow light to pass thru
+	bool hasOverlay;
 	bool solidBlock;
 	bool hasRandomVariants;
 };
@@ -48,11 +51,16 @@ void Block_SetHardness(Block *block, float v);
 void Block_SetBounds(Block *block, float3 from, float3 to);
 void Block_SetLightness(Block *block, u8 v);
 void Block_SetNotOpaque(Block *b);
+void Block_SetHasOverlay(Block *b);
 void Block_SetNotSolidBlock(Block *b);
 
 void Block_GetBlockColor(Block *b, Direction dir, int x, int y, int z, u8 meta, u8 out[]);
 void Block_GetItemColor(Block *b, Direction dir, u8 meta, u8 out[]);
+void Block_GetBlockTexture(Block *b, Direction dir, int x, int y, int z, u8 meta, s16 out_uv[]);
 
+static inline u16 Block_GetIcon(Block *b, Direction dir, u8 meta) {
+	return b->vptr->getBlockTexture(b, dir, 0, 0, 0, meta);
+}
 static inline u8 Block_GetRenderType(Block *block) {
 	return block->vptr->getRenderType();
 }

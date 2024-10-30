@@ -26,7 +26,6 @@
 #include "client/renderer/PolyGen.h"
 #include "client/renderer/SpriteBatch.h"
 #include "client/renderer/WorldRenderer.h"
-#include "client/renderer/block/model/BlockModel.h"
 #include "resources/locale/LanguageManager.h"
 #include "sounds/Sound.h"
 #include "util/Paths.h"
@@ -71,14 +70,6 @@ static bool sIsDemo;
 static float s3dSlider;
 static bool sShowDebug;
 static bool sIsIngame;
-
-#include "world/level/block/states/BlockStates.h"
-
-#ifdef _DEBUG
-void testFunction() {
-	// Crash(0, "%d", BlockState_Get(BLOCK_GRASS, 0)->index);
-}
-#endif
 
 void gInit(const char* name, bool isNew, bool demo) {
 	sUsername = name;  // pre-allocated.
