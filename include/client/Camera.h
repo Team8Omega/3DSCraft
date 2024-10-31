@@ -6,7 +6,8 @@
 
 #include <citro3d.h>
 
-enum FrustumPlanes {
+enum FrustumPlanes
+{
 	Frustum_Near = 0,
 	Frustum_Right,
 	Frustum_Left,
@@ -17,7 +18,8 @@ enum FrustumPlanes {
 	FrustumPlanes_Count
 };
 
-enum FrustumCorners {
+enum FrustumCorners
+{
 	Frustum_NearBottomLeft = 0,
 	Frustum_NearBottomRight,
 	Frustum_NearTopLeft,
@@ -30,13 +32,13 @@ enum FrustumCorners {
 	FrustumCorners_Count
 };
 
-typedef u8 CameraMode;
-enum {
+typedef enum
+{
 	CameraMode_First,
 	CameraMode_Third,
 	CameraMode_Second,
 	CameraMode_Count
-};
+} CameraMode;
 
 typedef struct {
 	C3D_Mtx projection, view, vp;

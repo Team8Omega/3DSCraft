@@ -1,7 +1,7 @@
 #include "world/level/item/Item.h"
 
+#include "client/model/VertexFmt.h"
 #include "client/renderer/texture/TextureMap.h"
-#include "core/VertexFmt.h"
 
 static Texture_Map textureMap;
 
@@ -18,12 +18,12 @@ const char* item_texture_files[] = { ITEM_TEXTURE_FILES };
 Icon totem;
 
 void Item_Init() {
-	// u16 icon = Texture_MapAddName("block/dirt.png");
-	// Texture_MapInit(&textureMap);
-	// totem = gTexMapBlock.icons[icon];
+	u16 icon = Texture_MapAdd("block/dirt.png");
+	Texture_MapInit(&textureMap);
+	totem = gTexMapBlock.icons[icon];
 }
 void Item_Deinit() {
-	// C3D_TexDelete(&textureMap.texture);
+	C3D_TexDelete(&textureMap.texture);
 }
 
 void* Item_GetTextureMap() {

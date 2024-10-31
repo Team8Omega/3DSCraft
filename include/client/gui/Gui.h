@@ -3,6 +3,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+void Gui_Init();
+
+void Gui_Deinit();
+
 void Gui_Label(int x, int y, int z, float size, bool shadow, s16 color, const char* text, ...);
 // this element is centered around the X axis
 void Gui_Label_Centered(int x, int y, int z, float size, bool shadow, s16 color, const char* text, ...);

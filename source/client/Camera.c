@@ -11,60 +11,62 @@ Camera gCamera;
 
 #define CAM_Y_OFFSET 0.3f
 
-#define CAM_SCALE (float)(BLOCK_SIZE)
-
-#define VIEW_DISTANCE 8
-
-#define VIEW_ASPECT (400.f / 240.f)
-
 void Camera_Init() {
 	Mtx_Identity(&gCamera.view);
 
 	gCamera.fov	 = C3D_AngleFromDegrees(60.f);
-	gCamera.near = 0.1f, gCamera.far = (VIEW_DISTANCE * CHUNK_SIZE);
+	gCamera.near = 0.2f, gCamera.far = 8.f * CHUNK_SIZE;
 
 	gCamera.mode = CameraMode_First;
 
-	Mtx_PerspTilt(&gCamera.projection, gCamera.fov, VIEW_ASPECT, gCamera.near, gCamera.far, false);
+	Mtx_PerspTilt(&gCamera.projection, gCamera.fov, ((400.f) / (240.f)), gCamera.near, gCamera.far, false);
 }
 
 void Camera_Update(float iod) {
-	float fov = gCamera.fov;  // + C3D_AngleFromDegrees(12.f) * gPlayer->fovAdd;
+	float fov = gCamera.fov + C3D_AngleFromDegrees(12.f) * gPlayer.fovAdd;
 
-	float3 playerHead = f3_new(gPlayer->position.x, gPlayer->position.y + PLAYER_EYEHEIGHT, gPlayer->position.z);
+	float3 playerHead = f3_new(gPlayer.position.x, gPlayer.position.y + PLAYER_EYEHEIGHT + sinf(gPlayer.bobbing) * 0.1f + gPlayer.crouchAdd,
+							   gPlayer.position.z);
 
 	Mtx_Identity(&gCamera.view);
 
-	float3 forward = gPlayer->view;
+	float3 forward = gPlayer.view;
 	float3 right   = f3_crs(f3_new(0, 1, 0), forward);
 	float3 up	   = f3_crs(forward, right);
 
-	Mtx_RotateX(&gCamera.view, -gPlayer->pitch, true);
-	Mtx_RotateY(&gCamera.view, -gPlayer->yaw, true);
+	Mtx_RotateX(&gCamera.view, -gPlayer.pitch, true);
+	Mtx_RotateY(&gCamera.view, -gPlayer.yaw, true);
 
-	/*switch (gCamera.mode) {
+	switch (gCamera.mode) {
 		case CameraMode_First:
-		case CameraMode_Second:
-	*/
-	Mtx_Translate(&gCamera.view, -playerHead.x, -playerHead.y, -playerHead.z, true);
-	/*		break;
+			Mtx_Translate(&gCamera.view, -playerHead.x, -playerHead.y, -playerHead.z, true);
+			break;
 
-		case CameraMode_Third:
+		case CameraMode_Second: {
+			float3 cameraPosition = f3_sub(playerHead, f3_scl(forward, -CAM_Z_OFFSET));
+			cameraPosition.y -= CAM_Y_OFFSET;
+
+			Mtx_Translate(&gCamera.view, -cameraPosition.x, -cameraPosition.y, -cameraPosition.z, true);
+			Mtx_RotateY(&gCamera.view, M_PI, true);
+		} break;
+
+		case CameraMode_Third: {
 			float3 cameraPosition = f3_sub(playerHead, f3_scl(forward, CAM_Z_OFFSET));
 			cameraPosition.y -= CAM_Y_OFFSET;
 
 			Mtx_Translate(&gCamera.view, -cameraPosition.x, -cameraPosition.y, -cameraPosition.z, true);
-			break;
-
+		} break;
 		default:
 			break;
-	}*/
+	}
 
-	Mtx_PerspStereoTilt(&gCamera.projection, fov, VIEW_ASPECT, gCamera.near, gCamera.far, iod, 1.f, false);
+	Mtx_PerspStereoTilt(&gCamera.projection, fov, ((400.f) / (240.f)), gCamera.near, gCamera.far, iod, 1.f, false);
 
 	C3D_Mtx vp;
 	Mtx_Multiply(&vp, &gCamera.projection, &gCamera.view);
+	Mtx_Copy(&gCamera.vp, &vp);
 
+	// Frustum plane calculations remain the same
 	C3D_FVec rowX = vp.r[0];
 	C3D_FVec rowY = vp.r[1];
 	C3D_FVec rowZ = vp.r[2];
@@ -77,7 +79,7 @@ void Camera_Update(float iod) {
 	gCamera.frustumPlanes[Frustum_Bottom] = FVec4_Normalize(FVec4_Subtract(rowW, rowY));
 	gCamera.frustumPlanes[Frustum_Far]	  = FVec4_Normalize(FVec4_Add(rowW, rowZ));
 
-	float ar		  = VIEW_ASPECT;
+	float ar		  = 400.f / 240.f;
 	float tan2halffov = 2.f * tanf(gCamera.fov / 2.f);
 
 	float hNear = tan2halffov * gCamera.near;
@@ -97,9 +99,6 @@ void Camera_Update(float iod) {
 	gCamera.frustumCorners[Frustum_FarBottomRight]	= f3_add(f3_sub(cFar, f3_scl(up, hFar * 0.5f)), f3_scl(right, wFar * 0.5f));
 	gCamera.frustumCorners[Frustum_FarTopLeft]		= f3_sub(f3_add(cFar, f3_scl(up, hFar * 0.5f)), f3_scl(right, wFar * 0.5f));
 	gCamera.frustumCorners[Frustum_FarTopRight]		= f3_add(f3_add(cFar, f3_scl(up, hFar * 0.5f)), f3_scl(right, wFar * 0.5f));
-
-	Mtx_Scale(&vp, 1 / CAM_SCALE, 1 / CAM_SCALE, 1 / CAM_SCALE);
-	Mtx_Copy(&gCamera.vp, &vp);
 }
 
 bool Camera_IsPointVisible(C3D_FVec point) {

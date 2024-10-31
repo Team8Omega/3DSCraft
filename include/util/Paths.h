@@ -16,4 +16,3 @@
 
 #define PATH_PACK_TEXTURES "textures"
 #define PATH_PACK_SOUNDS "sounds"
-#define PATH_PACK_LANG "lang"

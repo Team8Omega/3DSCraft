@@ -8,7 +8,6 @@ void Texture_Load(C3D_Tex* result, const char* filename);
 #define TEXTURE_MAPSIZE 128
 #define TEXTURE_TILESIZE 16
 #define TEXTURE_MAPTILES (TEXTURE_MAPSIZE / TEXTURE_TILESIZE)
-#define TEXTURE_TILENUM (TEXTURE_MAPTILES * TEXTURE_MAPTILES)
 
 typedef struct {
 	s16 u, v;
@@ -18,8 +17,6 @@ typedef struct {
 	C3D_Tex texture;
 	Icon icons[TEXTURE_MAPTILES * TEXTURE_MAPTILES];
 } Texture_Map;
-
-void Texture_Init();
 
 u16 Texture_MapAdd(const char* path);
 void Texture_MapInit(Texture_Map* map);

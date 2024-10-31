@@ -1015,16 +1015,16 @@ void mpack_write_tag(mpack_writer_t* writer, mpack_tag_t value) {
 			mpack_write_nil(writer);
 			break;
 		case mpack_type_bool:
-			mpack_save_bool(writer, value.v.b);
+			mpack_write_bool(writer, value.v.b);
 			break;
 		case mpack_type_float:
-			mpack_save_float(writer, value.v.f);
+			mpack_write_float(writer, value.v.f);
 			break;
 		case mpack_type_double:
 			mpack_write_double(writer, value.v.d);
 			break;
 		case mpack_type_int:
-			mpack_save_int(writer, value.v.i);
+			mpack_write_int(writer, value.v.i);
 			break;
 		case mpack_type_uint:
 			mpack_write_uint(writer, value.v.u);
@@ -1063,7 +1063,7 @@ void mpack_write_nil(mpack_writer_t* writer) {
 	mpack_write_byte_element(writer, (char)0xc0);
 }
 
-void mpack_save_bool(mpack_writer_t* writer, bool value) {
+void mpack_write_bool(mpack_writer_t* writer, bool value) {
 	mpack_write_byte_element(writer, (char)(0xc2 | (value ? 1 : 0)));
 }
 
@@ -1290,7 +1290,7 @@ MPACK_STATIC_INLINE void mpack_encode_ext32(char* p, int8_t exttype, uint32_t co
 		}                                                                                                                                  \
 	} while (0)
 
-void mpack_save_u8(mpack_writer_t* writer, uint8_t value) {
+void mpack_write_u8(mpack_writer_t* writer, uint8_t value) {
 #if MPACK_OPTIMIZE_FOR_SIZE
 	mpack_write_u64(writer, value);
 #else
@@ -1450,7 +1450,7 @@ void mpack_write_i64(mpack_writer_t* writer, int64_t value) {
 	}
 }
 
-void mpack_save_float(mpack_writer_t* writer, float value) {
+void mpack_write_float(mpack_writer_t* writer, float value) {
 	mpack_writer_track_element(writer);
 	MPACK_WRITE_ENCODED(mpack_encode_float, MPACK_TAG_SIZE_FLOAT, value);
 }
@@ -1547,7 +1547,7 @@ void mpack_start_ext(mpack_writer_t* writer, int8_t exttype, uint32_t count) {
  * Compound helpers and other functions
  */
 
-void mpack_save_cstr(mpack_writer_t* writer, const char* data, uint32_t count) {
+void mpack_write_str(mpack_writer_t* writer, const char* data, uint32_t count) {
 	mpack_assert(data != NULL, "data for string of length %i is NULL", (int)count);
 	mpack_start_str(writer, count);
 	mpack_write_bytes(writer, data, count);
@@ -1579,7 +1579,7 @@ void mpack_write_cstr(mpack_writer_t* writer, const char* cstr) {
 	size_t length = mpack_strlen(cstr);
 	if (length > UINT32_MAX)
 		mpack_writer_flag_error(writer, mpack_error_invalid);
-	mpack_save_cstr(writer, cstr, (uint32_t)length);
+	mpack_write_str(writer, cstr, (uint32_t)length);
 }
 
 void mpack_write_cstr_or_nil(mpack_writer_t* writer, const char* cstr) {
@@ -1595,7 +1595,7 @@ void mpack_write_utf8(mpack_writer_t* writer, const char* str, uint32_t length) 
 		mpack_writer_flag_error(writer, mpack_error_invalid);
 		return;
 	}
-	mpack_save_cstr(writer, str, length);
+	mpack_write_str(writer, str, length);
 }
 
 void mpack_write_utf8_cstr(mpack_writer_t* writer, const char* cstr) {

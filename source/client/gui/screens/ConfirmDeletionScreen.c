@@ -3,7 +3,7 @@
 #include "client/Crash.h"
 #include "client/gui/Gui.h"
 #include "client/renderer/CubeMap.h"
-#include "client/renderer/SpriteBatch.h"
+#include "client/renderer/texture/SpriteBatch.h"
 #include "util/Paths.h"
 
 #include <dirent.h>
@@ -15,16 +15,15 @@ static char path[256];
 static bool confirmed_deletion = false, canceled_deletion = false;
 
 void ConfirmDeletionScreen_Draw();
-void ConfirmDeletionScreen_Tick();
+void ConfirmDeletionScreen_Update();
 
-Screen sConfirmDeletionScreen = {
-	.DrawDown = ConfirmDeletionScreen_Draw,
-	.Tick	  = ConfirmDeletionScreen_Tick,
-};
+Screen sConfirmDeletionScreen = { .OnDrawDown = ConfirmDeletionScreen_Draw,
+								  .OnUpdate	  = ConfirmDeletionScreen_Update,
+								  .OnDrawUp	  = CubeMap_Draw };
 
 void ConfirmDeletionScreen(const char* path_) {
 	strcpy(path, path_);
-	Screen_SetScreen(SCREEN_CONFIRMDELETION);
+	ScreenManager_SetScreen(&sConfirmDeletionScreen);
 }
 
 static void delete_folder(const char* path) {
@@ -64,14 +63,14 @@ void ConfirmDeletionScreen_Draw() {
 	confirmed_deletion = Gui_Button(true, 80, 92, 75, 0, "Yes");
 }
 
-void ConfirmDeletionScreen_Tick() {
+void ConfirmDeletionScreen_Update() {
 	if (confirmed_deletion) {
 		confirmed_deletion = false;
 		delete_folder(path);
-		Screen_SetScreen(SCREEN_SELECTWORLD);
+		ScreenManager_SetPrevious();
 	}
 	if (canceled_deletion) {
 		canceled_deletion = false;
-		Screen_SetScreen(SCREEN_SELECTWORLD);
+		ScreenManager_SetPrevious();
 	}
 }

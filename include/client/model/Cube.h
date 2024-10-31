@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #include "client/model/CubeRaw.h"
-#include "core/VertexFmt.h"
+#include "client/model/VertexFmt.h"
 #include "util/math/VecMath.h"
 
 #define CUBE_VERTICE_NUM 6 * 6

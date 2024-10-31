@@ -1,6 +1,6 @@
 #pragma once
 
-#include "client/gui/Screen.h"
+#include "client/gui/ScreenManager.h"
 #include <citro3d.h>
 
 extern Screen sTitleScreen;

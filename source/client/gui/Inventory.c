@@ -1,8 +1,8 @@
 #include "client/gui/Inventory.h"
 
 #include "client/gui/Gui.h"
-#include "client/renderer/SpriteBatch.h"
-#include "core/VertexFmt.h"
+#include "client/model/VertexFmt.h"
+#include "client/renderer/texture/SpriteBatch.h"
 
 static ItemStack *sourceStack = NULL, *proposedSourceStack = NULL;
 
@@ -19,7 +19,7 @@ static void clickAtStack(ItemStack* stack) {
 	}
 }
 
-void Inventory_DrawQuickSelect(int x, int y, ItemStack* stacks, u8 count, u8* selected) {
+void Inventory_DrawQuickSelect(int x, int y, ItemStack* stacks, int count, int* selected) {
 	SpriteBatch_BindGuiTexture(GuiTexture_Widgets);
 	// TODO: Hotbar kleiner machen
 	for (int i = 0; i < count; i++) {
@@ -50,12 +50,12 @@ void Inventory_DrawQuickSelect(int x, int y, ItemStack* stacks, u8 count, u8* se
 	SpriteBatch_PushQuad(x + *selected * 20 - 1, y - 1, -9, 24, 24, 0, 22, 24, 24);
 }
 
-u8 Inventory_Draw(int x, int y, int w, ItemStack* stacks, u8 count, u8 _site) {
+int Inventory_Draw(int x, int y, int w, ItemStack* stacks, int count, int _site) {
 	SpriteBatch_SetScale(1);
 
 	int headX	 = x;
 	int headY	 = y;
-	u8 site		 = _site;
+	int site	 = _site;
 	bool even	 = false;
 	bool newLine = false;
 
@@ -71,30 +71,28 @@ u8 Inventory_Draw(int x, int y, int w, ItemStack* stacks, u8 count, u8 _site) {
 	}
 	int startindex = (site - 1) * INVENTORY_MAX_PER_SITE;
 	for (int i = startindex; i < fmin(site * INVENTORY_MAX_PER_SITE, count); i++) {
-		if (stacks[i].block == 0 && stacks[i].amount <= 0)
-			continue;  // only draw valid inventory
-
-		newLine = false;
-		if ((headX + 16) >= w) {
-			headX = x;
-			headY += 17;
-			newLine = true;
+		if (stacks[i].block && stacks[i].amount > 0)  // only draw valid inventory
+		{
+			newLine = false;
+			if ((headX + 16) >= w) {
+				headX = x;
+				headY += 17;
+				newLine = true;
+			}
+			if (stacks[i].amount > 0)
+				SpriteBatch_PushIcon(stacks[i].block, stacks[i].meta, headX * 2, headY * 2, -10);
+			if (Gui_EnteredCursorInside(headX * 2, headY * 2, 16 * 2, 16 * 2))
+				clickAtStack(&stacks[i]);
+			SpriteBatch_PushSingleColorQuad(headX * 2, headY * 2, -11, 16 * 2, 16 * 2,
+											sourceStack == &stacks[i] ? SHADER_RGB(20, 5, 2) : colors[even]);
+			even ^= true;
+			headX += 16;
+			if (newLine) {
+				even = false;
+				// draw separator between "inventory lines"
+				SpriteBatch_PushSingleColorQuad(x * 2, (headY - 1) * 2, -10, (w - 32) * 2, 2, SHADER_RGB(7, 7, 7));
+			}
 		}
-		if (stacks[i].amount > 0)
-			SpriteBatch_PushIcon(stacks[i].block, stacks[i].meta, headX * 2, headY * 2, -10);
-		if (Gui_EnteredCursorInside(headX * 2, headY * 2, 16 * 2, 16 * 2))
-			clickAtStack(&stacks[i]);
-		SpriteBatch_PushSingleColorQuad(headX * 2, headY * 2, -11, 16 * 2, 16 * 2,
-										sourceStack == &stacks[i] ? SHADER_RGB(20, 5, 2) : colors[even]);
-		even ^= true;
-		headX += 16;
-
-		if (!newLine)
-			continue;
-
-		even = false;
-		// draw separator between "inventory lines"
-		SpriteBatch_PushSingleColorQuad(x * 2, (headY - 1) * 2, -10, (w - 32) * 2, 2, SHADER_RGB(7, 7, 7));
 	}
 
 	SpriteBatch_SetScale(2);

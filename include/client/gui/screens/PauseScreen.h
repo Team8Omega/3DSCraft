@@ -1,5 +1,5 @@
 #pragma once
 
-#include "client/gui/Screen.h"
+#include "client/gui/ScreenManager.h"
 
 extern Screen sPauseScreen;

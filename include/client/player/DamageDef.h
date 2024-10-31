@@ -1,13 +1,12 @@
 #pragma once
 
-typedef u8 DamageCause;
-enum
+typedef enum
 {
 	DAMAGECAUSE_NONE,
 	DAMAGECAUSE_FIRE,
 	DAMAGECAUSE_POISON,
 	DAMAGECAUSE_COUNT
-};
+} DamageCause;
 
 typedef struct {
 	DamageCause cause;

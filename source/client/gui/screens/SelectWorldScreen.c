@@ -1,14 +1,13 @@
 #include "client/gui/screens/SelectWorldScreen.h"
 
+#include "Minecraft.h"
 #include "client/Crash.h"
-#include "client/Game.h"
-#include "client/gui/DebugUI.h"
 #include "client/gui/Gui.h"
 #include "client/gui/screens/ConfirmDeletionScreen.h"
 #include "client/gui/screens/CreateWorldScreen.h"
 #include "client/gui/screens/TitleScreen.h"
 #include "client/renderer/CubeMap.h"
-#include "client/renderer/SpriteBatch.h"
+#include "client/renderer/texture/SpriteBatch.h"
 #include "util/Paths.h"
 
 #include <dirent.h>
@@ -45,17 +44,16 @@ static void SelectWorldScreen_ScanWorlds() {
 
 			u8 err = mpack_tree_destroy(&tree);
 			if (err != mpack_ok) {
-				Crash(0, "Mpack failure \'%d\' while loading world %s", err, entry->d_name);
+				Crash("Mpack failure \'%d\' while loading world %s", err, entry->d_name);
 				continue;
 			}
 
-			WorldSummary info;
+			WorldInfo info;
 			strcpy(info.name, name);
+			info.lastPlayed = 0;
 			strcpy(info.path, entry->d_name);
 
 			vec_push(&worlds.list, info);
-		} else {
-			DebugUI_Log("World cannot be fetched: \'%s\'", entry->d_name);
 		}
 	}
 
@@ -66,13 +64,14 @@ void SelectWorldScreen_Init();
 void SelectWorldScreen_Awake();
 void SelectWorldScreen_Deinit();
 void SelectWorldScreen_DrawDown();
-void SelectWorldScreen_Tick();
+void SelectWorldScreen_Update();
 
-Screen sSelectWorldScreen = { .Init		= SelectWorldScreen_Init,
-							  .Awake	= SelectWorldScreen_Awake,
-							  .Deinit	= SelectWorldScreen_Deinit,
-							  .DrawDown = SelectWorldScreen_DrawDown,
-							  .Tick		= SelectWorldScreen_Tick };
+Screen sSelectWorldScreen = { .OnInit	  = SelectWorldScreen_Init,
+							  .OnAwake	  = SelectWorldScreen_Awake,
+							  .OnDeinit	  = SelectWorldScreen_Deinit,
+							  .OnDrawDown = SelectWorldScreen_DrawDown,
+							  .OnDrawUp	  = CubeMap_Draw,
+							  .OnUpdate	  = SelectWorldScreen_Update };
 
 void SelectWorldScreen_Init() {
 	vec_init(&worlds.list);
@@ -117,7 +116,7 @@ void SelectWorldScreen_DrawDown() {
 	if (ABS(velocity) < 0.001f)
 		velocity = 0.f;
 
-	WorldSummary info;
+	WorldInfo info;
 
 	clicked_back = Gui_IconButton(0, 0, 15, 15, 0, true, SHADER_RGB(20, 20, 20), "<");
 
@@ -182,10 +181,10 @@ void SelectWorldScreen_DrawDown() {
 	clicked_new_world = Gui_Button(true, 20, 97, 120, 0, "+   Create new world");
 }
 
-void SelectWorldScreen_Tick() {
+void SelectWorldScreen_Update() {
 	if (clicked_back) {
 		clicked_back = false;
-		Screen_SetScreen(SCREEN_TITLE);
+		ScreenManager_SetScreen(&sTitleScreen);
 	}
 	if (clicked_new_world) {
 		clicked_new_world = false;
@@ -193,9 +192,8 @@ void SelectWorldScreen_Tick() {
 	}
 
 	if (clicked_play && selectedWorld != -1) {
-		clicked_play	   = false;
-		WorldSummary* info = &worlds.list.data[selectedWorld];
-		gLoadWorld(info->path, info->name, 0, false);
+		clicked_play = false;
+		Game_LoadWorld(worlds.list.data[selectedWorld].path, worlds.list.data[selectedWorld].name, 0, false);
 	}
 	if (clicked_delete_world && selectedWorld != -1) {
 		clicked_delete_world = false;

@@ -5,7 +5,6 @@
 
 #include "util/math/NumberUtils.h"
 #include "util/math/Xorshift.h"
-#include "world/storage/WorldInfo.h"
 #include <vec/vec.h>
 
 #define CHUNKCACHE_SIZE (9)
@@ -15,32 +14,32 @@
 #define CHUNKPOOL_SIZE (CHUNKCACHE_SIZE * CHUNKCACHE_SIZE + UNDEADCHUNKS_COUNT)
 
 typedef struct Block Block;
-typedef struct BiomeGen BiomeGen;
 
-typedef u8 WorldGenType;
-enum {
+typedef enum
+{
 	WorldGen_Default,
 	WorldGen_SuperFlat,
 	WorldGenTypes_Count
-};
-typedef u8 Gamemode;
-enum {
+} WorldGenType;
+typedef enum
+{
 	Gamemode_Survival,
 	Gamemode_Hardcore,
 	Gamemode_Creative,
 	Gamemode_Adventure,
 	Gamemode_Spectator,
 	Gamemode_Count
-};
-typedef u8 Difficulty;
-enum {
+} Gamemode;
+typedef enum
+{
 	Difficulty_Normal,
 	Difficulty_Peaceful,
 	Difficulty_Easy,
 	Difficulty_Hard,
 	Difficulty_Count
-};
+} Difficulty;
 typedef struct {
+	u64 seed;
 	WorldGenType type;
 	// gamemode type;
 	union {
@@ -50,12 +49,13 @@ typedef struct {
 	} settings;
 } GeneratorSettings;
 
+#define WORLD_NAME_SIZE 256
 typedef struct {
 	bool active;
 
-	WorldInfo worldInfo;
-
 	int HighestBlock;
+
+	char name[WORLD_NAME_SIZE];
 
 	GeneratorSettings genSettings;
 
@@ -65,31 +65,25 @@ typedef struct {
 	Chunk* chunkCache[CHUNKCACHE_SIZE][CHUNKCACHE_SIZE];
 	vec_t(Chunk*) freeChunks;
 
+	WorkQueue* workqueue;
+
 	Xorshift32 randomTickGen;
 
 	int weather;
 } World;
 
-extern World* gWorld;
+extern World gWorld;
 
 static inline int WorldToChunkCoord(int x) {
 	return (x + (int)(x < 0)) / CHUNK_SIZE - (int)(x < 0);
 }
-static inline int ChunkToWorldCoord(int x) {
-	return (x << 4);
-}
 static inline int WorldToLocalCoord(int x) {
-	return x - (WorldToChunkCoord(x) << 4);
+	return x - WorldToChunkCoord(x) * CHUNK_SIZE;
 }
-static inline int WorldHeightToCluster(int y) {
-	return (y >> 4);
-}
-static inline int ClusterToWorldHeight(int y) {
-	return (y << 4);
-}
-void World_Init();
 
-void World_Deinit();
+void World_Init(WorkQueue* workqueue);
+
+void World_Reset();
 
 void World_Tick();
 
@@ -100,19 +94,15 @@ Chunk* World_GetChunk(int x, int z);
 
 BlockId World_GetBlock(int x, int y, int z);
 void World_SetBlock(int x, int y, int z, BlockId block);
-u8 World_GetBlockMetadata(int x, int y, int z);
-void World_SetBlockMetadata(int x, int y, int z, u8 metadata);
+u8 World_GetMetadata(int x, int y, int z);
+void World_SetMetadata(int x, int y, int z, u8 metadata);
 
 void World_SetBlockAndMeta(int x, int y, int z, BlockId block, u8 metadata);
 
 void World_UpdateChunkCache(int orginX, int orginZ);
 
-void World_UpdateChunkGen();
+int World_GetHeight(int x, int z);
 
-int World_GetChunkHeight(int x, int z);
+bool World_IsBlockOpaqueCube(int x, int y, int z);
 
-void World_MarkBlocksForUpdate(int x, int y, int z);
-
-const Material* World_GetBlockMaterial(int x, int y, int z);
-
-BiomeGen* World_GetBiomeGenAt(int x, int y, int z);
+const Material* World_GetMaterial(int x, int y, int z);

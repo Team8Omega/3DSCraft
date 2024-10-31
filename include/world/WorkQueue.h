@@ -10,8 +10,7 @@
 
 #include <3ds.h>
 
-typedef u8 WorkerItemType;
-enum
+typedef enum
 {
 	WorkerItemType_Load,
 	WorkerItemType_Save,
@@ -19,7 +18,7 @@ enum
 	WorkerItemType_Decorate,
 	WorkerItemType_PolyGen,
 	WorkerItemTypes_Count
-};
+} WorkerItemType;
 
 typedef struct {
 	WorkerItemType type;
@@ -34,25 +33,23 @@ typedef struct {
 	LightLock listInUse;
 } WorkQueue;
 
-extern WorkQueue gWorkqueue;
-
-static inline void WorkQueue_Init() {
-	vec_init(&gWorkqueue.queue);
-	LightLock_Init(&gWorkqueue.listInUse);
-	LightEvent_Init(&gWorkqueue.itemAddedEvent, RESET_STICKY);
+static inline void WorkQueue_Init(WorkQueue* queue) {
+	vec_init(&queue->queue);
+	LightLock_Init(&queue->listInUse);
+	LightEvent_Init(&queue->itemAddedEvent, RESET_STICKY);
 }
-static inline void WorkQueue_Deinit() {
-	vec_deinit(&gWorkqueue.queue);
+static inline void WorkQueue_Deinit(WorkQueue* queue) {
+	vec_deinit(&queue->queue);
 }
 
-static inline void WorkQueue_AddItem(WorkerItem item) {
+static inline void WorkQueue_AddItem(WorkQueue* queue, WorkerItem item) {
 	item.uuid = item.chunk->uuid;
 	++item.chunk->tasksRunning;
 	if (item.type == WorkerItemType_PolyGen)
 		++item.chunk->graphicalTasksRunning;
-	LightLock_Lock(&gWorkqueue.listInUse);
-	vec_push(&gWorkqueue.queue, item);
-	LightLock_Unlock(&gWorkqueue.listInUse);
+	LightLock_Lock(&queue->listInUse);
+	vec_push(&queue->queue, item);
+	LightLock_Unlock(&queue->listInUse);
 
-	LightEvent_Signal(&gWorkqueue.itemAddedEvent);
+	LightEvent_Signal(&queue->itemAddedEvent);
 }

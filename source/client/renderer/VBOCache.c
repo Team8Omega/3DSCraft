@@ -17,9 +17,7 @@ void VBOCache_Init() {
 void VBOCache_Deinit() {
 	VBO_Block block;
 	int i;
-	vec_foreach (&freedBlocks, block, i) {
-		linearFree(block.memory);
-	}
+	vec_foreach (&freedBlocks, block, i) { linearFree(block.memory); }
 	vec_deinit(&freedBlocks);
 }
 
@@ -29,7 +27,7 @@ VBO_Block VBO_Alloc(size_t size) {
 		VBO_Block block;
 		int i;
 		vec_foreach (&freedBlocks, block, i) {
-			if (size <= block.size && block.size - size <= 4096) {
+			if (size <= block.size && block.size - size <= 2048) {
 				vec_splice(&freedBlocks, i, 1);
 				LightLock_Unlock(&lock);
 				return block;

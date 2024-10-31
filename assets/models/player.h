@@ -1,7 +1,6 @@
 #include "client/model/CubeRaw.h"
 
-typedef u8 MODELPART_PLAYER;
-enum
+typedef enum
 {
 	MODELPART_PLAYER_HEAD,
 	MODELPART_PLAYER_HEADWEAR,
@@ -16,7 +15,7 @@ enum
 	MODELPART_PLAYER_ARML,
 	MODELPART_PLAYER_ARMLWEAR,
 	MODELPART_PLAYER_COUNT
-};
+} MODELPART_PLAYER;
 
 #define rotator M_PI
 
@@ -30,10 +29,10 @@ static CubeModelDef modeldef_player = { { 64, 64 },
 											  { -4, -4, -2 },
 											  { 8, 12, 4 },
 											  { 16, 16 } },
-											/*{ // arm r
+											{ // arm r
 											  { -4, -4, -2 },
 											  { -4, 12, 4 },
-											  { 40, 16 } },*/
+											  { 40, 16 } },
 											{ // arm l
 											  { 4, -4, -2 },
 											  { 4, 12, 4 },

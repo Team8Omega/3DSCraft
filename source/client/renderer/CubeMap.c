@@ -1,8 +1,8 @@
 #include "client/renderer/CubeMap.h"
 
 #include "client/Crash.h"
+#include "client/model/VertexFmt.h"
 #include "client/renderer/texture/TextureMap.h"
-#include "core/VertexFmt.h"
 #include "util/Paths.h"
 #include "util/math/NumberUtils.h"
 
@@ -10,49 +10,55 @@
 
 #define vSize 3
 #define vUV ((1 << 15) - 1)
+
 const WorldVertex vertices[6 * 6] = {
-	// Face 1
-	{ { { -vSize, -vSize, vSize } }, { vUV, vUV }, { 255, 255, 255 } },
-	{ { { vSize, -vSize, vSize } }, { 0, vUV }, { 255, 255, 255 } },
-	{ { { vSize, vSize, vSize } }, { 0, 0 }, { 255, 255, 255 } },
-	{ { { -vSize, -vSize, vSize } }, { vUV, vUV }, { 255, 255, 255 } },
-	{ { { vSize, vSize, vSize } }, { 0, 0 }, { 255, 255, 255 } },
-	{ { { -vSize, vSize, vSize } }, { vUV, 0 }, { 255, 255, 255 } },
-	//{ Face 2
-	{ { { -vSize, -vSize, -vSize } }, { vUV, vUV }, { 255, 255, 255 } },
-	{ { { -vSize, -vSize, vSize } }, { 0, vUV }, { 255, 255, 255 } },
-	{ { { -vSize, vSize, vSize } }, { 0, 0 }, { 255, 255, 255 } },
-	{ { { -vSize, -vSize, -vSize } }, { vUV, vUV }, { 255, 255, 255 } },
-	{ { { -vSize, vSize, vSize } }, { 0, 0 }, { 255, 255, 255 } },
-	{ { { -vSize, vSize, -vSize } }, { vUV, 0 }, { 255, 255, 255 } },
-	//{ Face 3
-	{ { { vSize, -vSize, -vSize } }, { vUV, vUV }, { 255, 255, 255 } },
-	{ { { -vSize, -vSize, -vSize } }, { 0, vUV }, { 255, 255, 255 } },
-	{ { { -vSize, vSize, -vSize } }, { 0, 0 }, { 255, 255, 255 } },
-	{ { { vSize, -vSize, -vSize } }, { vUV, vUV }, { 255, 255, 255 } },
-	{ { { -vSize, vSize, -vSize } }, { 0, 0 }, { 255, 255, 255 } },
-	{ { { vSize, vSize, -vSize } }, { vUV, 0 }, { 255, 255, 255 } },
-	//{ Face 4
-	{ { { vSize, -vSize, vSize } }, { vUV, vUV }, { 255, 255, 255 } },
-	{ { { vSize, -vSize, -vSize } }, { 0, vUV }, { 255, 255, 255 } },
-	{ { { vSize, vSize, -vSize } }, { 0, 0 }, { 255, 255, 255 } },
-	{ { { vSize, -vSize, vSize } }, { vUV, vUV }, { 255, 255, 255 } },
-	{ { { vSize, vSize, -vSize } }, { 0, 0 }, { 255, 255, 255 } },
-	{ { { vSize, vSize, vSize } }, { vUV, 0 }, { 255, 255, 255 } },
-	//{ Face 5
-	{ { { -vSize, vSize, vSize } }, { vUV, vUV }, { 255, 255, 255 } },
-	{ { { vSize, vSize, vSize } }, { 0, vUV }, { 255, 255, 255 } },
-	{ { { vSize, vSize, -vSize } }, { 0, 0 }, { 255, 255, 255 } },
-	{ { { -vSize, vSize, vSize } }, { vUV, vUV }, { 255, 255, 255 } },
-	{ { { vSize, vSize, -vSize } }, { 0, 0 }, { 255, 255, 255 } },
-	{ { { -vSize, vSize, -vSize } }, { vUV, 0 }, { 255, 255, 255 } },
-	//{ Face 6
-	{ { { -vSize, -vSize, -vSize } }, { vUV, vUV }, { 255, 255, 255 } },
-	{ { { vSize, -vSize, -vSize } }, { 0, vUV }, { 255, 255, 255 } },
-	{ { { vSize, -vSize, vSize } }, { 0, 0 }, { 255, 255, 255 } },
-	{ { { -vSize, -vSize, -vSize } }, { vUV, vUV }, { 255, 255, 255 } },
-	{ { { vSize, -vSize, vSize } }, { 0, 0 }, { 255, 255, 255 } },
-	{ { { -vSize, -vSize, vSize } }, { vUV, 0 }, { 255, 255, 255 } },
+	// Front face - Face 0
+	{ { -vSize, -vSize, vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { vSize, -vSize, vSize }, { 0, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { vSize, vSize, vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { -vSize, -vSize, vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { vSize, vSize, vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { -vSize, vSize, vSize }, { vUV, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+
+	// Left face - Face 1
+	{ { -vSize, -vSize, -vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { -vSize, -vSize, vSize }, { 0, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { -vSize, vSize, vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { -vSize, -vSize, -vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { -vSize, vSize, vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { -vSize, vSize, -vSize }, { vUV, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+
+	// Back face - Face 2
+	{ { vSize, -vSize, -vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { -vSize, -vSize, -vSize }, { 0, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { -vSize, vSize, -vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { vSize, -vSize, -vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { -vSize, vSize, -vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { vSize, vSize, -vSize }, { vUV, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+
+	// Right face - Face 3
+	{ { vSize, -vSize, vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { vSize, -vSize, -vSize }, { 0, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { vSize, vSize, -vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { vSize, -vSize, vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { vSize, vSize, -vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { vSize, vSize, vSize }, { vUV, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+
+	// Up face - Face 4
+	{ { -vSize, vSize, vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { vSize, vSize, vSize }, { 0, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { vSize, vSize, -vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { -vSize, vSize, vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { vSize, vSize, -vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { -vSize, vSize, -vSize }, { vUV, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+
+	// Down face - Face 5
+	{ { -vSize, -vSize, -vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { vSize, -vSize, -vSize }, { 0, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { vSize, -vSize, vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { -vSize, -vSize, -vSize }, { vUV, vUV }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { vSize, -vSize, vSize }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { -vSize, -vSize, vSize }, { vUV, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
 };
 
 static int projUniform;
@@ -86,9 +92,9 @@ void CubeMap_Deinit() {
 	}
 }
 
-void CubeMap_Tick(C3D_Mtx* projection, float3 rotationOffset) {
+void CubeMap_Update(C3D_Mtx* projection, float3 rotationOffset) {
 	if (cubeVBO == NULL) {
-		Crash(0, "CubeMap not set!");
+		Crash("CubeMap not set!");
 		return;
 	}
 
@@ -104,7 +110,7 @@ void CubeMap_Tick(C3D_Mtx* projection, float3 rotationOffset) {
 
 	Mtx_Multiply(&cubeMatrix, projection, &model);
 }
-void CubeMap_Render() {
+void CubeMap_Draw() {
 	C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, projUniform, &cubeMatrix);
 
 	C3D_CullFace(GPU_CULL_FRONT_CCW);
@@ -115,7 +121,10 @@ void CubeMap_Render() {
 
 	C3D_BufInfo* bufInfo = C3D_GetBufInfo();
 	BufInfo_Init(bufInfo);
-	BufInfo_Add(bufInfo, cubeVBO, sizeof(WorldVertex), 3, 0x3210);
+	BufInfo_Add(bufInfo, cubeVBO, sizeof(WorldVertex), 4, 0x3210);
+
+	// ToDo: find Alternative method to disable fog
+	C3D_FogGasMode(false, 0, false);
 
 	for (u8 i = 0; i < 6; i++) {
 		C3D_TexBind(0, &cubeTextures[i]);

@@ -16,6 +16,6 @@ static inline int Inventory_QuickSelectCalcWidth(int slots) {
 	return 54 + (slots - 2) * 20;
 }
 
-void Inventory_DrawQuickSelect(int x, int y, ItemStack* stacks, u8 count, u8* selected);
+void Inventory_DrawQuickSelect(int x, int y, ItemStack* stacks, int count, int* selected);
 
-u8 Inventory_Draw(int x, int y, int w, ItemStack* stacks, u8 count, u8 site);
+int Inventory_Draw(int x, int y, int w, ItemStack* stacks, int count, int site);

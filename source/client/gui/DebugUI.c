@@ -1,13 +1,12 @@
 #include "client/gui/DebugUI.h"
 
 #include "client/gui/Gui.h"
-#include "client/renderer/SpriteBatch.h"
-#include "core/VertexFmt.h"
+#include "client/model/VertexFmt.h"
+#include "client/renderer/texture/SpriteBatch.h"
 
 #include "client/player/InputData.h"
 
 #include "Globals.h"
-#include "client/Game.h"
 #include "util/math/NumberUtils.h"
 
 #include "client/Crash.h"
@@ -19,18 +18,15 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-static FILE* fileLog;
-
 #ifdef DEBUG_UI
-
-#define STATUS_LINES (240 / 8)
+#define STATUS_LINES (240 / 8 / 2)
 #define LOG_LINES 30
 #define LOG_LINE_LENGTH 128
 #define STATUS_LINE_LENGTH 128
 
 static char* statusLines[STATUS_LINES];
 static char* logLines[LOG_LINES];
-static u8 currentStatusLine = 0;
+static int currentStatusLine = 0;
 
 typedef void (*Function)();
 
@@ -45,26 +41,21 @@ typedef struct {
 	const char* name;
 } DebugUI_Menu;
 
-typedef u8 DebugUI_State;
-enum {
+typedef enum
+{
 	MENUSTATE_NONE,
 	MENUSTATE_LOG,
 	MENUSTATE_MENUROOT,
 	MENUSTATE_MENUDBGCOMMON,
 	MENUSTATE_MENUDBGINGAME,
 	MENUSTATE_COUNT
-};
+} DebugUI_State;
 
-static bool isLogPaused			   = false;
 static bool isInfoBG			   = false;
 static bool isShowButton		   = true;
 static DebugUI_State menuState	   = MENUSTATE_NONE;
 static DebugUI_State menuStateLast = MENUSTATE_NONE;
 static u8 debugMenuOptionNum	   = 0;
-
-static void menu_showDebug() {
-	gGetShowDebug() ? gSetShowDebug(false) : gSetShowDebug(true);
-}
 
 static const DebugUI_Menu debugMenus[MENUSTATE_COUNT - 2] = { { {
 																	{ 3, NULL, "Debug Common" },  // to sub menu
@@ -72,7 +63,7 @@ static const DebugUI_Menu debugMenus[MENUSTATE_COUNT - 2] = { { {
 																},
 																"Root" },
 															  { {
-																	{ 2, menu_showDebug, "Show debug info" }  // delete sdmc
+																	{ 0xFF, NULL, "(didnt work)" }	// delete sdmc
 																},
 																"Debug Common" },
 															  { {
@@ -87,7 +78,6 @@ void DebugUI_Init() {
 		logLines[i] = malloc(LOG_LINE_LENGTH);
 		memset(logLines[i], 0x0, LOG_LINE_LENGTH);
 	}
-
 #endif
 #ifdef DEBUG_INFO
 	for (int i = 0; i < STATUS_LINES; i++) {
@@ -95,12 +85,6 @@ void DebugUI_Init() {
 		memset(statusLines[i], 0x0, STATUS_LINE_LENGTH);
 	}
 #endif
-
-	fileLog = fopen(PATH_ROOT "log.txt", "w");
-	fprintf(fileLog, "3DSCraft Log");
-	fclose(fileLog);
-
-	fileLog = fopen(PATH_ROOT "log.txt", "a");
 }
 void DebugUI_Deinit() {
 #ifdef DEBUG_LOG
@@ -111,8 +95,6 @@ void DebugUI_Deinit() {
 	for (int i = 0; i < STATUS_LINES; i++)
 		free(statusLines[i]);
 #endif
-
-	fclose(fileLog);
 }
 
 void DebugUI_Text(const char* text, ...) {
@@ -128,28 +110,13 @@ void DebugUI_Text(const char* text, ...) {
 #endif
 }
 
-void DebugUI_TextAt(u8 line, const char* text, ...) {
-#ifdef DEBUG_INFO
-	va_list args;
-	va_start(args, text);
-
-	vsprintf(statusLines[line], text, args);
-
-	va_end(args);
-#endif
-}
-
 void DebugUI_Log(const char* text, ...) {
+#ifdef DEBUG_LOG
 	if (strlen(text) < 0)
 		return;
 
 	va_list args;
 	va_start(args, text);
-	vfprintf(fileLog, text, args);
-
-#ifdef DEBUG_LOG
-	if (isLogPaused)
-		return;
 
 	char stringFormatted[512];
 	vsprintf(stringFormatted, text, args);
@@ -167,23 +134,20 @@ void DebugUI_Log(const char* text, ...) {
 	strncpy(logLines[0], stringFormatted, LOG_LINE_LENGTH);
 	logLines[0][LOG_LINE_LENGTH - 1] = '\0';
 
-#endif
 	va_end(args);
+#endif
 }
 
 #ifdef DEBUG_INFO
 void DebugUI_DrawInfo() {
 	u8 infoNum;
-	u8 yOffset = gIngame() ? 40 : 0;
-
+	u8 yOffset = 0;
 	for (infoNum = 0; infoNum < STATUS_LINES; infoNum++) {
-		if (strcmp(statusLines[infoNum], "") == 0) {
-			yOffset += 8;
-			continue;
-		}
+		if (strcmp(statusLines[infoNum], "") == 0)
+			break;
 
 		int step = 0;
-		SpriteBatch_PushText(1, yOffset, 98, INT16_MAX, false, 320, &step, "%s", statusLines[infoNum]);
+		SpriteBatch_PushText(0, yOffset, 98, INT16_MAX, false, 320, &step, "%s", statusLines[infoNum]);
 		yOffset += step;
 
 		memset(statusLines[infoNum], 0x0, STATUS_LINE_LENGTH);
@@ -209,8 +173,6 @@ void DebugUI_DrawLog() {
 		if (yOffset >= 240)
 			break;
 	}
-	if (Gui_Button(true, 320 - 45, 54, 40, 100, "Pause"))
-		isLogPaused = isLogPaused ? false : true;
 }
 #endif
 #ifdef DEBUG_UI
@@ -269,12 +231,11 @@ void DebugUI_Draw() {
 			isShowButton = isShowButton ? false : true;
 
 	if (isShowButton) {
-		u8 y = gWorld && gWorld->active && !currentScreen ? 140 : 0;
-		if (Gui_Button(true, 320 - 32, y, 32, 100, "LOG"))
+		if (Gui_Button(true, 320 - 32, 0, 32, 100, "LOG"))
 			menuState == MENUSTATE_LOG ? DebugUI_MenuSet(MENUSTATE_NONE) : DebugUI_MenuSet(MENUSTATE_LOG);
-		if (Gui_Button(true, 320 - 32, y + 20, 32, 100, "DBG"))
+		if (Gui_Button(true, 320 - 32, 20, 32, 100, "DBG"))
 			menuState > 1 ? DebugUI_MenuSet(MENUSTATE_NONE) : DebugUI_MenuSet(MENUSTATE_MENUROOT);
-		if (Gui_Button(true, 320 - 32, y + 40, 32, 100, "INFO"))
+		if (Gui_Button(true, 320 - 32, 38, 32, 100, "INFO"))
 			isInfoBG = isInfoBG ? false : true;
 	}
 #endif

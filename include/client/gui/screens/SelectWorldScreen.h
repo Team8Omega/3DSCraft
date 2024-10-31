@@ -1,6 +1,6 @@
 #pragma once
 
-#include "client/gui/Screen.h"
+#include "client/gui/ScreenManager.h"
 
 /*typedef struct {
 	char worldName[WORLD_NAME_SIZE];

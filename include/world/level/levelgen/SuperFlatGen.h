@@ -9,4 +9,4 @@ typedef struct {
 
 void SuperFlatGen_Init(SuperFlatGen* gen);
 
-void SuperFlatGen_Generate(WorkerItem item, void* this);
+void SuperFlatGen_Generate(WorkQueue* queue, WorkerItem item, void* this);

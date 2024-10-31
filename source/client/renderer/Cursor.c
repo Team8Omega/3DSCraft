@@ -1,6 +1,6 @@
 #include "client/renderer/Cursor.h"
 
-#include "core/VertexFmt.h"
+#include "client/model/VertexFmt.h"
 
 #include "util/math/NumberUtils.h"
 
@@ -34,10 +34,10 @@ void Cursor_Draw(int projUniform, C3D_Mtx* projectionview, int x, int y, int z, 
 	size_t vertices	 = 0;
 	WorldVertex* vtx = cursorVBO;
 	for (int i = 0; i < 6; i++) {
-		const s8* offset = DirectionToOffset[i];
+		const int* offset = DirectionToOffset[i];
 		if (World_GetBlock(x + offset[0], y + offset[1], z + offset[2]) == BLOCK_AIR) {
 			memcpy(vtx, &block_sides_lut[i * 6], sizeof(WorldVertex) * 6);
-			u8 color = i == highlight ? 16 : 11;
+			u8 color = i == highlight ? 65 : 32;
 			for (int j = 0; j < 6; j++) {
 				vtx[j].rgb[0] = color;
 				vtx[j].rgb[1] = color;
@@ -61,7 +61,7 @@ void Cursor_Draw(int projUniform, C3D_Mtx* projectionview, int x, int y, int z, 
 
 	C3D_BufInfo* bufInfo = C3D_GetBufInfo();
 	BufInfo_Init(bufInfo);
-	BufInfo_Add(bufInfo, cursorVBO, sizeof(WorldVertex), 3, 0x3210);
+	BufInfo_Add(bufInfo, cursorVBO, sizeof(WorldVertex), 4, 0x3210);
 
 	C3D_DrawArrays(GPU_TRIANGLES, 0, vertices);
 

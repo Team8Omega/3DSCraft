@@ -17,8 +17,6 @@
 #include "util/Paths.h"
 #include "util/StringUtils.h"
 
-static C3D_Tex sTexError;
-
 u32 hash(const char* str) {
 	unsigned long hash = 5381;
 	int c;
@@ -28,10 +26,6 @@ u32 hash(const char* str) {
 }
 
 void tileImage32(u32* src, u8* dst, int sizex, int sizez);
-
-void Texture_Init() {
-	Texture_Load(&sTexError, "romfs:/error.png");
-}
 
 void Texture_Load(C3D_Tex* result, const char* filename) {
 	const char* filepath = filename;
@@ -68,8 +62,6 @@ void Texture_Load(C3D_Tex* result, const char* filename) {
 		GSPGPU_FlushDataCache(imgInLinRam, width * height * sizeof(u32));
 		free(image);
 
-		C3D_TexSetFilter(result, GPU_NEAREST, GPU_NEAREST);
-
 		if (width < 64 || height < 64) {
 			C3D_SyncTextureCopy(imgInLinRam, 0, result->data, 0, width * height * sizeof(u32), 8);
 		} else {
@@ -81,8 +73,6 @@ void Texture_Load(C3D_Tex* result, const char* filename) {
 
 		linearFree(imgInLinRam);
 	} else {
-		// 83 = alloc
-		//
 #ifdef DEBUG_LOG
 		if (error != 0) {
 			char name[512];
@@ -90,16 +80,7 @@ void Texture_Load(C3D_Tex* result, const char* filename) {
 			DebugUI_Log("Failed to load texture %s: Code %d", name, error);
 		}
 #endif
-
-		if (error == 83) {
-			Crash(CRASH_ALLOC, "Allocation Error at Texture_Load\nCould not allocate space for '%s'", filename);
-		}
-
-		memcpy(result, &sTexError, sizeof(C3D_Tex));
-		result->data = linearAlloc(sTexError.size);
-		if (!result->data)
-			Crash(0, "ahem.");
-		memcpy(result->data, sTexError.data, sTexError.size);
+		Texture_Load(result, "romfs:/error.png");
 	}
 }
 
@@ -167,7 +148,7 @@ u16 pathNum = 0;
 
 u16 Texture_MapAdd(const char* path) {
 	if (pathNum >= (TEXTURE_MAPTILES * TEXTURE_MAPTILES))
-		Crash(0, "Too many entries for TextureMap\n - you know what this means.");
+		Crash("Too many entries for TextureMap\n - you know what this means.");
 
 	strcpy(pathCollect[pathNum], path);
 	return pathNum++;
@@ -187,24 +168,24 @@ void Texture_MapInit(Texture_Map* map) {
 	int filei			 = 0;
 	const char* filename = pathCollect[0];
 	int c				 = 0;
-	while (filename != NULL && c < (TEXTURE_TILENUM) && filei < pathNum) {
+	while (filename != NULL && c < (TEXTURE_MAPTILES * TEXTURE_MAPTILES) && filei < pathNum) {
 		if (access(filename, F_OK))
-			filename = String_ParsePackName(PACK_VANILLA, PATH_PACK_TEXTURES, String_AddSuffix(filename, ".png"));
+			filename = String_ParsePackName(PACK_VANILLA, PATH_PACK_TEXTURES, filename);
 
 		u32* image;
 		unsigned int w, h;
 		u32 error = lodepng_decode32_file((u8**)&image, &w, &h, filename);
 		if (w == TEXTURE_TILESIZE && h == TEXTURE_TILESIZE && image != NULL && error == 0) {
-			for (int x = 0; x < TEXTURE_TILESIZE; ++x) {
-				for (int y = 0; y < TEXTURE_TILESIZE; ++y) {
+			for (int x = 0; x < TEXTURE_TILESIZE; x++) {
+				for (int y = 0; y < TEXTURE_TILESIZE; y++) {
 					buffer[(locX + x) + ((y + locY) * TEXTURE_MAPSIZE)] =
 						__builtin_bswap32(image[x + ((TEXTURE_TILESIZE - y - 1) * TEXTURE_TILESIZE)]);
 				}
 			}
 
 			Icon* icon = &map->icons[c];
-			icon->u	   = locX << 8;
-			icon->v	   = locY << 8;
+			icon->u	   = 256 * locX;
+			icon->v	   = 256 * locY;
 
 			locX += TEXTURE_TILESIZE;
 			if (locX == TEXTURE_MAPSIZE) {
@@ -269,7 +250,7 @@ void Texture_MapDeinit(Texture_Map* map) {
 /*
 Icon Texture_MapGetIcon(Texture_Map* map, char* filename) {
 	u32 h = hash(filename);
-	for (size_t i = 0; i < TEXTURE_TILENUM; i++) {
+	for (size_t i = 0; i < TEXTURE_MAPTILES * TEXTURE_MAPTILES; i++) {
 		if (h == map->icons[i].textureHash) {
 			return map->icons[i];
 		}

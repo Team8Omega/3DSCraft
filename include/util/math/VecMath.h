@@ -5,27 +5,18 @@
 #include "util/math/NumberUtils.h"
 
 typedef union {
-	float v[3];
-	struct {
-		float x, y, z;
-	};
+		float v[3];
+		struct {
+				float x, y, z;
+		};
 } float3;
-typedef union {
-	int v[3];
-	struct {
-		int x, y, z;
-	};
-} int3;
 
 static inline float3 f3_new(float x, float y, float z) {
-	return (float3){ { x, y, z } };
+	return (float3){{x, y, z}};
 }
 
 static inline float3 f3_add(float3 a, float3 b) {
 	return f3_new(a.x + b.x, a.y + b.y, a.z + b.z);
-}
-static inline float3 f3_addf(float3 a, float b) {
-	return f3_new(a.x + b, a.y + b, a.z + b);
 }
 static inline float3 f3_sub(float3 a, float3 b) {
 	return f3_new(a.x - b.x, a.y - b.y, a.z - b.z);
@@ -69,10 +60,6 @@ static inline float3 f3_clamp(float3 a, float3 min, float3 max) {
 
 static inline float3 f3_neg(float3 vec) {
 	return f3_new(-vec.x, -vec.y, -vec.z);
-}
-
-static inline bool f3_cmp(float3 a, float3 b) {
-	return a.x == b.x && a.y == b.y && a.z == b.z;
 }
 
 #define f3_unpack(v) (v).x, (v).y, (v).z

@@ -2,10 +2,16 @@
 
 #include <stdarg.h>
 
+#include "client/model/VertexFmt.h"
 #include "client/player/InputData.h"
-#include "client/renderer/SpriteBatch.h"
-#include "core/VertexFmt.h"
+#include "client/renderer/texture/SpriteBatch.h"
 #include "util/math/NumberUtils.h"
+
+void Gui_Init() {
+}
+
+void Gui_Deinit() {
+}
 
 void Gui_Label(int x, int y, int z, float size, bool shadow, s16 color, const char* text, ...) {
 	int wrap = size <= 0.f ? INFINITY : size;
@@ -32,7 +38,7 @@ bool Gui_Button(bool enabled, int x, int y, int width, int z, const char* label)
 #define SLICE_SIZE 8
 #define textureY 66
 
-	int textWidth = SpriteBatch_CalcTextWidth(label);  // Why did you use ChatGPT XD
+	int textWidth = SpriteBatch_CalcTextWidth(label);  // Adjust this call as necessary
 
 	int middlePieceSize = width - (SLICE_SIZE * 2);
 

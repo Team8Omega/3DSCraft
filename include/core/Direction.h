@@ -1,7 +1,7 @@
 #pragma once
 
-typedef u8 Direction;
-enum {
+typedef enum
+{
 	Direction_West,
 	Direction_East,
 	Direction_Bottom,
@@ -9,17 +9,15 @@ enum {
 	Direction_North,
 	Direction_South,
 	Direction_None
-};
+} Direction;
 
-typedef u8 Axis;
-enum {
+typedef enum
+{
 	Axis_X,
 	Axis_Y,
 	Axis_Z
-};
+} Axis;
 
-extern const char* DirectionNames[7];
-extern s8 DirectionToOffset[7][3];
+extern int DirectionToOffset[7][3];
 extern Direction DirectionOpposite[7];
 extern Axis DirectionToAxis[7];
-Direction DirectionByName(const char* name);

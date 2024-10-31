@@ -6,7 +6,7 @@
 
 CubeModel* CubeModel_Init(CubeModelRaw* in) {
 	if (!in) {
-		Crash(0, "Passed raw Model is NULL!");
+		Crash("Passed raw Model is NULL!");
 		return NULL;
 	}
 
@@ -18,7 +18,7 @@ CubeModel* CubeModel_Init(CubeModelRaw* in) {
 
 	for (u8 i = 0; i < model->cubeNum; ++i) {
 		if (!in->modeldef->cubes[i].size[0]) {
-			Crash(0, "Cube %d for Model is NULL!\n Total: %d\n in->modeldef->cubes: %08x", i, model->cubeNum, in->modeldef->cubes);
+			Crash("Cube %d for Model is NULL!\n Total: %d\n in->modeldef->cubes: %08x", i, model->cubeNum, in->modeldef->cubes);
 		}
 		model->cubes[i] = Cube_Init(&in->modeldef->cubes[i], in->modeldef->dimensions[0], in->modeldef->dimensions[1]);
 	}
@@ -42,7 +42,7 @@ void CubeModel_Deinit(CubeModel* model) {
 
 void CubeModel_Draw(CubeModel* model, C3D_Mtx* movement) {
 	if (!model)
-		Crash(0, "MODEL == NULL");
+		Crash("MODEL == NULL");
 
 #define modelScale 0.05f
 	Mtx_Scale(movement, modelScale, modelScale, modelScale);

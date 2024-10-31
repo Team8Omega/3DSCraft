@@ -1,9 +1,9 @@
 #pragma once
 
-#include "core/Direction.h"
-#include "world/level/biome/BiomeGenType.h"
+#include "world/level/block/Block.h"
+
+
 #include "world/level/block/Blocks.h"
-#include "world/level/material/Material.h"
 
 #include "client/renderer/VBOCache.h"
 #include "util/math/Xorshift.h"
@@ -12,10 +12,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#define BLOCK_SIZE (16)
 #define CHUNK_SIZE (16)
-#define CHUNK_REAL_SIZE (BLOCK_SIZE * CHUNK_SIZE)
-#define CHUNK_HEIGHT (256)
+#define CHUNK_HEIGHT (128)
 #define CLUSTER_PER_CHUNK (CHUNK_HEIGHT / CHUNK_SIZE)
 
 typedef struct {
@@ -36,12 +34,12 @@ typedef struct {
 	bool forceVBOUpdate;
 } Cluster;
 
-typedef u8 ChunkGenProgress;
-enum {
+typedef enum
+{
 	ChunkGen_Empty,	 //
 	ChunkGen_Terrain,
 	ChunkGen_Finished  // Terrain | Decoration
-};
+} ChunkGenProgress;
 
 typedef struct {
 	// Die Gesamtanzahl! >= graphicalTasksRunning
@@ -62,8 +60,6 @@ typedef struct {
 
 	u32 displayRevision;
 	bool forceVBOUpdate;
-
-	BiomeGenType biome;
 
 	int references;
 } Chunk;
@@ -88,8 +84,6 @@ static inline void Chunk_Init(Chunk* chunk, int x, int z) {
 		chunk->clusters[i].empty	  = true;
 	}
 	chunk->uuid = Xorshift32_Next(&uuidGenerator);
-
-	chunk->biome = BIOME_PLAINS;
 }
 
 static inline void Chunk_RequestGraphicsUpdate(Chunk* chunk, int cluster) {
@@ -135,9 +129,6 @@ static inline void Chunk_SetBlockAndMeta(Chunk* chunk, int x, int y, int z, Bloc
 
 	++cluster->revision;
 	++chunk->revision;
-}
-static inline BiomeGenType Chunk_GetBiome(Chunk* chunk) {
-	return chunk->biome;
 }
 
 bool Cluster_IsEmpty(Cluster* cluster);

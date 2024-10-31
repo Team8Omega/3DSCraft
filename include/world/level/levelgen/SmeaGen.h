@@ -7,4 +7,4 @@ typedef struct {
 } SmeaGen;
 
 void SmeaGen_Init(SmeaGen* gen);
-void SmeaGen_Generate(WorkerItem item, void* this);
+void SmeaGen_Generate(WorkQueue* queue, WorkerItem item, void* this);

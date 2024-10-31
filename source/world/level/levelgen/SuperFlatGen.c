@@ -5,22 +5,22 @@
 void SuperFlatGen_Init(SuperFlatGen* gen) {
 }
 
-void SuperFlatGen_Generate(WorkerItem item, void* this) {
+void SuperFlatGen_Generate(WorkQueue* queue, WorkerItem item, void* this) {
 	for (int y = 0; y < 17; y++) {
 		BlockId block = BLOCK_AIR;
 		switch (y) {  // TODO: Mit einem Lookup Table ersetzen, Superflach Gen konfigurierbar machen
 			case 0:
-				block = BLOCK_BEDROCK;
+				block = BLOCK_STONE;  // Block_Bedrock;
 				break;
-			/*case 1 ... 10:
-				block = BLOCK_STONE;
+			case 1 ... 10:
+				block = BLOCK_STONE;  // Block_Stone;
 				break;
 			case 11 ... 15:
-				block = BLOCK_DIRT;
+				block = BLOCK_STONE;  // Block_Dirt;
 				break;
 			case 16:
-				block = BLOCK_GRASS;
-				break;*/
+				block = BLOCK_GRASS;  // Block_Grass;
+				break;
 			default:
 				block = BLOCK_AIR;
 				break;

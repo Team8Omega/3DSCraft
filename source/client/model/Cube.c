@@ -8,52 +8,68 @@
 #include "core/Direction.h"
 #include "util/math/NumberUtils.h"
 
-#define CUBE_NUM_MAX 16
+#define CUBE_NUM_MAX 64
 
 static u16 cubeNum = 0;
 static Cube* cubeRef[CUBE_NUM_MAX];
 static WorldVertex* cubeModelVBOs[CUBE_NUM_MAX];
 
-// clang-format off
 const WorldVertex cube_sides_lut[] = {
-	{ {{ 0, 0, 0 }}, { 0, 1 }, { 255, 255, 255 } },
-	{ {{ 0, 0, 1 }}, { 1, 1 }, { 255, 255, 255 } },
-	{ {{ 0, 1, 1 }}, { 1, 0 }, { 255, 255, 255 } },
-	{ {{ 0, 1, 1 }}, { 1, 0 }, { 255, 255, 255 } },
-	{ {{ 0, 1, 0 }}, { 0, 0 }, { 255, 255, 255 } },
-	{ {{ 0, 0, 0 }}, { 0, 1 }, { 255, 255, 255 } },
-	{ {{ 1, 0, 0 }}, { 0, 1 }, { 255, 255, 255 } },
-	{ {{ 1, 1, 0 }}, { 0, 0 }, { 255, 255, 255 } },
-	{ {{ 1, 1, 1 }}, { 1, 0 }, { 255, 255, 255 } },
-	{ {{ 1, 1, 1 }}, { 1, 0 }, { 255, 255, 255 } },
-	{ {{ 1, 0, 1 }}, { 1, 1 }, { 255, 255, 255 } },
-	{ {{ 1, 0, 0 }}, { 0, 1 }, { 255, 255, 255 } },
-	{ {{ 0, 0, 0 }}, { 0, 0 }, { 255, 255, 255 } },
-	{ {{ 1, 0, 0 }}, { 1, 0 }, { 255, 255, 255 } },
-	{ {{ 1, 0, 1 }}, { 1, 1 }, { 255, 255, 255 } },
-	{ {{ 1, 0, 1 }}, { 1, 1 }, { 255, 255, 255 } },
-	{ {{ 0, 0, 1 }}, { 0, 1 }, { 255, 255, 255 } },
-	{ {{ 0, 0, 0 }}, { 0, 0 }, { 255, 255, 255 } },
-	{ {{ 0, 1, 0 }}, { 0, 1 }, { 255, 255, 255 } },
-	{ {{ 0, 1, 1 }}, { 0, 0 }, { 255, 255, 255 } },
-	{ {{ 1, 1, 1 }}, { 1, 0 }, { 255, 255, 255 } },
-	{ {{ 1, 1, 1 }}, { 1, 0 }, { 255, 255, 255 } },
-	{ {{ 1, 1, 0 }}, { 1, 1 }, { 255, 255, 255 } },
-	{ {{ 0, 1, 0 }}, { 0, 1 }, { 255, 255, 255 } },
-	{ {{ 0, 0, 1 }}, { 1, 1 }, { 255, 255, 255 } },
-	{ {{ 1, 0, 1 }}, { 0, 1 }, { 255, 255, 255 } },
-	{ {{ 1, 1, 1 }}, { 0, 0 }, { 255, 255, 255 } },
-	{ {{ 1, 1, 1 }}, { 0, 0 }, { 255, 255, 255 } },
-	{ {{ 0, 1, 1 }}, { 1, 0 }, { 255, 255, 255 } },
-	{ {{ 0, 0, 1 }}, { 1, 1 }, { 255, 255, 255 } },
-	{ {{ 0, 0, 0 }}, { 1, 1 }, { 255, 255, 255 } },
-	{ {{ 1, 0, 0 }}, { 0, 1 }, { 255, 255, 255 } },
-	{ {{ 1, 1, 0 }}, { 0, 0 }, { 255, 255, 255 } },
-	{ {{ 1, 1, 0 }}, { 0, 0 }, { 255, 255, 255 } },
-	{ {{ 0, 1, 0 }}, { 1, 0 }, { 255, 255, 255 } },
-	{ {{ 0, 0, 0 }}, { 1, 1 }, { 255, 255, 255 } },
+	// Fourth face (MX) - West
+	// First triangle
+	{ { 0, 0, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 0, 1 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 1, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Second triangle
+	{ { 0, 1, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 1, 0 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 0, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Third face (PX) - East
+	// First triangle
+	{ { 1, 0, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 1, 0 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 1, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Second triangle
+	{ { 1, 1, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 0, 1 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 0, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Sixth face (MY) - Down
+	// First triangle
+	{ { 0, 0, 0 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 0, 0 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 0, 1 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Second triangle
+	{ { 1, 0, 1 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 0, 1 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 0, 0 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Fifth face (PY) - Up
+	// First triangle
+	{ { 0, 1, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 1, 1 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 1, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Second triangle
+	{ { 1, 1, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 1, 0 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 1, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Second face (MZ) - North
+	// First triangle
+	{ { 0, 0, 1 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 0, 1 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 1, 1 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Second triangle
+	{ { 1, 1, 1 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 1, 1 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 0, 1 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// First face (PZ) - South
+	// First triangle
+	{ { 0, 0, 0 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 0, 0 }, { 0, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 1, 1, 0 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	// Second triangle
+	{ { 1, 1, 0 }, { 0, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 1, 0 }, { 1, 0 }, { 255, 255, 255 }, { 0, 0, 0 } },
+	{ { 0, 0, 0 }, { 1, 1 }, { 255, 255, 255 }, { 0, 0, 0 } },
 };
-// clang-format on
 
 void Cube_InitVBOs() {
 	for (u16 i = 0; i < cubeNum; i++) {
@@ -73,7 +89,7 @@ void Cube_DeinitVBOs() {
 
 Cube* Cube_Init(const CubeRaw* in, s16 texwidth, s16 texheight) {
 	if (!in) {
-		Crash(0, "Passed unbaked CubeRaw is NULL!");
+		Crash("Passed unbaked CubeRaw is NULL!");
 		return NULL;
 	}
 
@@ -144,9 +160,9 @@ Cube* Cube_Init(const CubeRaw* in, s16 texwidth, s16 texheight) {
 			u8 idx				= lutStartIndex + i;
 			WorldVertex* vertex = &cube->vertices[idx];
 
-			vertex->pos.x = -(pos[0] + (cube_sides_lut[idx].pos.x ? size[0] : 0));
-			vertex->pos.y = -(pos[1] + (cube_sides_lut[idx].pos.y ? size[1] : 0));
-			vertex->pos.z = -(pos[2] + (cube_sides_lut[idx].pos.z ? size[2] : 0));
+			vertex->pos[0] = -(pos[0] + (cube_sides_lut[idx].pos[0] ? size[0] : 0));
+			vertex->pos[1] = -(pos[1] + (cube_sides_lut[idx].pos[1] ? size[1] : 0));
+			vertex->pos[2] = -(pos[2] + (cube_sides_lut[idx].pos[2] ? size[2] : 0));
 
 #define sizeTexCrd(x, tw) (s16)(((float)(x) / (float)(tw)) * (float)((1 << 15) - 1))
 
@@ -172,7 +188,7 @@ extern Shader shaderWorld;
 
 void Cube_Draw(Cube* cube, C3D_Mtx* matrix) {
 	if (!cube)
-		Crash(0, "CUBE==NULL");
+		Crash("CUBE==NULL");
 
 	C3D_Mtx outMatrix;
 	Mtx_Identity(&outMatrix);
@@ -183,13 +199,13 @@ void Cube_Draw(Cube* cube, C3D_Mtx* matrix) {
 	WorldVertex* vbo = cubeModelVBOs[cube->vboIdx];
 
 	if (vbo == NULL)
-		Crash(0, "Cube Num %d has NULL VBO!", cube->vboIdx);
+		Crash("Cube Num %d has NULL VBO!", cube->vboIdx);
 
 	GSPGPU_FlushDataCache(vbo, sizeof(cube_sides_lut));
 
 	C3D_BufInfo* bufInfo = C3D_GetBufInfo();
 	BufInfo_Init(bufInfo);
-	BufInfo_Add(bufInfo, vbo, sizeof(WorldVertex), 3, 0x3210);
+	BufInfo_Add(bufInfo, vbo, sizeof(WorldVertex), 4, 0x3210);
 
 	C3D_DrawArrays(GPU_TRIANGLES, 0, CUBE_VERTICE_NUM);
 }
